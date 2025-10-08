@@ -9,11 +9,11 @@ public class Mostro {
         colore = "rosso";
     }
 
-    public void cambiaNome(String nome) {
+    public void setNome(String nome) {
         this.nome = nome;
     }
 
-    public String mostraNome() {
+    public String getNome() {
         return nome;
     }
 
@@ -21,7 +21,7 @@ public class Mostro {
         return vita;
     }
 
-    public String mostraColore() {
+    public String getColore() {
         return colore;
     }
 }

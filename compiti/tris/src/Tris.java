@@ -9,7 +9,7 @@ public class Tris {
     public final char giocatoreX;
     public final char giocatoreO;
     public final char casellaVuota;
-    public final HashMap<String, Integer> diozionario;
+    public final HashMap<Character, Integer> diozionario;
 
     public Tris() {
         LUNGHEZZA_GRIGLIA = 3;
@@ -20,41 +20,39 @@ public class Tris {
         griglia = new char[LUNGHEZZA_GRIGLIA][ALTEZZA_GRIGLIA];
         inizializzaGriglia();
         diozionario = new HashMap<>();
-        diozionario.put("A", 0);
-        diozionario.put("B", 1);
-        diozionario.put("C", 2);
+        diozionario.put('A', 0);
+        diozionario.put('B', 1);
+        diozionario.put('C', 2);
     }
 
     private void inizializzaGriglia() {
-        for(int y = 0; y < ALTEZZA_GRIGLIA; y++) {
-            for(int x = 0; x < LUNGHEZZA_GRIGLIA; x++) {
+        for(int x = 0; x < ALTEZZA_GRIGLIA; x++) {
+            for(int y = 0; y < LUNGHEZZA_GRIGLIA; y++) {
                 griglia[x][y] = casellaVuota;
             }
         }
     }
 
+    public char cambiaSegno(char segno) throws InvalidParameterException {
+        if (segno != giocatoreO && segno != giocatoreX) throw new InvalidParameterException("Segno non valido");
+        if (segno == giocatoreO) return giocatoreX;
+        else return giocatoreO;
+    }
+
     public void addSegno(char segno, char x, int y) throws InvalidParameterException, Exception {
-        if (segno != giocatoreO && segno != giocatoreX) throw new InvalidParameterException("segno non valido");
-        if (x < 0 || x > LUNGHEZZA_GRIGLIA || (!diozionario.containsKey(y))) throw new InvalidParameterException("casella inesistente");
-        if (griglia[x][y] != casellaVuota) throw new Exception("casella già occupata");
-        griglia[x][diozionario.get(y)] = segno;
+        y--;
+        if (segno != giocatoreO && segno != giocatoreX) throw new InvalidParameterException("Segno non valido");
+        if (y < 0 || y >= ALTEZZA_GRIGLIA || (!diozionario.containsKey(x))) throw new InvalidParameterException("Casella inesistente");
+        if (griglia[y][diozionario.get(x)] != casellaVuota) throw new Exception("Casella già occupata");
+        griglia[y][diozionario.get(x)] = segno;
     }
 
     public int controlli(char segno) {
-        //controlla se è piena
-        for (char[] y : griglia) {
-            for (char x : y) {
-                if (x == casellaVuota) {
-                    return 2;
-                }
-            }
-        }
-
         //controllo orizzontale
-        for(char[] x : griglia) {
+        for(char[] y : griglia) {
             boolean tris = true;
-            for(char y : x) {
-               if (y != segno) {
+            for(char x : y) {
+               if (x != segno) {
                    tris = false;
                    break;
                }
@@ -63,9 +61,9 @@ public class Tris {
         }
 
         //controllo verticale
-        for (int x = 0; x < LUNGHEZZA_GRIGLIA; x++) {
+        for (int y = 0; y < ALTEZZA_GRIGLIA; y++) {
             boolean tris = true;
-            for (int y = 0; y < ALTEZZA_GRIGLIA; y++) {
+            for (int x = 0; x < LUNGHEZZA_GRIGLIA; x++) {
                 if (griglia[x][y] != segno) {
                     tris = false;
                     break;
@@ -91,7 +89,7 @@ public class Tris {
         x = LUNGHEZZA_GRIGLIA - 1;
         y = 0;
         tris = true;
-        while (x <= 0 && y < ALTEZZA_GRIGLIA) {
+        while (x >= 0 && y < ALTEZZA_GRIGLIA) {
             if (griglia[y][x] != segno) {
                 tris = false;
                 break;
@@ -101,42 +99,85 @@ public class Tris {
         }
         if (tris) return 1;
 
+        //controlla se è piena
+        boolean piena = true;
+        for (char[] verticale : griglia) {
+            for (char orizzontale : verticale) {
+                if (orizzontale == casellaVuota) {
+                    piena = false;
+                    break;
+                }
+            }
+            if (!piena) break;
+        }
+        if (piena) return 2;
+
         return 0;
     }
 
     public String getStringaGriglia() {
         StringBuilder s = new StringBuilder(" A   B   C \n");
-        for (int x = 0; x < LUNGHEZZA_GRIGLIA; x++) {
-            for (int y = 0; y < ALTEZZA_GRIGLIA; y++) {
+        for (int y = 0; y < ALTEZZA_GRIGLIA; y++) {
+            for (int x = 0; x < LUNGHEZZA_GRIGLIA; x++) {
                 s.append(" ");
                 s.append(griglia[y][x]);
                 s.append(" ");
 
-                if (y == ALTEZZA_GRIGLIA - 1) {
+                if (x == LUNGHEZZA_GRIGLIA - 1) {
                     s.append(" ");
-                    s.append(x + 1);
+                    s.append(y + 1);
                     s.append("\n");
                 }
                 else s.append("|");
             }
-            if (x < LUNGHEZZA_GRIGLIA - 1) s.append("---|---|---\n");
+            if (y < ALTEZZA_GRIGLIA - 1) s.append("---|---|---\n");
         }
         s.append("\n");
         return s.toString();
     }
 
-    private void chiediCasella() {
-        String casella = IO.readln().trim().toUpperCase();
-        //controlli e aggiunta (usando il metodo)
-    }
+    private void occupaCasellaConsole(char segno) {
+        System.out.println("Giocatore " + segno + " inserisci la casella che vuoi occupare (esempio: A1)");
+        boolean errore = true;
 
-    public void giocaConsole() {
-        System.out.println(getStringaGriglia());
+        while (errore) {
+            String casella = IO.readln().trim().toUpperCase();
 
-        boolean gioco = false;
-        while (gioco) {
-            System.out.println(getStringaGriglia());
+            if (casella.length() != 2) System.out.println("Formato casella non valido");
+            else {
+                try {
+                    addSegno(segno, casella.charAt(0), Character.getNumericValue(casella.charAt(1)));
+                    System.out.println();
+                    errore = false;
+                }
+                catch (Exception e) {
+                    System.out.println(e.getMessage());
+                }
+            }
         }
     }
 
+    public void giocaConsole() {
+        char segno = giocatoreO;
+        int esito = 0;
+
+        while (esito == 0) {
+            segno = cambiaSegno(segno);
+            System.out.print(getStringaGriglia());
+            occupaCasellaConsole(segno);
+            esito = controlli(segno);
+        }
+
+        System.out.print(getStringaGriglia());
+        if (esito == 1) System.out.println("Vince il giocatore " + segno + "\n");
+        else System.out.println("Pareggio\n");
+
+        System.out.println("Vuoi giocare ancora? (si/no)");
+        String scelta = IO.readln().trim().toLowerCase();
+        if (scelta.equals("si")) {
+            System.out.println();
+            inizializzaGriglia();
+            giocaConsole();
+        }
+    }
 }

@@ -11,6 +11,9 @@ public class Tris {
     public final char casellaVuota;
     public final HashMap<Character, Integer> diozionario;
 
+    /**
+     * Costruttore: inizializza la griglia e i caratteri dei giocatori.
+     */
     public Tris() {
         LUNGHEZZA_GRIGLIA = 3;
         ALTEZZA_GRIGLIA = 3;
@@ -25,6 +28,9 @@ public class Tris {
         diozionario.put('C', 2);
     }
 
+    /**
+     * Inizializza la griglia riempiendola con caselle vuote.
+     */
     private void inizializzaGriglia() {
         for(int x = 0; x < ALTEZZA_GRIGLIA; x++) {
             for(int y = 0; y < LUNGHEZZA_GRIGLIA; y++) {
@@ -33,12 +39,28 @@ public class Tris {
         }
     }
 
+    /**
+     * Restituisce il segno dell'altro giocatore.
+     *
+     * @param segno Segno corrente ('X' o 'O')
+     * @return Il segno opposto
+     * @throws InvalidParameterException Se il segno non è valido
+     */
     public char cambiaSegno(char segno) throws InvalidParameterException {
         if (segno != giocatoreO && segno != giocatoreX) throw new InvalidParameterException("Segno non valido");
         if (segno == giocatoreO) return giocatoreX;
         else return giocatoreO;
     }
 
+    /**
+     * Inserisce un segno nella griglia in base alle coordinate.
+     *
+     * @param segno Segno del giocatore ('X' o 'O')
+     * @param x Lettera della colonna ('A', 'B', 'C')
+     * @param y Numero della riga (1-3)
+     * @throws InvalidParameterException Se il segno o le coordinate non sono valide
+     * @throws Exception Se la casella è già occupata
+     */
     public void addSegno(char segno, char x, int y) throws InvalidParameterException, Exception {
         y--;
         if (segno != giocatoreO && segno != giocatoreX) throw new InvalidParameterException("Segno non valido");
@@ -47,6 +69,12 @@ public class Tris {
         griglia[y][diozionario.get(x)] = segno;
     }
 
+    /**
+     * Controlla l'esito della partita.
+     *
+     * @param segno Segno del giocatore da controllare
+     * @return 1 se il giocatore ha vinto, 2 se la griglia è piena (pareggio), 0 se la partita continua
+     */
     public int controlli(char segno) {
         //controllo orizzontale
         for(char[] y : griglia) {
@@ -115,6 +143,11 @@ public class Tris {
         return 0;
     }
 
+    /**
+     * Restituisce una rappresentazione testuale della griglia di gioco.
+     *
+     * @return Stringa che rappresenta la griglia del Tris
+     */
     public String getStringaGriglia() {
         StringBuilder s = new StringBuilder(" A   B   C \n");
         for (int y = 0; y < ALTEZZA_GRIGLIA; y++) {
@@ -136,6 +169,11 @@ public class Tris {
         return s.toString();
     }
 
+    /**
+     * Gestisce l'inserimento della mossa di un giocatore tramite input console.
+     *
+     * @param segno Segno del giocatore ('X' o 'O')
+     */
     private void occupaCasellaConsole(char segno) {
         System.out.println("Giocatore " + segno + " inserisci la casella che vuoi occupare (esempio: A1)");
         boolean errore = true;
@@ -157,6 +195,11 @@ public class Tris {
         }
     }
 
+    /**
+     * Avvia una partita di Tris giocata tramite console.
+     * Il gioco continua fino a quando un giocatore vince o si verifica un pareggio.
+     * Alla fine chiede se l'utente vuole giocare di nuovo.
+     */
     public void giocaConsole() {
         char segno = giocatoreO;
         int esito = 0;

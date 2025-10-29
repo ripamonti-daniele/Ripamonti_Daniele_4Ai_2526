@@ -11,8 +11,10 @@ public class FrameGioco extends JFrame implements ComponentListener {
     private final int BARRASUPERIORE;
     private JPanel pInfo;
     private JPanel pGioco;
+    private final Board board;
 
-    public FrameGioco() {
+    public FrameGioco(Board board) {
+        this.board = board;
         lunghezzaFrame = 1024;
         altezzaFrame = 768;
         BARRASUPERIORE = 31;
@@ -34,7 +36,7 @@ public class FrameGioco extends JFrame implements ComponentListener {
     private void inizializzaGriglia() {
         for (int i = 0; i < 8; i++) {
             for (int j = 0; j < 8; j++) {
-                griglia[i][j] = new PanelGioco(j, i, pGioco.getHeight());
+                griglia[i][j] = new PanelGioco(j, i, pGioco.getHeight(), board);
                 pGioco.add(griglia[i][j]);
             }
         }
@@ -52,8 +54,8 @@ public class FrameGioco extends JFrame implements ComponentListener {
     public void drawDischi(int[][] griglia) {
         for (int y = 0; y < 8; y++) {
             for (int x = 0; x < 8; x++) {
-                if (griglia[x][y] == 0) this.griglia[x][y].aggiungiDisco(Color.black);
-                else if (griglia[x][y] == 1) this.griglia[x][y].aggiungiDisco(Color.white);
+                if (griglia[x][y] == 0) this.griglia[x][y].disegnaDisco(Color.black);
+                else if (griglia[x][y] == 1) this.griglia[x][y].disegnaDisco(Color.white);
             }
         }
     }

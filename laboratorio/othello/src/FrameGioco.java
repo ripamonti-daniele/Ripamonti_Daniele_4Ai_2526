@@ -11,6 +11,7 @@ public class FrameGioco extends JFrame implements ComponentListener {
     private final int BARRASUPERIORE;
     private JPanel pInfo;
     private JPanel pGioco;
+    JLabel label;
     private final Board board;
 
     public FrameGioco(Board board) {
@@ -20,12 +21,16 @@ public class FrameGioco extends JFrame implements ComponentListener {
         BARRASUPERIORE = 31;
         proporzioniFrame = Integer.parseInt(String.valueOf(lunghezzaFrame / (altezzaFrame - BARRASUPERIORE)));
         griglia = new PanelGioco[8][8];
+        label = new JLabel();
+        label.setFont(new Font("", Font.BOLD, 50));
+        setLabel("Turno: nero");
         inizializzaPanel();
         inizializzaGriglia();
         this.setTitle("Othello");
         this.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
         this.setLayout(null);
         this.setSize(lunghezzaFrame, altezzaFrame + BARRASUPERIORE);
+        this.setLocationRelativeTo(null);
         this.addComponentListener(this);
         this.add(pInfo);
         this.add(pGioco);
@@ -36,7 +41,7 @@ public class FrameGioco extends JFrame implements ComponentListener {
     private void inizializzaGriglia() {
         for (int i = 0; i < 8; i++) {
             for (int j = 0; j < 8; j++) {
-                griglia[i][j] = new PanelGioco(j, i, pGioco.getHeight(), board);
+                griglia[i][j] = new PanelGioco(j, i, pGioco.getWidth(), pGioco.getHeight(), board, this);
                 pGioco.add(griglia[i][j]);
             }
         }
@@ -46,9 +51,11 @@ public class FrameGioco extends JFrame implements ComponentListener {
         pInfo = new JPanel();
         pInfo.setBounds(0, 0, lunghezzaFrame, Integer.parseInt(String.valueOf(altezzaFrame / 5)));
         pInfo.setBackground(Color.red);
+        pInfo.setLayout(new FlowLayout());
+        pInfo.add(label);
         pGioco = new JPanel();
         pGioco.setLayout(null);
-        pGioco.setBounds(0, pInfo.getHeight(), lunghezzaFrame, Integer.parseInt(String.valueOf(altezzaFrame / 5 * 4)));
+        pGioco.setBounds(0, pInfo.getHeight(), lunghezzaFrame, Integer.parseInt(String.valueOf(altezzaFrame - pInfo.getHeight())));
     }
 
     public void drawDischi(int[][] griglia) {
@@ -58,6 +65,16 @@ public class FrameGioco extends JFrame implements ComponentListener {
                 else if (griglia[x][y] == 1) this.griglia[x][y].disegnaDisco(Color.white);
             }
         }
+    }
+
+    public void finePartita(String esito) {
+        esito = esito.replace("\n", "<br>");
+        esito = "<html><div style='text-align:center;'>" + esito + "</div><html>";
+        label.setText(esito);
+    }
+
+    public void setLabel(String s) {
+        label.setText(s);
     }
 
     @Override

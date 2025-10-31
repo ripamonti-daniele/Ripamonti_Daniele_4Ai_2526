@@ -1,41 +1,47 @@
 import javax.swing.*;
 import java.awt.*;
-import java.awt.event.ComponentEvent;
-import java.awt.event.ComponentListener;
 
-public class FrameGioco extends JFrame implements ComponentListener {
+public class FrameGioco extends JFrame {
     private final PanelGioco[][] griglia;
-    private int lunghezzaFrame;
-    private int altezzaFrame;
-    private int proporzioniFrame;
-    private final int BARRASUPERIORE;
+    private final int LUNGHEZZAFRAME;
+    private final int ALTEZZAFRAME;
     private JPanel pInfo;
     private JPanel pGioco;
-    JLabel label;
+    private final JLabel label;
     private final Board board;
 
     public FrameGioco(Board board) {
         this.board = board;
-        lunghezzaFrame = 1024;
-        altezzaFrame = 768;
-        BARRASUPERIORE = 31;
-        proporzioniFrame = Integer.parseInt(String.valueOf(lunghezzaFrame / (altezzaFrame - BARRASUPERIORE)));
         griglia = new PanelGioco[8][8];
         label = new JLabel();
         label.setFont(new Font("", Font.BOLD, 50));
-        setLabel("Turno: nero");
+        label.setForeground(Color.lightGray);
+        setLabelText("Turno: nero");
+        this.setExtendedState(JFrame.MAXIMIZED_BOTH);
+        this.setVisible(true);
+        LUNGHEZZAFRAME = this.getWidth();
+        ALTEZZAFRAME = this.getHeight() - (Integer.parseInt(String.valueOf(this.getHeight() / 20)));
         inizializzaPanel();
         inizializzaGriglia();
+        aggiornaPanelInfo(true);
+        setIcona();
         this.setTitle("Othello");
         this.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
         this.setLayout(null);
-        this.setSize(lunghezzaFrame, altezzaFrame + BARRASUPERIORE);
         this.setLocationRelativeTo(null);
-        this.addComponentListener(this);
+        this.getContentPane().setBackground(new Color(28, 27, 27));
         this.add(pInfo);
         this.add(pGioco);
+    }
 
-        this.setVisible(true);
+    private void setIcona() {
+        try {
+            Image icona = new ImageIcon("othello_icona.png").getImage();
+            this.setIconImage(icona);
+        }
+        catch (Exception e) {
+            System.out.println("Icona non trovata");
+        }
     }
 
     private void inizializzaGriglia() {
@@ -49,13 +55,48 @@ public class FrameGioco extends JFrame implements ComponentListener {
 
     private void inizializzaPanel() {
         pInfo = new JPanel();
-        pInfo.setBounds(0, 0, lunghezzaFrame, Integer.parseInt(String.valueOf(altezzaFrame / 5)));
-        pInfo.setBackground(Color.red);
+        pInfo.setBounds(0, 0, LUNGHEZZAFRAME, Integer.parseInt(String.valueOf(ALTEZZAFRAME / 5)));
         pInfo.setLayout(new FlowLayout());
+        pInfo.setBackground(new Color(28, 27, 27));
         pInfo.add(label);
         pGioco = new JPanel();
+        pGioco.setBounds(0, pInfo.getHeight(), LUNGHEZZAFRAME, ALTEZZAFRAME - pInfo.getHeight());
         pGioco.setLayout(null);
-        pGioco.setBounds(0, pInfo.getHeight(), lunghezzaFrame, Integer.parseInt(String.valueOf(altezzaFrame - pInfo.getHeight())));
+        pGioco.setBackground(new Color(28, 27, 27));
+    }
+
+    public Color aggiornaPanelInfo(boolean inizioPartita) {
+        int turno = board.getTurno();
+        int[] punteggi = board.getPunteggi();
+
+
+        String testoTurno;
+        Color c;
+        if (inizioPartita) {
+            testoTurno = "nero";
+            c = Color.black;
+        }
+        else if (turno == 0) {
+            testoTurno = "bianco";
+            c = Color.black;
+        }
+        else {
+            testoTurno = "nero";
+            c = Color.white;
+        }
+        setLabelText("<html><div style='text-align:center;'>Nero: " + punteggi[0] + " - Bianco: " + punteggi[1] + "<br>Turno: " + testoTurno + "</div><html>");
+        drawDischi(board.getGriglia());
+
+        if (!inizioPartita) {
+            int esito = board.esitoPartita();
+            if (esito != -1) {
+                griglia[0][0].disabilitaClick();
+                finePartita(esito, punteggi);
+            }
+            else board.cambiaTurno();
+        }
+
+        return c;
     }
 
     public void drawDischi(int[][] griglia) {
@@ -67,35 +108,16 @@ public class FrameGioco extends JFrame implements ComponentListener {
         }
     }
 
-    public void finePartita(String esito) {
-        esito = esito.replace("\n", "<br>");
-        esito = "<html><div style='text-align:center;'>" + esito + "</div><html>";
-        label.setText(esito);
+    public void finePartita(int esito, int[] punteggi) {
+        String testo = "<html><div style='text-align:center;'>Nero: " + punteggi[0] + " - Bianco: " + punteggi[1] + "<br>";
+        if (esito == 0) testo += "Vince il nero!";
+        else if (esito == 1) testo += "Vince il bianco!";
+        else if (esito == 2) testo += "Pareggio!";
+        testo += "</div><html>";
+        label.setText(testo);
     }
 
-    public void setLabel(String s) {
+    public void setLabelText(String s) {
         label.setText(s);
-    }
-
-    @Override
-    public void componentResized(ComponentEvent e) {
-        lunghezzaFrame = this.getWidth();
-        altezzaFrame = this.getHeight();
-        proporzioniFrame = Integer.parseInt(String.valueOf(lunghezzaFrame / (altezzaFrame - BARRASUPERIORE)));
-    }
-
-    @Override
-    public void componentMoved(ComponentEvent e) {
-
-    }
-
-    @Override
-    public void componentShown(ComponentEvent e) {
-
-    }
-
-    @Override
-    public void componentHidden(ComponentEvent e) {
-
     }
 }

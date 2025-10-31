@@ -40,28 +40,26 @@ public class Board {
         return copiaGriglia;
     }
 
-    public String esitoPartita() {
-        int nero = 0;
-        int bianco = 0;
+    public int[] getPunteggi() {
+        int[] punteggi = new int[2];
 
         for (int y = 0; y < 8; y++) {
             for (int x = 0; x < 8; x++) {
-                switch (griglia[y][x]) {
-                    case -1:
-                        return "";
-                    case 0:
-                        nero++;
-                        break;
-                    case 1:
-                        bianco++;
-                        break;
-                }
+                int val = griglia[y][x];
+                if (val == 0) punteggi[0]++;
+                else if (val == 1) punteggi[1]++;
             }
         }
+        return punteggi;
+    }
 
-        if (nero == bianco) return "Nero: " + nero + " Bianco: " + bianco + "\nPareggio!";
-        else if (nero > bianco) return "Nero: " + nero + " Bianco: " + bianco + "\nVince il nero!";
-        else return "Nero: " + nero + " Bianco: " + bianco + "\nVince il bianco!";
+    public int esitoPartita() {
+        int[] punteggi = getPunteggi();
+
+        if (punteggi[0] + punteggi[1] < 64) return -1;
+        else if (punteggi[0] == punteggi[1]) return 2;
+        else if (punteggi[0] > punteggi[1]) return 0;
+        else return 1;
     }
 
     private boolean isAdiacente(int x, int y) {

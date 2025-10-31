@@ -4,3 +4,7 @@ public class Main {
         FrameGioco frame = new FrameGioco(board);
     }
 }
+//TODO
+//gioca ancora
+//controlli per il passo
+//mostra con un cerchio vuoto le mosse possibili

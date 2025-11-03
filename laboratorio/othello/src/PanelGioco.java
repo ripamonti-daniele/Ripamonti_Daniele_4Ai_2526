@@ -25,7 +25,7 @@ public class PanelGioco extends JPanel {
                 super.mouseClicked(e);
                 if (!discoDisegnato && clickAbilitato) {
                     try {
-                        board.addDisco(x, y);
+                        board.addDisco(x, y, board.getTurno());
                     }
                     catch (InvalidParameterException exc) {
                         System.out.println(exc.getMessage());

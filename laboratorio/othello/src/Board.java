@@ -1,9 +1,19 @@
 import java.security.InvalidParameterException;
+import java.util.ArrayList;
+import java.util.List;
 
 public class Board {
-    private final int[][] griglia;
     private int turno;
-    private boolean aggiornato;
+    private final int[][] griglia;
+    private List<List<Integer>> caselleLegali;
+    private final int NORTH = 1;
+    private final int EAST = 2;
+    private final int SOUTH = 3;
+    private final int WEST = 4;
+    private final int NORTH_EAST = 5;
+    private final int SOUTH_EAST = 6;
+    private final int SOUTH_WEST = 7;
+    private final int NORTH_WEST = 8;
 
     public Board() {
         griglia = new int[8][8];
@@ -62,7 +72,7 @@ public class Board {
         else return 1;
     }
 
-    private boolean isAdiacente(int x, int y) {
+    private boolean isAdiacente(int x, int y, int turno) {
         boolean adiacente = false;
         for (int verticale = -1; verticale <= 1; verticale ++) {
             for (int orizzontale = -1; orizzontale <= 1; orizzontale ++) {
@@ -77,202 +87,136 @@ public class Board {
         return adiacente;
     }
 
-    public void addDisco(int x, int y) {
+    private void aggiornaCaselleLegali(int turno) {
+        caselleLegali = new ArrayList<>();
+        for (int y = 0; y < 8; y++) {
+            for (int x = 0; x < 8; x++) {
+                if (griglia[y][x] != -1) continue;
+                if (isAdiacente(x, y, 0)) {
+                    caselleLegali.add(new ArrayList<Integer>());
+                    caselleLegali.getLast().add(x);
+                    caselleLegali.getLast().add(y);
+                    caselleLegali.getLast().add(turno);
+                    for (int i = 1; i <= 8; i++) {
+                        int val = aggiornaDischi(x, y, i, false);
+                        if (val != 0) {
+                            caselleLegali.getLast().add(val);
+                            System.out.println("coordinate:" + x + " " + y + " - turno: " + turno);
+                        }
+                    }
+                    if (caselleLegali.getLast().size() == 3) caselleLegali.remove(caselleLegali.getLast());
+                }
+            }
+        }
+    }
+
+    public void addDisco(int x, int y, int turno) {
         if (x < 0 || x > 7 || y < 0 || y > 7) throw new InvalidParameterException("Errore: questa casella non esiste");
         if (griglia[y][x] != -1) throw new InvalidParameterException("Errore: casella già occupata");
 
-        boolean adiacente = isAdiacente(x, y);
-        if (!adiacente) throw new InvalidParameterException("Errore: casella non adiacente ai dischi dell'avversario");
+        aggiornaCaselleLegali(turno);
+        boolean legale = false;
 
-        aggiornato = false;
+        for (List<Integer> mossa : caselleLegali) {
+            System.out.println(mossa);
+            if (mossa.getFirst() == x && mossa.get(1) == y && mossa.get(2) == turno) {
+                legale = true;
+                for (int i = 3; i < mossa.size(); i++) aggiornaDischi(mossa.getFirst(), mossa.get(1), mossa.get(i), true);
+            }
+        }
 
-        aggiornaDischi(x, y, true, false, true, false, false);
-        aggiornaDischi(x, y, true, false, false, false, false);
-        aggiornaDischi(x, y, false, true, false, true, false);
-        aggiornaDischi(x, y, false, true, false, false, false);
-        aggiornaDischi(x, y, true, true, true, true, false);
-        aggiornaDischi(x, y, true, true, false, false, false);
-        aggiornaDischi(x, y, true, true, true, false, false);
-        aggiornaDischi(x, y, true, true, false, true, false);
-
-        if (aggiornato) griglia[y][x] = turno;
-        else throw new InvalidParameterException("Errore: questa casella non permette di rubare dischi all'avversario");
+        if (!legale) throw new InvalidParameterException("Errore: non puoi inserire un disco in questa casella");
     }
 
-    private void aggiornaDischi(int x, int y, boolean cambiaX, boolean cambiaY, boolean aumentaX, boolean aumentaY, boolean modifica) {
-        if (!cambiaX && !cambiaY) {
-            throw new InvalidParameterException("Errore, almeno uno tra cambiaX e cambiaY dev'essere true");
-        }
-        int startX = x;
-        int startY = y;
+    private int aggiornaDischi(int x, int y, int direzione, boolean modifica) {
         boolean catturato = false;
 
-        //destra
-        if (aumentaX && cambiaX && x < 6 && !cambiaY) {
-            x++;
-            for (; x < 8; x++) {
-                if (!modifica) {
-                    if (griglia[y][x] == -1) break;
-                    if (griglia[y][x] != turno) catturato = true;
-                    else if (griglia[y][x] == turno && catturato) {
-                        aggiornaDischi(startX, startY, cambiaX, cambiaY, aumentaX, aumentaY,true);
-                        break;
-                    }
-                    else break;
-                }
-                else {
-                    if (griglia[y][x] != turno) {
-                        griglia[y][x] = turno;
-                        aggiornato = true;
-                    }
-                    else break;
-                }
-            }
-        }
-
-        //sinistra
-        if (!aumentaX && cambiaX && x > 1 && !cambiaY) {
-            x--;
-            for (; x > -1; x--) {
-                if (!modifica) {
-                    if (griglia[y][x] == -1) break;
-                    if (griglia[y][x] != turno) catturato = true;
-                    else if (griglia[y][x] == turno && catturato) {
-                        aggiornaDischi(startX, startY, cambiaX, cambiaY, aumentaX, aumentaY,true);
-                        break;
-                    }
-                    else break;
-                }
-                else {
-                    if (griglia[y][x] != turno) {
-                        griglia[y][x] = turno;
-                        aggiornato = true;
-                    }
-                    else break;
-                }
-            }
-        }
-
-        //basso
-        if (aumentaY && cambiaY && y < 6 && !cambiaX) {
-            y++;
-            for (; y < 8; y++) {
-                if (!modifica) {
-                    if (griglia[y][x] == -1) break;
-                    if (griglia[y][x] != turno) catturato = true;
-                    else if (griglia[y][x] == turno && catturato) {
-                        aggiornaDischi(startX, startY, cambiaX, cambiaY, aumentaX, aumentaY,true);
-                        break;
-                    }
-                    else break;
-                }
-                else {
-                    if (griglia[y][x] != turno) {
-                        griglia[y][x] = turno;
-                        aggiornato = true;
-                    }
-                    else break;
-                }
-            }
-        }
-
-        //alto
-        if (!aumentaY && cambiaY && y > 1 && !cambiaX) {
+        //NORTH
+        if (direzione == NORTH && y > 1) {
             y--;
             for (; y > -1; y--) {
                 if (!modifica) {
                     if (griglia[y][x] == -1) break;
                     if (griglia[y][x] != turno) catturato = true;
                     else if (griglia[y][x] == turno && catturato) {
-                        aggiornaDischi(startX, startY, cambiaX, cambiaY, aumentaX, aumentaY,true);
-                        break;
+                        return direzione;
                     }
                     else break;
                 }
                 else {
                     if (griglia[y][x] != turno) {
                         griglia[y][x] = turno;
-                        aggiornato = true;
                     }
                     else break;
                 }
             }
         }
 
-        //basso destra
-        if (aumentaX && cambiaX && x < 6 && aumentaY && cambiaY && y < 6) {
+        //EAST
+        if (direzione == EAST && x < 6) {
             x++;
+            for (; x < 8; x++) {
+                if (!modifica) {
+                    if (griglia[y][x] == -1) break;
+                    if (griglia[y][x] != turno) catturato = true;
+                    else if (griglia[y][x] == turno && catturato) {
+                        return direzione;
+                    }
+                    else break;
+                }
+                else {
+                    if (griglia[y][x] != turno) {
+                        griglia[y][x] = turno;
+                    }
+                    else break;
+                }
+            }
+        }
+
+        //SOUTH
+        if (direzione == SOUTH && y < 6) {
             y++;
-
-            while (x < 8 && y < 8) {
+            for (; y < 8; y++) {
                 if (!modifica) {
                     if (griglia[y][x] == -1) break;
                     if (griglia[y][x] != turno) catturato = true;
                     else if (griglia[y][x] == turno && catturato) {
-                        aggiornaDischi(startX, startY, cambiaX, cambiaY, aumentaX, aumentaY,true);
-                        break;
-                    } else break;
-                } else {
+                        return direzione;
+                    }
+                    else break;
+                }
+                else {
                     if (griglia[y][x] != turno) {
                         griglia[y][x] = turno;
-                        aggiornato = true;
-                    } else break;
+                    }
+                    else break;
                 }
-                x++;
-                y++;
             }
         }
 
-        //alto sinistra
-        if (!aumentaX && cambiaX && x > 1 && !aumentaY && cambiaY && y > 1) {
+        //WEST
+        if (direzione == WEST && x > 1) {
             x--;
-            y--;
-
-            while (x > -1  && y > -1) {
+            for (; x > -1; x--) {
                 if (!modifica) {
                     if (griglia[y][x] == -1) break;
                     if (griglia[y][x] != turno) catturato = true;
                     else if (griglia[y][x] == turno && catturato) {
-                        aggiornaDischi(startX, startY, cambiaX, cambiaY, aumentaX, aumentaY,true);
-                        break;
-                    } else break;
-                } else {
+                        return direzione;
+                    }
+                    else break;
+                }
+                else {
                     if (griglia[y][x] != turno) {
                         griglia[y][x] = turno;
-                        aggiornato = true;
-                    } else break;
+                    }
+                    else break;
                 }
-                x--;
-                y--;
             }
         }
 
-        //basso sinistra
-        if (!aumentaX && cambiaX && x > 1 && aumentaY && cambiaY && y < 6) {
-            x--;
-            y++;
-
-            while (x > -1 && y < 8) {
-                if (!modifica) {
-                    if (griglia[y][x] == -1) break;
-                    if (griglia[y][x] != turno) catturato = true;
-                    else if (griglia[y][x] == turno && catturato) {
-                        aggiornaDischi(startX, startY, cambiaX, cambiaY, aumentaX, aumentaY,true);
-                        break;
-                    } else break;
-                } else {
-                    if (griglia[y][x] != turno) {
-                        griglia[y][x] = turno;
-                        aggiornato = true;
-                    } else break;
-                }
-                x--;
-                y++;
-            }
-        }
-
-        //alto destra
-        if (aumentaX && cambiaX && x < 6 && !aumentaY && cambiaY && y > 1) {
+        //NORTH EAST
+        if (direzione == NORTH_EAST && x < 6 && y > 1) {
             x++;
             y--;
 
@@ -281,18 +225,91 @@ public class Board {
                     if (griglia[y][x] == -1) break;
                     if (griglia[y][x] != turno) catturato = true;
                     else if (griglia[y][x] == turno && catturato) {
-                        aggiornaDischi(startX, startY, cambiaX, cambiaY, aumentaX, aumentaY,true);
-                        break;
-                    } else break;
-                } else {
+                        return direzione;
+                    }
+                    else break;
+                }
+                else {
                     if (griglia[y][x] != turno) {
                         griglia[y][x] = turno;
-                        aggiornato = true;
                     } else break;
                 }
                 x++;
                 y--;
             }
         }
+
+        //SOUTH EAST
+        if (direzione == SOUTH_EAST && x < 6 && y < 6) {
+            x++;
+            y++;
+
+            while (x < 8 && y < 8) {
+                if (!modifica) {
+                    if (griglia[y][x] == -1) break;
+                    if (griglia[y][x] != turno) catturato = true;
+                    else if (griglia[y][x] == turno && catturato) {
+                        return direzione;
+                    }
+                    else break;
+                }
+                else {
+                    if (griglia[y][x] != turno) {
+                        griglia[y][x] = turno;
+                    } else break;
+                }
+                x++;
+                y++;
+            }
+        }
+
+        //SOUTH WEST
+        if (direzione == SOUTH_WEST && x > 1 && y < 6) {
+            x--;
+            y++;
+
+            while (x > -1 && y < 8) {
+                if (!modifica) {
+                    if (griglia[y][x] == -1) break;
+                    if (griglia[y][x] != turno) catturato = true;
+                    else if (griglia[y][x] == turno && catturato) {
+                        return direzione;
+                    }
+                    else break;
+                }
+                else {
+                    if (griglia[y][x] != turno) {
+                        griglia[y][x] = turno;
+                    } else break;
+                }
+                x--;
+                y++;
+            }
+        }
+
+        //NORTH WEST
+        if (direzione == NORTH_WEST && x > 1 && y > 1) {
+            x--;
+            y--;
+
+            while (x > -1  && y > -1) {
+                if (!modifica) {
+                    if (griglia[y][x] == -1) break;
+                    if (griglia[y][x] != turno) catturato = true;
+                    else if (griglia[y][x] == turno && catturato) {
+                        return direzione;
+                    }
+                    else break;
+                }
+                else {
+                    if (griglia[y][x] != turno) {
+                        griglia[y][x] = turno;
+                    } else break;
+                }
+                x--;
+                y--;
+            }
+        }
+        return 0;
     }
 }

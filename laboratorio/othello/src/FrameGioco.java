@@ -23,7 +23,7 @@ public class FrameGioco extends JFrame {
         ALTEZZAFRAME = this.getHeight() - (Integer.parseInt(String.valueOf(this.getHeight() / 20)));
         inizializzaPanel();
         inizializzaGriglia();
-        aggiornaPanelInfo(true);
+        aggiornaPanelInfo();
         setIcona();
         this.setTitle("Othello");
         this.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
@@ -65,41 +65,33 @@ public class FrameGioco extends JFrame {
         pGioco.setBackground(new Color(28, 27, 27));
     }
 
-    public Color aggiornaPanelInfo(boolean inizioPartita) {
+    public void aggiornaPanelInfo() {
         int turno = board.getTurno();
         int[] punteggi = board.getPunteggi();
-
-
+        int esito;
         String testoTurno;
-        Color c;
-        if (inizioPartita) {
-            testoTurno = "nero";
-            c = Color.black;
-        }
-        else if (turno == 0) {
-            testoTurno = "bianco";
-            c = Color.black;
+
+        esito = board.esitoPartita();
+        if (esito != -1 && esito != -2) {
+            griglia[0][0].disabilitaClick();
+            finePartita(esito, punteggi);
+            drawDischi(board.getGriglia());
         }
         else {
-            testoTurno = "nero";
-            c = Color.white;
-        }
-        setLabelText("<html><div style='text-align:center;'>Nero: " + punteggi[0] + " - Bianco: " + punteggi[1] + "<br>Turno: " + testoTurno + "</div><html>");
-        drawDischi(board.getGriglia());
-
-        if (!inizioPartita) {
-            int esito = board.esitoPartita();
-            if (esito != -1) {
-                griglia[0][0].disabilitaClick();
-                finePartita(esito, punteggi);
+            if (turno == 0) {
+                testoTurno = "nero";
+                if (esito == -2) testoTurno += " (il bianco salta il turno)";
             }
-            else board.cambiaTurno();
+            else {
+                testoTurno = "bianco";
+                if (esito == -2) testoTurno += " (il nero salta il turno)";
+            }
+            setLabelText("<html><div style='text-align:center;'>Nero: " + punteggi[0] + " - Bianco: " + punteggi[1] + "<br>Turno: " + testoTurno + "</div><html>");
+            drawDischi(board.getGriglia());
         }
-
-        return c;
     }
 
-    public void drawDischi(int[][] griglia) {
+    private void drawDischi(int[][] griglia) {
         for (int y = 0; y < 8; y++) {
             for (int x = 0; x < 8; x++) {
                 if (griglia[x][y] == 0) this.griglia[x][y].disegnaDisco(Color.black);
@@ -108,16 +100,17 @@ public class FrameGioco extends JFrame {
         }
     }
 
-    public void finePartita(int esito, int[] punteggi) {
+    private void finePartita(int esito, int[] punteggi) {
         String testo = "<html><div style='text-align:center;'>Nero: " + punteggi[0] + " - Bianco: " + punteggi[1] + "<br>";
         if (esito == 0) testo += "Vince il nero!";
         else if (esito == 1) testo += "Vince il bianco!";
         else if (esito == 2) testo += "Pareggio!";
+        if (punteggi[0] + punteggi[1] < 64) testo += " (mosse finite)";
         testo += "</div><html>";
         label.setText(testo);
     }
 
-    public void setLabelText(String s) {
+    private void setLabelText(String s) {
         label.setText(s);
     }
 }

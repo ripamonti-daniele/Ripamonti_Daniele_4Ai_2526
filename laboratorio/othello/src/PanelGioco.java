@@ -31,9 +31,7 @@ public class PanelGioco extends JPanel {
                         System.out.println(exc.getMessage());
                         return;
                     }
-
-                    Color c = frame.aggiornaPanelInfo(false);
-                    disegnaDisco(c);
+                    frame.aggiornaPanelInfo();
                 }
             }
         });

@@ -6,6 +6,8 @@ public class Board {
     private int turno;
     private final int[][] griglia;
     private List<List<Integer>> caselleLegali;
+    boolean passo;
+    private boolean doppioPasso;
     public final int NORTH = 1;
     public final int EAST = 2;
     public final int SOUTH = 3;
@@ -18,7 +20,10 @@ public class Board {
     public Board() {
         griglia = new int[8][8];
         turno = 0;
+        passo = false;
+        doppioPasso = false;
         inizializzaGriglia();
+        aggiornaCaselleLegali();
     }
 
     public void inizializzaGriglia() {
@@ -33,7 +38,7 @@ public class Board {
         griglia[4][4] = 1;
     }
 
-    public void cambiaTurno() {
+    private void cambiaTurno() {
         if (turno == 0) turno = 1;
         else turno = 0;
     }
@@ -48,6 +53,14 @@ public class Board {
             copiaGriglia[i] = griglia[i].clone();
         }
         return copiaGriglia;
+    }
+
+    public List<List<Integer>> getCaselleLegali() {
+        List<List<Integer>> copiaCaselleLegali = new ArrayList<>();
+        for (List<Integer> sublist : caselleLegali) {
+            copiaCaselleLegali.add(new ArrayList<>(sublist));
+        }
+        return copiaCaselleLegali;
     }
 
     public int[] getPunteggi() {
@@ -65,8 +78,8 @@ public class Board {
 
     public int esitoPartita() {
         int[] punteggi = getPunteggi();
-
-        if (punteggi[0] + punteggi[1] < 64) return -1;
+        if (passo && !doppioPasso) return -2;
+        else if (punteggi[0] + punteggi[1] < 64 && !doppioPasso) return -1;
         else if (punteggi[0] == punteggi[1]) return 2;
         else if (punteggi[0] > punteggi[1]) return 0;
         else return 1;
@@ -113,9 +126,7 @@ public class Board {
         if (x < 0 || x > 7 || y < 0 || y > 7) throw new InvalidParameterException("Errore: questa casella non esiste");
         if (griglia[y][x] != -1) throw new InvalidParameterException("Errore: casella già occupata");
 
-        aggiornaCaselleLegali();
         boolean legale = false;
-
         for (List<Integer> mossa : caselleLegali) {
             if (mossa.getFirst() == x && mossa.get(1) == y && mossa.get(2) == turno) {
                 legale = true;
@@ -123,9 +134,22 @@ public class Board {
                 break;
             }
         }
-
         if (!legale) throw new InvalidParameterException("Errore: non puoi inserire un disco in questa casella");
+
         griglia[y][x] = turno;
+        cambiaTurno();
+
+        aggiornaCaselleLegali();
+        if (caselleLegali.isEmpty()) {
+            passo = true;
+            cambiaTurno();
+            aggiornaCaselleLegali();
+            if (caselleLegali.isEmpty()) {
+                doppioPasso = true;
+                cambiaTurno();
+            }
+        }
+        else passo = false;
     }
 
     private int aggiornaDischi(int x, int y, int direzione, boolean modifica) {

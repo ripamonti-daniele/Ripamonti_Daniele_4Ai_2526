@@ -6,5 +6,5 @@ public class Main {
 }
 //TODO
 //gioca ancora
-//controlli per il passo
+//implementazione passo
 //mostra con un cerchio vuoto le mosse possibili

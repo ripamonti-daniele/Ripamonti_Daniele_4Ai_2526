@@ -6,14 +6,14 @@ public class Board {
     private int turno;
     private final int[][] griglia;
     private List<List<Integer>> caselleLegali;
-    private final int NORTH = 1;
-    private final int EAST = 2;
-    private final int SOUTH = 3;
-    private final int WEST = 4;
-    private final int NORTH_EAST = 5;
-    private final int SOUTH_EAST = 6;
-    private final int SOUTH_WEST = 7;
-    private final int NORTH_WEST = 8;
+    public final int NORTH = 1;
+    public final int EAST = 2;
+    public final int SOUTH = 3;
+    public final int WEST = 4;
+    public final int NORTH_EAST = 5;
+    public final int SOUTH_EAST = 6;
+    public final int SOUTH_WEST = 7;
+    public final int NORTH_WEST = 8;
 
     public Board() {
         griglia = new int[8][8];
@@ -72,7 +72,7 @@ public class Board {
         else return 1;
     }
 
-    private boolean isAdiacente(int x, int y, int turno) {
+    private boolean isAdiacente(int x, int y) {
         boolean adiacente = false;
         for (int verticale = -1; verticale <= 1; verticale ++) {
             for (int orizzontale = -1; orizzontale <= 1; orizzontale ++) {
@@ -87,12 +87,12 @@ public class Board {
         return adiacente;
     }
 
-    private void aggiornaCaselleLegali(int turno) {
+    private void aggiornaCaselleLegali() {
         caselleLegali = new ArrayList<>();
         for (int y = 0; y < 8; y++) {
             for (int x = 0; x < 8; x++) {
                 if (griglia[y][x] != -1) continue;
-                if (isAdiacente(x, y, 0)) {
+                if (isAdiacente(x, y)) {
                     caselleLegali.add(new ArrayList<Integer>());
                     caselleLegali.getLast().add(x);
                     caselleLegali.getLast().add(y);
@@ -101,7 +101,6 @@ public class Board {
                         int val = aggiornaDischi(x, y, i, false);
                         if (val != 0) {
                             caselleLegali.getLast().add(val);
-                            System.out.println("coordinate:" + x + " " + y + " - turno: " + turno);
                         }
                     }
                     if (caselleLegali.getLast().size() == 3) caselleLegali.remove(caselleLegali.getLast());
@@ -110,22 +109,23 @@ public class Board {
         }
     }
 
-    public void addDisco(int x, int y, int turno) {
+    public void addDisco(int x, int y) {
         if (x < 0 || x > 7 || y < 0 || y > 7) throw new InvalidParameterException("Errore: questa casella non esiste");
         if (griglia[y][x] != -1) throw new InvalidParameterException("Errore: casella già occupata");
 
-        aggiornaCaselleLegali(turno);
+        aggiornaCaselleLegali();
         boolean legale = false;
 
         for (List<Integer> mossa : caselleLegali) {
-            System.out.println(mossa);
             if (mossa.getFirst() == x && mossa.get(1) == y && mossa.get(2) == turno) {
                 legale = true;
                 for (int i = 3; i < mossa.size(); i++) aggiornaDischi(mossa.getFirst(), mossa.get(1), mossa.get(i), true);
+                break;
             }
         }
 
         if (!legale) throw new InvalidParameterException("Errore: non puoi inserire un disco in questa casella");
+        griglia[y][x] = turno;
     }
 
     private int aggiornaDischi(int x, int y, int direzione, boolean modifica) {
@@ -153,7 +153,7 @@ public class Board {
         }
 
         //EAST
-        if (direzione == EAST && x < 6) {
+        else if (direzione == EAST && x < 6) {
             x++;
             for (; x < 8; x++) {
                 if (!modifica) {
@@ -174,7 +174,7 @@ public class Board {
         }
 
         //SOUTH
-        if (direzione == SOUTH && y < 6) {
+        else if (direzione == SOUTH && y < 6) {
             y++;
             for (; y < 8; y++) {
                 if (!modifica) {
@@ -195,7 +195,7 @@ public class Board {
         }
 
         //WEST
-        if (direzione == WEST && x > 1) {
+        else if (direzione == WEST && x > 1) {
             x--;
             for (; x > -1; x--) {
                 if (!modifica) {
@@ -216,7 +216,7 @@ public class Board {
         }
 
         //NORTH EAST
-        if (direzione == NORTH_EAST && x < 6 && y > 1) {
+        else if (direzione == NORTH_EAST && x < 6 && y > 1) {
             x++;
             y--;
 
@@ -240,7 +240,7 @@ public class Board {
         }
 
         //SOUTH EAST
-        if (direzione == SOUTH_EAST && x < 6 && y < 6) {
+        else if (direzione == SOUTH_EAST && x < 6 && y < 6) {
             x++;
             y++;
 
@@ -264,7 +264,7 @@ public class Board {
         }
 
         //SOUTH WEST
-        if (direzione == SOUTH_WEST && x > 1 && y < 6) {
+        else if (direzione == SOUTH_WEST && x > 1 && y < 6) {
             x--;
             y++;
 
@@ -288,7 +288,7 @@ public class Board {
         }
 
         //NORTH WEST
-        if (direzione == NORTH_WEST && x > 1 && y > 1) {
+        else if (direzione == NORTH_WEST && x > 1 && y > 1) {
             x--;
             y--;
 

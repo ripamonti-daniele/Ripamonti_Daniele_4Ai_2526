@@ -6,4 +6,3 @@ public class Main {
 }
 //TODO
 //gioca ancora
-//mostra con un cerchio vuoto le mosse possibili

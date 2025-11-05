@@ -1,5 +1,7 @@
 import javax.swing.*;
 import java.awt.*;
+import java.util.ArrayList;
+import java.util.List;
 
 public class FrameGioco extends JFrame {
     private final PanelGioco[][] griglia;
@@ -9,6 +11,7 @@ public class FrameGioco extends JFrame {
     private JPanel pGioco;
     private final JLabel label;
     private final Board board;
+    private List<List<Integer>> mossePossibili = new ArrayList<>();
 
     public FrameGioco(Board board) {
         this.board = board;
@@ -72,6 +75,7 @@ public class FrameGioco extends JFrame {
         String testoTurno;
 
         esito = board.esitoPartita();
+        cancellaMossePossibili();
         if (esito != -1 && esito != -2) {
             griglia[0][0].disabilitaClick();
             finePartita(esito, punteggi);
@@ -88,15 +92,35 @@ public class FrameGioco extends JFrame {
             }
             setLabelText("<html><div style='text-align:center;'>Nero: " + punteggi[0] + " - Bianco: " + punteggi[1] + "<br>Turno: " + testoTurno + "</div><html>");
             drawDischi(board.getGriglia());
+            drawMossePossibili();
         }
     }
 
     private void drawDischi(int[][] griglia) {
         for (int y = 0; y < 8; y++) {
             for (int x = 0; x < 8; x++) {
-                if (griglia[x][y] == 0) this.griglia[x][y].disegnaDisco(Color.black);
-                else if (griglia[x][y] == 1) this.griglia[x][y].disegnaDisco(Color.white);
+                if (griglia[x][y] == 0) this.griglia[x][y].disegnaDisco(Color.black, false, false);
+                else if (griglia[x][y] == 1) this.griglia[x][y].disegnaDisco(Color.white, false, false);
             }
+        }
+    }
+
+    private void drawMossePossibili() {
+        mossePossibili = board.getCaselleLegali();
+        for (List<Integer> mp : mossePossibili) {
+            Color c;
+            if (mp.get(2) == 0) c = Color.black;
+            else c = Color.white;
+            griglia[mp.get(1)][mp.getFirst()].disegnaDisco(c, true, false);
+        }
+    }
+
+    private void cancellaMossePossibili() {
+        for (List<Integer> mp : mossePossibili) {
+            Color c;
+            if (mp.get(2) == 0) c = Color.black;
+            else c = Color.white;
+            griglia[mp.get(1)][mp.getFirst()].disegnaDisco(c, false, true);
         }
     }
 

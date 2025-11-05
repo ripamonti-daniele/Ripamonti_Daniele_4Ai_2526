@@ -31,7 +31,7 @@ public class PanelGioco extends JPanel {
                     catch (InvalidParameterException exc) {
                         return;
                     }
-                    frame.aggiornaPanelInfo();
+                    frame.aggiornaPanel();
                 }
             }
         });

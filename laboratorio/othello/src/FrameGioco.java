@@ -26,7 +26,7 @@ public class FrameGioco extends JFrame {
         ALTEZZAFRAME = this.getHeight() - (Integer.parseInt(String.valueOf(this.getHeight() / 20)));
         inizializzaPanel();
         inizializzaGriglia();
-        aggiornaPanelInfo();
+        aggiornaPanel();
         setIcona();
         this.setTitle("Othello");
         this.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
@@ -62,13 +62,14 @@ public class FrameGioco extends JFrame {
         pInfo.setLayout(new FlowLayout());
         pInfo.setBackground(new Color(28, 27, 27));
         pInfo.add(label);
+
         pGioco = new JPanel();
         pGioco.setBounds(0, pInfo.getHeight(), LUNGHEZZAFRAME, ALTEZZAFRAME - pInfo.getHeight());
         pGioco.setLayout(null);
         pGioco.setBackground(new Color(28, 27, 27));
     }
 
-    public void aggiornaPanelInfo() {
+    public void aggiornaPanel() {
         int turno = board.getTurno();
         int[] punteggi = board.getPunteggi();
         int esito;
@@ -116,12 +117,7 @@ public class FrameGioco extends JFrame {
     }
 
     private void cancellaMossePossibili() {
-        for (List<Integer> mp : mossePossibili) {
-            Color c;
-            if (mp.get(2) == 0) c = Color.black;
-            else c = Color.white;
-            griglia[mp.get(1)][mp.getFirst()].disegnaDisco(c, false, true);
-        }
+        for (List<Integer> mp : mossePossibili) griglia[mp.get(1)][mp.getFirst()].disegnaDisco(null, false, true);
     }
 
     private void finePartita(int esito, int[] punteggi) {

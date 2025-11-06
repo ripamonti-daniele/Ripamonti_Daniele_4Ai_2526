@@ -44,6 +44,15 @@ public class PanelGioco extends JPanel {
         else if (x == 4 && y == 4) disegnaDisco(Color.white, false, false);
     }
 
+    public void reset(int x, int y) {
+        discoDisegnato = false;
+        coloreDisco = null;
+        mossaPossibile = false;
+        if (x == 0 && y == 0) clickAbilitato = true;
+        disegnaDisco(null, false, true);
+        disegnaDiscoIniziale(x, y);
+    }
+
     public void disabilitaClick() {
         clickAbilitato = false;
     }

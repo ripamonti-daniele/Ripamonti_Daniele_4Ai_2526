@@ -1,12 +1,13 @@
 import java.security.InvalidParameterException;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 
 public class Board {
     private int turno;
     private final int[][] griglia;
     private List<List<Integer>> caselleLegali;
-    boolean passo;
+    private boolean passo;
     private boolean doppioPasso;
     public final int NORTH = 1;
     public final int EAST = 2;
@@ -19,14 +20,10 @@ public class Board {
 
     public Board() {
         griglia = new int[8][8];
-        turno = 0;
-        passo = false;
-        doppioPasso = false;
-        inizializzaGriglia();
-        aggiornaCaselleLegali();
+        reset();
     }
 
-    public void inizializzaGriglia() {
+    private void inizializzaGriglia() {
         for (int i = 0; i < 8; i++) {
             for (int j = 0; j < 8; j++) {
                 griglia[i][j] = -1;
@@ -83,6 +80,14 @@ public class Board {
         else if (punteggi[0] == punteggi[1]) return 2;
         else if (punteggi[0] > punteggi[1]) return 0;
         else return 1;
+    }
+
+    public void reset() {
+        turno = 0;
+        passo = false;
+        doppioPasso = false;
+        inizializzaGriglia();
+        aggiornaCaselleLegali();
     }
 
     private boolean isAdiacente(int x, int y) {

@@ -48,20 +48,19 @@ public class PanelGioco extends JPanel {
         discoDisegnato = false;
         coloreDisco = null;
         mossaPossibile = false;
-        if (x == 0 && y == 0) clickAbilitato = true;
         disegnaDisco(null, false, true);
         disegnaDiscoIniziale(x, y);
     }
 
-    public void disabilitaClick() {
-        clickAbilitato = false;
+    public void setClickAbilitato(boolean abilitato) {
+        clickAbilitato = abilitato;
     }
 
-    public void disegnaDisco(Color colore, boolean disegnaMossaPossibile, boolean cancellaMossaPossibile) {
-        if (disegnaMossaPossibile && cancellaMossaPossibile) throw new InvalidParameterException("Non puoi disegnare e cancellare contemporaneamente le mosse possibili");
+    public void disegnaDisco(Color colore, boolean disegnaMossaPossibile, boolean cancella) {
+        if (disegnaMossaPossibile && cancella) throw new InvalidParameterException("Non puoi disegnare e cancellare contemporaneamente le mosse possibili");
         mossaPossibile = disegnaMossaPossibile;
 
-        if (cancellaMossaPossibile) repaint();
+        if (cancella) repaint();
         else if (mossaPossibile && !discoDisegnato) {
             coloreDisco = colore;
             repaint();
@@ -75,7 +74,12 @@ public class PanelGioco extends JPanel {
 
     @Override
     public void paint(Graphics g) {
-        Graphics2D grafiche = (Graphics2D) g;
+        super.paintComponent(g);
+        Graphics2D grafiche = (Graphics2D) g.create();
+
+        //migliora la grafica
+        grafiche.setRenderingHint(RenderingHints.KEY_ANTIALIASING, RenderingHints.VALUE_ANTIALIAS_ON);
+
         grafiche.setStroke(new BasicStroke(5));
         grafiche.setColor(new Color(34, 139, 34));
         grafiche.fillRect(0, 0, LATOPANEL, LATOPANEL);
@@ -91,5 +95,7 @@ public class PanelGioco extends JPanel {
             grafiche.setColor(coloreDisco);
             grafiche.fillOval(SPAZIATURA, SPAZIATURA, LATOPANEL - 2 * SPAZIATURA, LATOPANEL - 2 * SPAZIATURA);
         }
+
+        grafiche.dispose();
     }
 }

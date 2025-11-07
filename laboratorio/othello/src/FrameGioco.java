@@ -12,26 +12,18 @@ public class FrameGioco extends JFrame implements ActionListener {
     private JPanel pInfo;
     private JPanel pButton;
     private JPanel pGioco;
-    private final JLabel label;
-    private final JButton btn;
+    private JLabel label;
+    private JButton btn;
     private final Board board;
     private List<List<Integer>> mossePossibili = new ArrayList<>();
 
     public FrameGioco(Board board) {
-        this.board = board;
         griglia = new PanelGioco[8][8];
-        label = new JLabel();
-        label.setForeground(Color.lightGray);
-        setLabelText("Turno: nero");
-        btn = new JButton("Gioca ancora");
-        btn.setEnabled(false);
-        btn.setFocusable(false);
-        btn.addActionListener(this);
+        this.board = board;
         this.setExtendedState(JFrame.MAXIMIZED_BOTH);
         this.setVisible(true);
         LUNGHEZZAFRAME = this.getWidth();
         ALTEZZAFRAME = this.getHeight() - (Integer.parseInt(String.valueOf(this.getHeight() / 20)));
-        label.setFont(new Font("", Font.BOLD, 50 * (Integer.parseInt(String.valueOf(ALTEZZAFRAME / 996)))));
         inizializzaPanel();
         inizializzaGriglia();
         aggiornaPanel();
@@ -70,14 +62,21 @@ public class FrameGioco extends JFrame implements ActionListener {
         pInfo.setBounds(0, 0, LUNGHEZZAFRAME, Integer.parseInt(String.valueOf(ALTEZZAFRAME / 50 * 7)));
         pInfo.setLayout(new FlowLayout());
         pInfo.setBackground(new Color(28, 27, 27));
+
+        label = new JLabel();
+        label.setForeground(Color.lightGray);
+        label.setFont(new Font("", Font.BOLD, 50 * (Integer.parseInt(String.valueOf(ALTEZZAFRAME / 996)))));
         pInfo.add(label);
 
         pButton = new JPanel();
         pButton.setBounds(0, pInfo.getHeight(), LUNGHEZZAFRAME, Integer.parseInt(String.valueOf(ALTEZZAFRAME / 50 * 3)));
         pButton.setLayout(new FlowLayout());
         pButton.setBackground(new Color(28, 27, 27));
+
+        btn = new ButtonGioco("Gioca ancora", ALTEZZAFRAME / 996);
+        btn.setEnabled(false);
+        btn.addActionListener(this);
         btn.setPreferredSize(new Dimension(Integer.parseInt(String.valueOf(pButton.getWidth() / 12)), Integer.parseInt(String.valueOf(pButton.getHeight() / 10 * 8))));
-        btn.setFont(new Font("", Font.BOLD, 20 * (Integer.parseInt(String.valueOf(ALTEZZAFRAME / 996)))));
         pButton.add(btn);
 
         pGioco = new JPanel();
@@ -95,7 +94,7 @@ public class FrameGioco extends JFrame implements ActionListener {
         esito = board.esitoPartita();
         cancellaMossePossibili();
         if (esito != -1 && esito != -2) {
-            griglia[0][0].disabilitaClick();
+            griglia[0][0].setClickAbilitato(false);
             finePartita(esito, punteggi);
             drawDischi(board.getGriglia());
             btn.setEnabled(true);
@@ -109,7 +108,7 @@ public class FrameGioco extends JFrame implements ActionListener {
                 testoTurno = "bianco";
                 if (esito == -2) testoTurno += " (il nero salta il turno)";
             }
-            setLabelText("<html><div style='text-align:center;'>Nero: " + punteggi[0] + " - Bianco: " + punteggi[1] + "<br>Turno: " + testoTurno + "</div><html>");
+            label.setText("<html><div style='text-align:center;'>Nero: " + punteggi[0] + " - Bianco: " + punteggi[1] + "<br>Turno: " + testoTurno + "</div><html>");
             drawDischi(board.getGriglia());
             drawMossePossibili();
         }
@@ -148,16 +147,13 @@ public class FrameGioco extends JFrame implements ActionListener {
         label.setText(testo);
     }
 
-    private void setLabelText(String s) {
-        label.setText(s);
-    }
-
     @Override
     public void actionPerformed(ActionEvent e) {
         board.reset();
         for(int y = 0; y < 8; y++) {
             for(int x = 0; x < 8; x++) griglia[y][x].reset(x, y);
         }
+        griglia[0][0].setClickAbilitato(true);
         aggiornaPanel();
         btn.setEnabled(false);
     }

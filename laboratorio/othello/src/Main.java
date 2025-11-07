@@ -4,5 +4,3 @@ public class Main {
         FrameGioco frame = new FrameGioco(board);
     }
 }
-//TODO
-//rifare grafica button

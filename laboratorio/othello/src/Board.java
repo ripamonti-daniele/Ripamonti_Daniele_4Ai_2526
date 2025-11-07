@@ -1,6 +1,5 @@
 import java.security.InvalidParameterException;
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.List;
 
 public class Board {
@@ -9,14 +8,6 @@ public class Board {
     private List<List<Integer>> caselleLegali;
     private boolean passo;
     private boolean doppioPasso;
-    public final int NORTH = 1;
-    public final int EAST = 2;
-    public final int SOUTH = 3;
-    public final int WEST = 4;
-    public final int NORTH_EAST = 5;
-    public final int SOUTH_EAST = 6;
-    public final int SOUTH_WEST = 7;
-    public final int NORTH_WEST = 8;
 
     public Board() {
         griglia = new int[8][8];
@@ -111,7 +102,7 @@ public class Board {
             for (int x = 0; x < 8; x++) {
                 if (griglia[y][x] != -1) continue;
                 if (isAdiacente(x, y)) {
-                    caselleLegali.add(new ArrayList<Integer>());
+                    caselleLegali.add(new ArrayList<>());
                     caselleLegali.getLast().add(x);
                     caselleLegali.getLast().add(y);
                     caselleLegali.getLast().add(turno);
@@ -161,7 +152,7 @@ public class Board {
         boolean catturato = false;
 
         //NORTH
-        if (direzione == NORTH && y > 1) {
+        if (direzione == 1 && y > 1) {
             y--;
             for (; y > -1; y--) {
                 if (!modifica) {
@@ -182,7 +173,7 @@ public class Board {
         }
 
         //EAST
-        else if (direzione == EAST && x < 6) {
+        else if (direzione == 2 && x < 6) {
             x++;
             for (; x < 8; x++) {
                 if (!modifica) {
@@ -203,7 +194,7 @@ public class Board {
         }
 
         //SOUTH
-        else if (direzione == SOUTH && y < 6) {
+        else if (direzione == 3 && y < 6) {
             y++;
             for (; y < 8; y++) {
                 if (!modifica) {
@@ -224,7 +215,7 @@ public class Board {
         }
 
         //WEST
-        else if (direzione == WEST && x > 1) {
+        else if (direzione == 4 && x > 1) {
             x--;
             for (; x > -1; x--) {
                 if (!modifica) {
@@ -245,7 +236,7 @@ public class Board {
         }
 
         //NORTH EAST
-        else if (direzione == NORTH_EAST && x < 6 && y > 1) {
+        else if (direzione == 5 && x < 6 && y > 1) {
             x++;
             y--;
 
@@ -269,7 +260,7 @@ public class Board {
         }
 
         //SOUTH EAST
-        else if (direzione == SOUTH_EAST && x < 6 && y < 6) {
+        else if (direzione == 6 && x < 6 && y < 6) {
             x++;
             y++;
 
@@ -293,7 +284,7 @@ public class Board {
         }
 
         //SOUTH WEST
-        else if (direzione == SOUTH_WEST && x > 1 && y < 6) {
+        else if (direzione == 7 && x > 1 && y < 6) {
             x--;
             y++;
 
@@ -317,7 +308,7 @@ public class Board {
         }
 
         //NORTH WEST
-        else if (direzione == NORTH_WEST && x > 1 && y > 1) {
+        else if (direzione == 8 && x > 1 && y > 1) {
             x--;
             y--;
 

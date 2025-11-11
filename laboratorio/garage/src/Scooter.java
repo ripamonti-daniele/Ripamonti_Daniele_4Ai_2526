@@ -7,15 +7,19 @@ public class Scooter {
     private String modello;
     private LocalDate dataAcquisto;
 
-//    public Scooter(String targa, int km, String modello, LocalDate anno) {
-//
-//    }
+    public Scooter(String targa, int km, String modello, LocalDate dataAcquisto) {
+        setTarga(targa);
+        setKm(km);
+        setModello(modello);
+        setDataAcquisto(dataAcquisto);
+    }
 
     public String getTarga() {
         return targa;
     }
 
     public void setTarga(String targa) {
+        targa = targa.toUpperCase();
         if (!targa.matches("[A-Z][0-9A-Z]{5}")) throw new InvalidParameterException("Formato targa non valido");
         this.targa = targa;
     }
@@ -34,7 +38,8 @@ public class Scooter {
     }
 
     public void setModello(String modello) {
-
+        if (modello.length() < 2) throw new InvalidParameterException("Nome modello troppo corto");
+        this.modello = modello;
     }
 
     public LocalDate getDataAcquisto() {
@@ -42,6 +47,8 @@ public class Scooter {
     }
 
     public void setDataAcquisto(LocalDate dataAcquisto) {
-
+        if (dataAcquisto.getYear() > LocalDate.now().getYear() || dataAcquisto.getYear() == LocalDate.now().getYear() && dataAcquisto.getDayOfYear() > LocalDate.now().getDayOfYear()) throw new InvalidParameterException("Non puoi inserire una data futura");
+        if (dataAcquisto.getYear() < 1919) throw new InvalidParameterException("Gli scooter non esistevano in quest'anno");
+        this.dataAcquisto = dataAcquisto;
     }
 }

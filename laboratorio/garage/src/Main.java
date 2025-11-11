@@ -1,7 +1,4 @@
-public class Main {
-    public static void main(String[] args) {
-        Scooter scooter = new Scooter();
-//        scooter.setTarga("XB6XX9");
-//        System.out.println(scooter.getTarga());
-    }
+void main() {
+    Scooter scooter = new Scooter("xb6xx9", 13800, "Phantom-f12", LocalDate.of(2025, 3, 14));
+    System.out.println(scooter.getTarga());
 }

@@ -3,12 +3,10 @@ import java.awt.*;
 
 public class ButtonGioco extends JButton {
     private final String testo;
-    private final int PROPORZIONI;
     private boolean hover = false;
 
-    public ButtonGioco(String testo, int proporzioni) {
+    public ButtonGioco(String testo) {
         this.testo = testo;
-        this.PROPORZIONI = proporzioni;
         this.setContentAreaFilled(false);
         this.setFocusPainted(false);
         this.setFocusable(false);
@@ -18,14 +16,21 @@ public class ButtonGioco extends JButton {
         this.addMouseListener(new java.awt.event.MouseAdapter() {
             public void mouseEntered(java.awt.event.MouseEvent evt) {
                 hover = true;
+                setCursore(hover);
                 repaint();
             }
 
             public void mouseExited(java.awt.event.MouseEvent evt) {
                 hover = false;
+                setCursore(hover);
                 repaint();
             }
         });
+    }
+
+    private void setCursore(boolean hover) {
+        if (!this.isEnabled() || !hover) this.setCursor(Cursor.getPredefinedCursor(Cursor.DEFAULT_CURSOR));
+        else this.setCursor(Cursor.getPredefinedCursor(Cursor.HAND_CURSOR));
     }
 
     @Override
@@ -51,7 +56,6 @@ public class ButtonGioco extends JButton {
         grafiche.setStroke(new BasicStroke(offset * 2));
 
         if (!this.isEnabled()) {
-            this.setCursor(Cursor.getPredefinedCursor(Cursor.DEFAULT_CURSOR));
             grafiche.setColor(new Color(60, 70, 60));
             grafiche.fillRoundRect(0, 0, w, h, arc, arc);
             grafiche.setColor(new Color(80, 100, 80));
@@ -59,7 +63,6 @@ public class ButtonGioco extends JButton {
         }
 
         else if (hover && this.isEnabled()) {
-            this.setCursor(Cursor.getPredefinedCursor(Cursor.HAND_CURSOR));
             grafiche.setColor(new Color(0, 130, 0));
             grafiche.fillRoundRect(0, 0, w, h, arc, arc);
             grafiche.setColor(new Color(50, 170, 50));
@@ -67,7 +70,6 @@ public class ButtonGioco extends JButton {
         }
 
         else {
-            this.setCursor(Cursor.getPredefinedCursor(Cursor.DEFAULT_CURSOR));
             grafiche.setColor(new Color(0, 100, 0));
             grafiche.fillRoundRect(0, 0, w, h, arc, arc);
             grafiche.setColor(new Color(34, 139, 34));
@@ -76,7 +78,7 @@ public class ButtonGioco extends JButton {
 
         if (!this.isEnabled()) grafiche.setColor(new Color(200, 200, 200));
         else grafiche.setColor(Color.WHITE);
-        grafiche.setFont(new Font("", Font.BOLD, 20 * PROPORZIONI));
+        grafiche.setFont(new Font("", Font.BOLD, 20));
         FontMetrics fm = grafiche.getFontMetrics();
         int x = (w - fm.stringWidth(testo)) / 2;
         int y = (h + fm.getAscent()) / 2 - 4;

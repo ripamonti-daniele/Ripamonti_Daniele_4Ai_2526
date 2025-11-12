@@ -14,9 +14,9 @@ public class PanelGioco extends JPanel {
 
     public PanelGioco(int x, int y, int lunghezzaPanelPadre, int altezzaPanelPadre, Board board, FrameGioco frame) {
         discoDisegnato = false;
-        LATOPANEL = Integer.parseInt(String.valueOf(altezzaPanelPadre / 8));
-        SPAZIATURA = Integer.parseInt(String.valueOf(LATOPANEL / 10));
-        int offset = Integer.parseInt(String.valueOf((lunghezzaPanelPadre - LATOPANEL * 8) / 2));
+        LATOPANEL  = altezzaPanelPadre / 8;
+        SPAZIATURA = LATOPANEL / 10;
+        int offset = (lunghezzaPanelPadre - LATOPANEL * 8) / 2;
         this.setBounds(x * LATOPANEL + offset, y * LATOPANEL, LATOPANEL, LATOPANEL);
         disegnaDiscoIniziale(x, y);
 

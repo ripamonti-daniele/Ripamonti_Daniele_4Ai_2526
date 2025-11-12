@@ -23,7 +23,7 @@ public class FrameGioco extends JFrame implements ActionListener {
         this.setExtendedState(JFrame.MAXIMIZED_BOTH);
         this.setVisible(true);
         LUNGHEZZAFRAME = this.getWidth();
-        ALTEZZAFRAME = this.getHeight() - (Integer.parseInt(String.valueOf(this.getHeight() / 20)));
+        ALTEZZAFRAME = this.getHeight() - this.getHeight() / 20;
         inizializzaPanel();
         inizializzaGriglia();
         aggiornaPanel();
@@ -59,24 +59,25 @@ public class FrameGioco extends JFrame implements ActionListener {
 
     private void inizializzaPanel() {
         pInfo = new JPanel();
-        pInfo.setBounds(0, 0, LUNGHEZZAFRAME, Integer.parseInt(String.valueOf(ALTEZZAFRAME / 50 * 7)));
+        pInfo.setBounds(0, 0, LUNGHEZZAFRAME, ALTEZZAFRAME / 50 * 7);
         pInfo.setLayout(new FlowLayout());
         pInfo.setBackground(new Color(28, 27, 27));
 
         label = new JLabel();
         label.setForeground(Color.lightGray);
-        label.setFont(new Font("", Font.BOLD, 50 * (Integer.parseInt(String.valueOf(ALTEZZAFRAME / 996)))));
+        label.setFont(new Font("", Font.BOLD, 50 * ALTEZZAFRAME / 996));
         pInfo.add(label);
 
         pButton = new JPanel();
-        pButton.setBounds(0, pInfo.getHeight(), LUNGHEZZAFRAME, Integer.parseInt(String.valueOf(ALTEZZAFRAME / 50 * 3)));
+        System.out.println(ALTEZZAFRAME / 50 * 3);
+        pButton.setBounds(0, pInfo.getHeight(), LUNGHEZZAFRAME, ALTEZZAFRAME / 50 * 3);
         pButton.setLayout(new FlowLayout());
         pButton.setBackground(new Color(28, 27, 27));
 
-        btn = new ButtonGioco("Gioca ancora", ALTEZZAFRAME / 996);
+        btn = new ButtonGioco("Gioca ancora");
         btn.setEnabled(false);
         btn.addActionListener(this);
-        btn.setPreferredSize(new Dimension(Integer.parseInt(String.valueOf(pButton.getWidth() / 12)), Integer.parseInt(String.valueOf(pButton.getHeight() / 10 * 8))));
+        btn.setPreferredSize(new Dimension(pButton.getWidth() / 12, pButton.getHeight() / 10 * 8));
         pButton.add(btn);
 
         pGioco = new JPanel();

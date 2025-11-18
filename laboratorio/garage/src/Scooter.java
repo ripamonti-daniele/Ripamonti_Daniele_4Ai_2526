@@ -1,11 +1,14 @@
 import java.security.InvalidParameterException;
 import java.time.LocalDate;
+import java.util.ArrayList;
+import java.util.List;
 
 public class Scooter {
     private String targa;
     private int km;
     private String modello;
     private LocalDate dataAcquisto;
+    private static final List<String> targhe = new ArrayList<>();
 
     public Scooter(String targa, int km, String modello, LocalDate dataAcquisto) {
         setTarga(targa);
@@ -21,7 +24,9 @@ public class Scooter {
     public void setTarga(String targa) {
         targa = targa.toUpperCase();
         if (!targa.matches("[A-Z][0-9A-Z]{5}")) throw new InvalidParameterException("Formato targa non valido");
+        if (targhe.contains(targa)) throw new InvalidParameterException("Esiste già uno scooter con questa targa");
         this.targa = targa;
+        targhe.add(targa);
     }
 
     public int getKm() {

@@ -35,44 +35,55 @@ void main() {
     int riga = -1;
     int col = -1;
 
-    while (esito == 'n') {
+    boolean gioca = true;
+    while (gioca) {
+        while (esito == 'n') {
+            System.out.println(creaStringaGriglia(griglia.getGriglia(), griglia.N_CASELLE));
+            boolean errore = true;
+
+            System.out.println("Giocatore " + giocatoreCorrente + " inserisci la colonna che vuoi occupare");
+            while (errore) {
+                try {
+                    col = Integer.parseInt(IO.readln());
+                    errore = false;
+                } catch (Exception e) {
+                    System.out.println("Devi inseirire un numero intero");
+                }
+            }
+
+            errore = true;
+            System.out.println("Giocatore " + giocatoreCorrente + " inserisci la riga che vuoi occupare");
+            while (errore) {
+                try {
+                    riga = Integer.parseInt(IO.readln());
+                    errore = false;
+                } catch (Exception e) {
+                    System.out.println("Devi inseirire un numero intero");
+                }
+            }
+
+            try {
+                griglia.inserisciSimbolo(giocatoreCorrente, riga, col);
+                esito = griglia.controllaVincita();
+                giocatoreCorrente = cambiaSegno(giocatoreCorrente, giocatoreO, giocatoreX);
+            } catch (Exception e) {
+                System.out.println(e.getMessage());
+            }
+        }
         System.out.println(creaStringaGriglia(griglia.getGriglia(), griglia.N_CASELLE));
-        boolean errore = true;
+        if (esito == giocatoreO) System.out.println("Vince il giocatore " + giocatoreO);
+        else if (esito == giocatoreX) System.out.println("Vince il giocatore " + giocatoreX);
+        else System.out.println("Pareggio");
 
-        System.out.println("Giocatore " + giocatoreCorrente + " inserisci la colonna che vuoi occupare");
-        while (errore) {
-            try {
-                col = Integer.parseInt(IO.readln());
-                errore = false;
-            }
-            catch (Exception e) {
-                System.out.println("Devi inseirire un numero intero");
-            }
-        }
+        System.out.println("\nVuoi giocare ancora? (si/no)");
+        String scelta = IO.readln().trim().toLowerCase();
 
-        errore = true;
-        System.out.println("Giocatore " + giocatoreCorrente + " inserisci la riga che vuoi occupare");
-        while (errore) {
-            try {
-                riga = Integer.parseInt(IO.readln());
-                errore = false;
-            }
-            catch (Exception e) {
-                System.out.println("Devi inseirire un numero intero");
-            }
-        }
-
-        try {
-            griglia.inserisciSimbolo(giocatoreCorrente, riga, col);
+        if (!scelta.equals("si")) gioca = false;
+        else {
+            griglia.resetGriglia();
             esito = griglia.controllaVincita();
-            giocatoreCorrente = cambiaSegno(giocatoreCorrente, giocatoreO, giocatoreX);
-        }
-        catch (Exception e) {
-            System.out.println(e.getMessage());
+            giocatoreCorrente = giocatoreX;
+            System.out.println();
         }
     }
-    System.out.println(creaStringaGriglia(griglia.getGriglia(), griglia.N_CASELLE));
-    if (esito == giocatoreO) System.out.println("Vince il giocatore " + giocatoreO);
-    else if (esito == giocatoreX) System.out.println("Vince il giocatore " + giocatoreX);
-    else System.out.println("Pareggio");
 }

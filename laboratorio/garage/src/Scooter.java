@@ -9,12 +9,14 @@ public class Scooter {
     private String modello;
     private LocalDate dataAcquisto;
     private static final List<String> targhe = new ArrayList<>();
+    private Proprietario proprietario;
 
-    public Scooter(String targa, int km, String modello, LocalDate dataAcquisto) {
+    public Scooter(String targa, int km, String modello, LocalDate dataAcquisto, Proprietario proprietario) {
         setTarga(targa);
         setKm(km);
         setModello(modello);
         setDataAcquisto(dataAcquisto);
+        setProprietario(proprietario);
     }
 
     public String getTarga() {
@@ -55,5 +57,19 @@ public class Scooter {
         if (dataAcquisto.getYear() > LocalDate.now().getYear() || dataAcquisto.getYear() == LocalDate.now().getYear() && dataAcquisto.getDayOfYear() > LocalDate.now().getDayOfYear()) throw new InvalidParameterException("Non puoi inserire una data futura");
         if (dataAcquisto.getYear() < 1919) throw new InvalidParameterException("Gli scooter non esistevano in quest'anno");
         this.dataAcquisto = dataAcquisto;
+    }
+
+    public Proprietario getProprietario() {
+        return proprietario;
+    }
+
+    public void setProprietario(Proprietario proprietario) {
+        if (proprietario == null) throw new InvalidParameterException("Proprietario non valido");
+        this.proprietario = proprietario;
+    }
+
+    @Override
+    public String toString() {
+        return "Targa: " + targa + " - Km: " + km + " - Modello: " + modello + " - Data acquisto: " + dataAcquisto;
     }
 }

@@ -10,7 +10,7 @@ String chiediStringa(String msg) {
     return elem;
 }
 
-int chediNumero(String msg) {
+int chiediNumero(String msg) {
     int n = 0;
     System.out.println(msg);
     boolean errore = true;
@@ -28,12 +28,12 @@ int chediNumero(String msg) {
 void aggiungi(HashMap<String, Scooter> scooter, List<Proprietario> anagrafica) {
     String targa = chiediStringa("Inserisci la targa: ");
     String modello = chiediStringa("Inserisci il nome del modello: ");
-    int km = chediNumero("Inserisci il kilometraggio");
-    int annoAcquisto = chediNumero("Inserisci l'anno di acquisto: ");
-    int meseAcquisto = chediNumero("Inserisci il numero del mese di acquisto: ");
-    int giornoAcquisto = chediNumero("Inserisci il giorno di acquisto: ");
+    int km = chiediNumero("Inserisci il kilometraggio");
+    int annoAcquisto = chiediNumero("Inserisci l'anno di acquisto: ");
+    int meseAcquisto = chiediNumero("Inserisci il numero del mese di acquisto: ");
+    int giornoAcquisto = chiediNumero("Inserisci il giorno di acquisto: ");
     LocalDate dataAcquisto = null;
-    int indiceProprietario = chediNumero("Inserisci il numero assegnato a uno dei proprietari(1, 2, 3...)");
+    int indiceProprietario = chiediNumero("Inserisci il numero assegnato a uno dei proprietari(1, 2, 3...)");
     try {
         dataAcquisto = LocalDate.of(annoAcquisto, meseAcquisto, giornoAcquisto);
         Scooter s = new Scooter(targa, km, modello, dataAcquisto, anagrafica.get(indiceProprietario - 1));
@@ -69,7 +69,7 @@ void modifica(HashMap<String, Scooter> scooter) {
     String targa = chiediStringa("Inserisci la targa dello scooter che vuoi modificare: ").toUpperCase();
     if (!scooter.containsKey(targa)) System.out.println("Targa non trovata");
     else {
-        int km = chediNumero("Inserisci il nuovo kilometraggio");
+        int km = chiediNumero("Inserisci il nuovo kilometraggio");
         if (scooter.get(targa).getKm() > km) System.out.println("Non puoi inserire un kilometraggio minore di quello precedente");
         else {
             try {
@@ -99,6 +99,28 @@ void ricerca_targa(boolean parziale, HashMap<String, Scooter> scooter) {
             }
         }
         if (!trovato) System.out.println("Nessuno scooter trovato");
+    }
+}
+
+void ordinaPerKilometri(HashMap<String, Scooter> scooter) {
+    int km1 = chiediNumero("Inserisci il kilometraggio minimo");
+    int km2 = chiediNumero("Inserisci il kilometraggio massimo");
+
+    List<Scooter> scooterValidi = new ArrayList<>();
+
+    if (km1 > km2) System.out.println("Errore: il kilometragio minimo non può essere maggiore di quello massimo");
+    else {
+        for (Scooter s : scooter.values()) {
+            if (s.getKm() >= km1 && s.getKm() <= km2) scooterValidi.add(s);
+        }
+
+        scooterValidi.sort(Comparator.comparingInt(Scooter::getKm)); //ordina in base ai kilometri
+
+        int i = 0;
+        for (Scooter s : scooterValidi) {
+            i++;
+            System.out.println(i + ") " + s);
+        }
     }
 }
 
@@ -134,7 +156,7 @@ void eliminaProprietario(HashMap<String, Scooter> scooter, List<Proprietario> an
         System.out.println("Non ci sono proprietari registrati");
         return;
     }
-    int indiceProprietario = chediNumero("Inserisci il numero assegnato a uno dei proprietari(1, 2, 3...)");
+    int indiceProprietario = chiediNumero("Inserisci il numero assegnato a uno dei proprietari(1, 2, 3...)");
     Proprietario p;
     try {
         p = anagrafica.get(indiceProprietario - 1);
@@ -185,6 +207,7 @@ boolean menu(HashMap<String, Scooter> scooter, List<Proprietario> anagrafica) {
     System.out.println("Inserisci 4 per modificare il kilometraggio uno scooter");
     System.out.println("Inserisci 5 per cercare uno scooter in base alla targa completa");
     System.out.println("Inserisci 6 per cercare gli scooter in base a una targa parziale");
+    System.out.println("Inserisci 7 per ordinare gli scooter in base a una range di km");
     System.out.println("Inserisci 7 per aggiungere un proprietario");
     System.out.println("Inserisci 8 per visualizzare i proprietari");
     System.out.println("Inserisci 9 per eliminare un proprietario");
@@ -192,8 +215,8 @@ boolean menu(HashMap<String, Scooter> scooter, List<Proprietario> anagrafica) {
     System.out.println("Inserisci 0 per uscire");
 
     int scelta = -1;
-    while (scelta < 0 || scelta > 10) {
-        scelta = chediNumero("Inserisci un'opzione: ");
+    while (scelta < 0 || scelta > 11) {
+        scelta = chiediNumero("Inserisci un'opzione: ");
     }
     switch (scelta) {
         case 1:
@@ -215,15 +238,18 @@ boolean menu(HashMap<String, Scooter> scooter, List<Proprietario> anagrafica) {
             ricerca_targa(true, scooter);
             break;
         case 7:
-            aggiungiProprietario(anagrafica);
+            ordinaPerKilometri(scooter);
             break;
         case 8:
-            visualizzaProprietari(anagrafica);
+            aggiungiProprietario(anagrafica);
             break;
         case 9:
-            eliminaProprietario(scooter, anagrafica);
+            visualizzaProprietari(anagrafica);
             break;
         case 10:
+            eliminaProprietario(scooter, anagrafica);
+            break;
+        case 11:
             visualizzaScooterPerProprietario(scooter, anagrafica);
             break;
         case 0:

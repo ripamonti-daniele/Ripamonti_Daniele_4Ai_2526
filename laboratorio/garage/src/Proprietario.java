@@ -8,7 +8,7 @@ public class Proprietario {
     private String nome;
     private String cognome;
     private String residenza;
-    private static List<String> codici_registrati = new ArrayList<>();
+    private final static List<String> codici_registrati = new ArrayList<>();
 
     public Proprietario(String CF, String nome, String cognome, String residenza) {
         setCF(CF);

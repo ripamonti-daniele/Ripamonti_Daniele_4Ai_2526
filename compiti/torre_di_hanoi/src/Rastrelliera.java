@@ -39,7 +39,8 @@ public class Rastrelliera {
     public boolean aggiungiDisco (int d) {
         if (dischi.size() == maxDischi) throw new IllegalStateException("Impossibile aggiungere un disco a una torre piena");
         if (!dischi.isEmpty() && d >= dischi.peek()) throw new InvalidParameterException("Impossibile aggiungere un disco più grande dell'ultimo inserito");
-        if (d <= 0) throw new InvalidParameterException("Il disco deve avere valore maggiore o uguale a 0");
+        if (d <= 0) throw new InvalidParameterException("Il disco deve avere valore maggiore di 0");
+        if (d > maxDischi) throw new InvalidParameterException("Il disco non può avere valore maggiore di " + maxDischi);
         dischi.push(d);
 
         return (rastrelliera_vittoria && dischi.size() == maxDischi);

@@ -33,10 +33,10 @@ void aggiungi(HashMap<String, Scooter> scooter, List<Proprietario> anagrafica) {
     int meseAcquisto = chiediNumero("Inserisci il numero del mese di acquisto: ");
     int giornoAcquisto = chiediNumero("Inserisci il giorno di acquisto: ");
     LocalDate dataAcquisto = null;
-    int indiceProprietario = chiediNumero("Inserisci il numero assegnato a uno dei proprietari(1, 2, 3...)");
+    Proprietario p = chiediProprietario(anagrafica);
     try {
         dataAcquisto = LocalDate.of(annoAcquisto, meseAcquisto, giornoAcquisto);
-        Scooter s = new Scooter(targa, km, modello, dataAcquisto, anagrafica.get(indiceProprietario - 1));
+        Scooter s = new Scooter(targa, km, modello, dataAcquisto, p);
         scooter.put(s.getTarga(), s);
         System.out.println("Scooter inserito");
     }
@@ -139,6 +139,98 @@ void aggiungiProprietario(List<Proprietario> anagrafica) {
     }
 }
 
+Proprietario chiediProprietario(List<Proprietario> anagrafica) {
+    String cognome = chiediStringa("Inserisci il cognome del proprietario");
+    boolean trovato = false;
+    boolean doppione = false;
+    Proprietario pScelto = null;
+
+    for (Proprietario p : anagrafica) {
+        if (cognome.equals(p.getCognome())) {
+            if (trovato) {
+                doppione = true;
+                break;
+            }
+            trovato = true;
+            pScelto = p;
+        }
+    }
+
+    if (trovato && !doppione) {
+        System.out.println("Proprietario trovato");
+        return pScelto;
+    }
+    else if (!trovato) {
+        System.out.println("cognome non trovato");
+        return null;
+    }
+    else {
+        System.out.println("Sono state trovate più persone col cognome " + cognome);
+
+        String nome = chiediStringa("Inserisci il nome del proprietario");
+        trovato = false;
+        doppione = false;
+        pScelto = null;
+
+        for (Proprietario p : anagrafica) {
+            if (nome.equals(p.getNome()) && cognome.equals(p.getCognome())) {
+                if (trovato) {
+                    doppione = true;
+                    break;
+                }
+                trovato = true;
+                pScelto = p;
+            }
+        }
+
+        if (trovato && !doppione) {
+            System.out.println("Proprietario trovato");
+            return pScelto;
+        }
+        else {
+            if (!trovato) System.out.println("nome non trovato");
+            else System.out.println("Sono state trovate più persone col nome " + nome);
+
+            String residenza = chiediStringa("Inserisci la residenza del proprietario");
+            trovato = false;
+            doppione = false;
+            pScelto = null;
+
+            for (Proprietario p : anagrafica) {
+                if (residenza.equals(p.getResidenza()) && nome.equals(p.getNome()) && cognome.equals(p.getCognome())) {
+                    if (trovato) {
+                        doppione = true;
+                        break;
+                    }
+                    trovato = true;
+                    pScelto = p;
+                }
+            }
+
+            if (trovato && !doppione) {
+                System.out.println("Proprietario trovato");
+                return pScelto;
+            }
+            else {
+                if (!trovato) System.out.println("residenza non trovata");
+                else System.out.println("Sono state trovate più persone con residenza " + residenza);
+
+                String cf = chiediStringa("Inserisci il codice fiscale del proprietario");
+
+                for (Proprietario p : anagrafica) {
+                    if (cf.equals(p.getCF())) {
+                        System.out.println("Proprietario trovato");
+                        return p;
+                    }
+                }
+                System.out.println("Codice fiscale non valido");
+                return null;
+            }
+        }
+    }
+}
+
+
 void visualizzaProprietari(List<Proprietario> anagrafica) {
     if (anagrafica.isEmpty()) {
         System.out.println("Non ci sono proprietari registrati");
@@ -208,10 +300,10 @@ boolean menu(HashMap<String, Scooter> scooter, List<Proprietario> anagrafica) {
     System.out.println("Inserisci 5 per cercare uno scooter in base alla targa completa");
     System.out.println("Inserisci 6 per cercare gli scooter in base a una targa parziale");
     System.out.println("Inserisci 7 per ordinare gli scooter in base a una range di km");
-    System.out.println("Inserisci 7 per aggiungere un proprietario");
-    System.out.println("Inserisci 8 per visualizzare i proprietari");
-    System.out.println("Inserisci 9 per eliminare un proprietario");
-    System.out.println("Inserisci 10 per visualizzare gli scooter di ogni proprietario");
+    System.out.println("Inserisci 8 per aggiungere un proprietario");
+    System.out.println("Inserisci 9 per visualizzare i proprietari");
+    System.out.println("Inserisci 10 per eliminare un proprietario");
+    System.out.println("Inserisci 11 per visualizzare gli scooter di ogni proprietario");
     System.out.println("Inserisci 0 per uscire");
 
     int scelta = -1;

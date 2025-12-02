@@ -39,56 +39,60 @@ int chiediNumero(String msg) {
     return n;
 }
 
-void impostaDescrizione(Articolo a) {
+String impostaDescrizione() {
     String descrizione = "";
     boolean errore = true;
     while (errore) {
         errore = false;
+        descrizione = chiediStringa("Inserisci la descrizione dell'articolo ");
         try {
-            descrizione = chiediStringa("Inserisci la descrizione dell'articolo ");
-            a.setDescrizione(descrizione);
+            Articolo.controllaDescrizione(descrizione);
         }
-        catch (InvalidParameterException e) {
+        catch (IllegalArgumentException e) {
             System.out.println(e.getMessage());
             errore = true;
         }
     }
+    return descrizione;
 }
 
-void impostaTipo(Articolo a) {
+String impostaTipo() {
     String tipo = "";
     boolean errore = true;
     while (errore) {
         errore = false;
-        try {
-            System.out.println("Tipi di articolo disponibili:");
-            for (String t : Articolo.getTipiArticolo()) {
-                System.out.print(t + " ");
-            }
-            tipo = chiediStringa("\nInserisci il tipo di articolo ");
-            a.setTipo(tipo);
+        System.out.print("Tipi di articolo disponibili: ");
+        for (String t : Articolo.getTipiArticolo()) {
+            System.out.print(t + " ");
         }
-        catch (InvalidParameterException e) {
+        tipo = chiediStringa("\nInserisci il tipo di articolo ");
+        try {
+            Articolo.controllaTipo(tipo);
+        }
+        catch (IllegalArgumentException e) {
             System.out.println(e.getMessage());
             errore = true;
         }
     }
+    return tipo;
 }
 
-void impostaData(Articolo a) {
-    int anno = 0;
-    int mese = 0;
-    int giorno = 0;
+LocalDate impostaData() {
+    int anno;
+    int mese;
+    int giorno;
+    LocalDate data = null;
     boolean errore = true;
     while (errore) {
         errore = false;
+        giorno = chiediNumero("Inserisci il giorno di aggiunta al catalogo");
+        mese = chiediNumero("Inserisci il mese di aggiunta al catalogo");
+        anno = chiediNumero("Inserisci l'anno di aggiunta al catalogo");
         try {
-            giorno = chiediNumero("Inserisci il giorno di aggiunta al catalogo");
-            mese = chiediNumero("Inserisci il mese di aggiunta al catalogo");
-            anno = chiediNumero("Inserisci l'anno di aggiunta al catalogo");
-            a.setData(LocalDate.of(anno, mese, giorno));
+            data = LocalDate.of(anno, mese, giorno);
+            Articolo.controllaData(data);
         }
-        catch (InvalidParameterException e) {
+        catch (IllegalArgumentException e) {
             System.out.println(e.getMessage());
             errore = true;
         }
@@ -97,50 +101,54 @@ void impostaData(Articolo a) {
             errore = true;
         }
     }
-
+    return data;
 }
 
-void impostaPrezzo(Articolo a) {
+float impostaPrezzo() {
     float prezzo = 0;
     boolean errore = true;
     while (errore) {
         errore = false;
+        prezzo = chiediFloat("Inserisci il prezzo dell'articolo ");
         try {
-            prezzo = chiediFloat("Inserisci il prezzo dell'articolo ");
-            a.setPrezzo(prezzo);
+            Articolo.controllaPrezzo(prezzo);
         }
-        catch (InvalidParameterException e) {
+        catch (IllegalArgumentException e) {
             System.out.println(e.getMessage());
             errore = true;
         }
     }
+    return prezzo;
 }
 
 void inserisci(List<Articolo> articoli) {
-    Articolo a = new Articolo();
-
     boolean errore = true;
     String id = "";
-    float prezzo = 0f;
+    String descrizione;
+    String tipo;
+    LocalDate data;
+    float prezzo;
 
+    System.out.println("Scrivi esc per annullare ");
     while (errore) {
         errore = false;
+        id = chiediStringa("Inserisci l'id dell'articolo (formato AAA000) ");
+        if (id.trim().equalsIgnoreCase("esc")) return;
         try {
-            id = chiediStringa("Inserisci l'id dell'articolo (formato AAA000) ");
-            a.setId(id);
+            Articolo.controllaId(id);
         }
-        catch (InvalidParameterException e) {
+        catch (IllegalArgumentException e) {
             System.out.println(e.getMessage());
             errore = true;
         }
     }
 
-    impostaDescrizione(a);
-    impostaTipo(a);
-    impostaData(a);
-    impostaPrezzo(a);
+    descrizione = impostaDescrizione();
+    tipo = impostaTipo();
+    prezzo = impostaPrezzo();
+    data = impostaData();
 
-    articoli.add(a);
+    articoli.add(new Articolo(id, descrizione, tipo, prezzo, data));
     System.out.println("Articolo aggiunto");
 }
 
@@ -186,19 +194,19 @@ void modifica(List<Articolo> articoli) {
                 scelta = IO.readln().trim();
                 switch (scelta) {
                     case "1":
-                        impostaDescrizione(a);
+                        a.setDescrizione(impostaDescrizione());
                         System.out.println("Modifica effettuata");
                         break;
                     case "2":
-                        impostaTipo(a);
+                        a.setTipo(impostaTipo());
                         System.out.println("Modifica effettuata");
                         break;
                     case "3":
-                        impostaData(a);
+                        a.setData(impostaData());
                         System.out.println("Modifica effettuata");
                         break;
                     case "4":
-                        impostaPrezzo(a);
+                        a.setPrezzo(impostaPrezzo());
                         System.out.println("Modifica effettuata");
                         break;
                     case "0":
@@ -223,9 +231,9 @@ void visualizzaDati(List<Articolo> articoli) {
         if (a.scontoApplicabile() > scontomassimo) scontomassimo = a.scontoApplicabile();
     }
 
-    System.out.println("articoli totali:" + totale);
-    System.out.println("Articoli scontabili:" + scontabili);
-    System.out.println("Prezzo medio: "  +somma_prezzi/totale);
+    System.out.println("articoli totali: " + totale);
+    System.out.println("Articoli scontabili: " + scontabili);
+    System.out.println("Prezzo medio: " + Math.round(somma_prezzi / totale * 100f) / 100f);
     System.out.println("Sconto massimo: " + scontomassimo);
 }
 
@@ -244,7 +252,7 @@ void main() {
         System.out.println("Inserisci 2 per visualizzare gli articoli");
         System.out.println("Inserisci 3 per cancellare un articolo");
         System.out.println("Inserisci 4 per modificare un articolo");
-        System.out.println("Insersci 5 per visualizzare altre info");
+        System.out.println("Inserisci 5 per visualizzare altre info");
         System.out.println("Inserisci 0 per uscire");
         switch (IO.readln().trim()) {
             case "1":
@@ -261,6 +269,7 @@ void main() {
                 break;
             case "5":
                 visualizzaDati(articoli);
+                break;
             case "0":
                 run = false;
                 break;

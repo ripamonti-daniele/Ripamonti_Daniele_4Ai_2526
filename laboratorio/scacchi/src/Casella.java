@@ -1,11 +1,27 @@
 import javax.swing.*;
 import java.awt.Color;
 import java.awt.Dimension;
+import java.util.Arrays;
+import java.util.List;
 
 public class Casella extends JPanel {
     private Color colore;
     private JLabel label;
     private ImageIcon img;
+    private static final ImageIcon[] iconeValide = new ImageIcon[] {
+        IconaPedina.RE_WHITE.getImageIcon(),
+        IconaPedina.REGINA_WHITE.getImageIcon(),
+        IconaPedina.TORRE_WHITE.getImageIcon(),
+        IconaPedina.ALFIERE_WHITE.getImageIcon(),
+        IconaPedina.CAVALLO_WHITE.getImageIcon(),
+        IconaPedina.PEDONE_WHITE.getImageIcon(),
+        IconaPedina.RE_BLACK.getImageIcon(),
+        IconaPedina.REGINA_BLACK.getImageIcon(),
+        IconaPedina.TORRE_BLACK.getImageIcon(),
+        IconaPedina.ALFIERE_BLACK.getImageIcon(),
+        IconaPedina.CAVALLO_BLACK.getImageIcon(),
+        IconaPedina.PEDONE_BLACK.getImageIcon(),
+    };
 
     public Casella(Color colore, int lunghezzaLato) {
         this.setSize(lunghezzaLato, lunghezzaLato);
@@ -32,13 +48,8 @@ public class Casella extends JPanel {
     }
 
     public void setImg(ImageIcon img) {
-        if (img == ScacchieraLabel.RE) label.setIcon(ScacchieraLabel.RE);
-        else if (img == ScacchieraLabel.REGINA) label.setIcon(ScacchieraLabel.REGINA);
-        else if (img == ScacchieraLabel.TORRE) label.setIcon(ScacchieraLabel.TORRE);
-        else if (img == ScacchieraLabel.ALFIERE) label.setIcon(ScacchieraLabel.ALFIERE);
-        else if (img == ScacchieraLabel.CAVALLO) label.setIcon(ScacchieraLabel.CAVALLO);
-        else if (img == ScacchieraLabel.PEDONE) label.setIcon(ScacchieraLabel.PEDONE);
-        else throw new IllegalArgumentException("Immagine non valida");
+        if (!Arrays.asList(iconeValide).contains(img)) throw new IllegalArgumentException("Immagine non valida");
+        label.setIcon(img);
     }
 
     public void rimuoviImg() {

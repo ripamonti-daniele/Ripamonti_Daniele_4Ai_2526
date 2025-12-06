@@ -4,10 +4,17 @@ public abstract class Pedina {
     private Color colore;
     private int[] posizione;
     private int materiale;
+    public final int DIMENSIONE_SCACCHIERA = 8;
 
     public Pedina(Color colore, int[] posizione) {
         setColore(colore);
         setPosizione(posizione);
+    }
+
+    public Pedina(Color colore, int[] posizione, int materiale) {
+        setColore(colore);
+        setPosizione(posizione);
+        setMateriale(materiale);
     }
 
     public Color getColore() {
@@ -23,9 +30,8 @@ public abstract class Pedina {
         return posizione.clone();
     }
 
-    private void setPosizione(int[] posizione) {
-        if (posizione[0] < 0 || posizione[0] > 7 || posizione[1] < 0 || posizione[1] > 7) throw new IllegalArgumentException("Non esiste questa posizione nella scacchiera");
-        if (posizione[0] > 2 && posizione[0] < 6) throw new IllegalArgumentException("Posizione iniziale non valida");
+    protected void setPosizione(int[] posizione) {
+        if (posizione[0] < 0 || posizione[0] > 7 || posizione[1] < 0 || posizione[1] > DIMENSIONE_SCACCHIERA - 1) throw new IllegalArgumentException("Non esiste questa posizione nella scacchiera");
         this.posizione = posizione;
     }
 
@@ -33,5 +39,10 @@ public abstract class Pedina {
         return materiale;
     }
 
-    public abstract void muovi();
+    private void setMateriale(int materiale) {
+        if (materiale != 1 && materiale != 3 && materiale != 5 && materiale != 9) throw new IllegalArgumentException("Non esiste una pedina con questo materiale");
+        this.materiale = materiale;
+    }
+
+    public abstract void muovi(int[] posizione);
 }

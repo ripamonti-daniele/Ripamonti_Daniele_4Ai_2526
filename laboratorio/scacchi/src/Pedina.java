@@ -21,7 +21,7 @@ public abstract class Pedina {
         return colore;
     }
 
-    public void setColore(Color colore) {
+    private void setColore(Color colore) {
         if (colore != Color.white && colore != Color.black) throw new IllegalArgumentException("Colore non valido");
         this.colore = colore;
     }
@@ -32,6 +32,7 @@ public abstract class Pedina {
 
     protected void setPosizione(int[] posizione) {
         if (posizione[0] < 0 || posizione[0] > 7 || posizione[1] < 0 || posizione[1] > DIMENSIONE_SCACCHIERA - 1) throw new IllegalArgumentException("Non esiste questa posizione nella scacchiera");
+        if (this.posizione == posizione) throw new IllegalArgumentException("La pedina si trova già sulla casella che hai scelto");
         this.posizione = posizione;
     }
 
@@ -40,7 +41,7 @@ public abstract class Pedina {
     }
 
     private void setMateriale(int materiale) {
-        if (materiale != 1 && materiale != 3 && materiale != 5 && materiale != 9) throw new IllegalArgumentException("Non esiste una pedina con questo materiale");
+        if (materiale <= 0) throw new IllegalArgumentException("Il materiale deve essere maggiore di 0");
         this.materiale = materiale;
     }
 

@@ -17,6 +17,12 @@ public abstract class Pedina {
         setMateriale(materiale);
     }
 
+    protected Pedina(Pedina originale) {
+        this.colore = originale.colore;
+        this.posizione = originale.posizione;
+        this.materiale = originale.materiale;
+    }
+
     public Color getColore() {
         return colore;
     }
@@ -46,4 +52,6 @@ public abstract class Pedina {
     }
 
     public abstract void muovi(int[] posizione);
+
+    public abstract Pedina copy();
 }

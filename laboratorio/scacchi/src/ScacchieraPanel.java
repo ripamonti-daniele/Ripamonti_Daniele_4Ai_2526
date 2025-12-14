@@ -1,11 +1,14 @@
-public class ScacchieraPanel {
+import javax.swing.*;
+
+public class ScacchieraPanel extends JPanel {
     private final Casella[][] casellePanel;
     private final Pedina[][] scacchiera;
-    private final int DIMENSIONE = 8;
+    public final int DIMENSIONE = 8;
 
-    public ScacchieraPanel() {
+    public ScacchieraPanel(Pedina[][] scacchiera) {
         casellePanel = new Casella[DIMENSIONE][DIMENSIONE];
-        scacchiera = new Pedina[DIMENSIONE][DIMENSIONE];
+        this.scacchiera = scacchiera;
     }
 
+//    private void
 }

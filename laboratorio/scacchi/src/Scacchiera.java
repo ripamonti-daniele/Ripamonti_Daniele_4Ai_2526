@@ -41,6 +41,28 @@ public class Scacchiera {
         System.gc();
     }
 
+    public Pedina[][] getScacchiera() {
+        Pedina[][] copia = new Pedina[DIMENSIONE][DIMENSIONE];
+        for (int i = 0; i < caselle.length; i++) {
+            for (int j = 0; j < caselle[i].length; j++) {
+                if (caselle[i][j] == null) copia[i][j] = null;
+                else copia[i][j] = caselle[i][j].copy();
+            }
+        }
+        return copia;
+    }
+
+    public String[][] getTipoPedine() {
+        String[][] tipoPedine = new String[DIMENSIONE][DIMENSIONE];
+        for (int i = 0; i < tipoPedine.length; i++) {
+            for (int j = 0; j < tipoPedine[i].length; j++) {
+                if (caselle[i][j] == null) tipoPedine[i][j] = null;
+                else tipoPedine[i][j] = caselle[i][j].getClass().getSimpleName();
+            }
+        }
+        return tipoPedine;
+    }
+
     public void muoviPedina(Pedina pedina, int[] posizione) {
         if (posizione[0] < 0 || posizione[0] > 7 || posizione[1] < 0 || posizione[1] > DIMENSIONE - 1) throw new IllegalArgumentException("Non esiste questa posizione nella scacchiera");
 

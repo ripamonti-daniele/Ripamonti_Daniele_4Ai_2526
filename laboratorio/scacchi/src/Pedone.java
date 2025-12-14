@@ -10,6 +10,12 @@ public class Pedone extends Pedina {
         enpassant = false;
     }
 
+    public Pedone(Pedone originale) {
+        super(originale);
+        this.muoviDiDueCaselle = originale.muoviDiDueCaselle;
+        this.enpassant = originale.enpassant;
+    }
+
     public boolean getEnpassant() {
         return enpassant;
     }
@@ -33,5 +39,10 @@ public class Pedone extends Pedina {
         }
         muoviDiDueCaselle = false;
         setPosizione(posizione);
+    }
+
+    @Override
+    public Pedina copy() {
+        return new Pedone(this);
     }
 }

@@ -8,6 +8,11 @@ public class Torre extends Pedina {
         arrocco = true;
     }
 
+    public Torre(Torre originale) {
+        super(originale);
+        arrocco = originale.arrocco;
+    }
+
     public boolean getArrocco() {
         return arrocco;
     }
@@ -18,6 +23,11 @@ public class Torre extends Pedina {
         if (posizione[0] != posizione_attuale[0] && posizione[1] != posizione_attuale[1]) throw new IllegalArgumentException("Mossa non valida");
         setPosizione(posizione);
         arrocco = false;
+    }
+
+    @Override
+    public Pedina copy() {
+        return new Torre(this);
     }
 
     //da implementare bene l'arrocco

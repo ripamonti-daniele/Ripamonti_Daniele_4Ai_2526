@@ -53,7 +53,7 @@ private void menu() {
 
             case 3:
                 int i = chiediIntero("Seleziona cassa (1 - " + (casse.length) + "): ", 1, casse.length, true, true);
-                String chiamato = casse[i + 1].chiamaProssimoCliente(gestore);
+                String chiamato = casse[i - 1].chiamaProssimoCliente(gestore);
                 if (chiamato == null)
                     System.out.println("Nessuno in attesa");
                 else

@@ -5,7 +5,7 @@ import java.util.Arrays;
 
 public class Casella extends JPanel {
     private Color colore;
-    private JLabel label;
+    private final JLabel label;
     private ImageIcon img;
     private static final ImageIcon[] iconeValide = new ImageIcon[] {
         IconaPedina.RE_WHITE.getImageIcon(),
@@ -23,6 +23,7 @@ public class Casella extends JPanel {
     };
 
     public Casella(Color colore, int lunghezzaLato) {
+        label = new JLabel();
         this.setSize(lunghezzaLato, lunghezzaLato);
         this.add(label);
         setColore(colore);
@@ -47,7 +48,8 @@ public class Casella extends JPanel {
     }
 
     public void setImg(ImageIcon img) {
-        if (!Arrays.asList(iconeValide).contains(img)) throw new IllegalArgumentException("Immagine non valida");
+//        for (ImageIcon i : iconeValide)
+//        if (!Arrays.asList(iconeValide).contains(img)) throw new IllegalArgumentException("Immagine non valida");
         label.setIcon(img);
     }
 

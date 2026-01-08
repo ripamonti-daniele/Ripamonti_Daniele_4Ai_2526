@@ -1,8 +1,13 @@
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
 public class Cassa {
-    private Map<String, Float> conti;
+    private final Map<String, Float> conti;
+
+    public Cassa() {
+        conti = new HashMap<>();
+    }
 
     public void creaConto(Tavolo t) {
         float prezzo = 0;
@@ -12,9 +17,10 @@ public class Cassa {
     }
 
     public float getConto(String idTavolo) {
-
-        return 0;
-        //toglie il tavolo dal dizionario
+        if (!conti.containsKey(idTavolo)) throw new IllegalArgumentException("Tavolo non valido");
+        float conto = conti.get(idTavolo);
+        conti.remove(idTavolo);
+        return conto;
     }
 }
 

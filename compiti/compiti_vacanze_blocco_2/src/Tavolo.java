@@ -6,7 +6,7 @@ public class Tavolo {
     private int persone;
     private static int numeroTavolo = 1;
     public final String id;
-    private List<Pizza> ordini;
+    private final List<Pizza> ordini;
     private boolean stato;
 
     public Tavolo(int persone, List<Pizza> ordini) {
@@ -19,6 +19,10 @@ public class Tavolo {
 
     public String getId() {
         return id;
+    }
+
+    public int getPersoneSedute() {
+        return persone;
     }
 
     private void setPersoneSedute(int persone) {

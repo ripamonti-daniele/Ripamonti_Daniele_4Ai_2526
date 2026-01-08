@@ -5,4 +5,17 @@ public class Pizza {
     public Pizza(String nome, float costo) {
         this.nome = nome;
     }
+
+    public Pizza(Pizza p) {
+        this.nome = p.nome;
+        this.costo = p.costo;
+    }
+
+    public String getNome() {
+        return nome;
+    }
+
+    public float getCosto() {
+        return costo;
+    }
 }

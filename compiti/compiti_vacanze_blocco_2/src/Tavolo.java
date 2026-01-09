@@ -2,7 +2,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 public class Tavolo {
-    public final int POSTIMASSIMI = 4;
+    private static final int POSTIMASSIMI = 4;
     private int persone;
     private static int numeroTavolo = 1;
     public final String id;
@@ -15,6 +15,10 @@ public class Tavolo {
         numeroTavolo++;
         setPersoneSedute(persone);
         this.ordini = ordini;
+    }
+
+    public static int getPostiMassimi() {
+        return POSTIMASSIMI;
     }
 
     public String getId() {
@@ -47,4 +51,17 @@ public class Tavolo {
         return copia;
     }
 
+    @Override
+    public String toString() {
+        String statoStringa = "aperto";
+        if (!stato) statoStringa = "chiuso";
+
+        String ordiniStringa = "";
+        for (Pizza p : ordini) {
+            ordiniStringa += p.getNome() + ", ";
+        }
+        ordiniStringa = ordiniStringa.substring(0, ordiniStringa.length() - 2);
+
+        return id + " - " + statoStringa + ", " + persone + " persone, ordine: " + ordiniStringa;
+    }
 }

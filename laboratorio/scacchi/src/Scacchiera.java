@@ -41,12 +41,25 @@ public class Scacchiera {
         System.gc();
     }
 
+    private Pedina copiaPedina(Pedina p) {
+        if (p == null) return null;
+        return switch (p.getClass().getSimpleName()) {
+            case "Pedone" -> new Pedone((Pedone) p);
+            case "Alfiere" -> new Alfiere((Alfiere) p);
+            case "Cavallo" -> new Cavallo((Cavallo) p);
+            case "Torre" -> new Torre((Torre) p);
+            case "Regina" -> new Regina((Regina) p);
+            case "Re" -> new Re((Re) p);
+            default -> throw new IllegalArgumentException("Tipo di pedina non valido");
+        };
+    }
+
     public Pedina[][] getScacchiera() {
         Pedina[][] copia = new Pedina[DIMENSIONE][DIMENSIONE];
         for (int i = 0; i < caselle.length; i++) {
             for (int j = 0; j < caselle[i].length; j++) {
                 if (caselle[i][j] == null) copia[i][j] = null;
-                else copia[i][j] = caselle[i][j].copy();
+                else copia[i][j] = copiaPedina(caselle[i][j]);
             }
         }
         return copia;

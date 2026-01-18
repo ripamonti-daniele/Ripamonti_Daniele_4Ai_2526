@@ -1,11 +1,17 @@
 import javax.swing.*;
 import java.awt.*;
 
+//void aggiungiStatoJSON(JSONObject)
+
 void main() {
     JFrame frame = new JFrame("Scacchi");
+//    frame.setLayout(null);
+    frame.setSize(1200, 1000);
 
     Scacchiera scacchiera = new Scacchiera();
     ScacchieraPanel scacchieraPanel = new ScacchieraPanel(scacchiera.getScacchiera());
+
+    System.out.println(scacchiera);
 
     Casella[][] caselle = scacchieraPanel.getCasellePanel();
 
@@ -18,11 +24,7 @@ void main() {
     }
 
     frame.add(board);
-
-    frame.pack();
-    frame.setSize(1200, 1000);
     frame.setLocationRelativeTo(null);
     frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
     frame.setVisible(true);
-
 }

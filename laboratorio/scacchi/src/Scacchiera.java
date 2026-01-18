@@ -1,11 +1,24 @@
 import java.awt.*;
+import java.util.Arrays;
+import java.util.HashMap;
+import java.util.Map;
 
 public class Scacchiera {
     public final int DIMENSIONE = 8;
     private final Pedina[][] caselle;
     private int mosseNeutre;
+    private final Map<Integer, String> numeroToLettera = new HashMap<>();
 
     public Scacchiera() {
+        numeroToLettera.put(1, "A");
+        numeroToLettera.put(2, "B");
+        numeroToLettera.put(3, "C");
+        numeroToLettera.put(4, "D");
+        numeroToLettera.put(5, "E");
+        numeroToLettera.put(6, "F");
+        numeroToLettera.put(7, "G");
+        numeroToLettera.put(8, "H");
+
         caselle = new Pedina[DIMENSIONE][DIMENSIONE];
         mosseNeutre = 0;
         inizializza();
@@ -154,5 +167,24 @@ public class Scacchiera {
 
     private void promuoviPedone(Pedina pedina) {
 
+    }
+
+    @Override
+    public String toString() {
+        String str = "";
+        for (int i = 0; i < DIMENSIONE; i++) {
+            for (int j = 0; j < DIMENSIONE; j++) {
+                if (caselle[i][j] == null) str += "null null " +  numeroToLettera.get(j + 1) + (i + 1) + "\n";
+                else {
+                    Color colore = caselle[i][j].getColore();
+                    String c = colore.getRed() + "_" + colore.getGreen() + "_" + colore.getBlue();
+                    if (c.equals("255_255_255")) c = "white";
+                    else if (c.equals("0_0_0")) c = "black";
+
+                    str += caselle[i][j].getClass().getSimpleName() + " " + c + " " + numeroToLettera.get(j + 1) + (DIMENSIONE - i) + "\n";
+                }
+            }
+        }
+        return str;
     }
 }

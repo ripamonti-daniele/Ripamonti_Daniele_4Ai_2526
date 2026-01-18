@@ -1,12 +1,25 @@
 import javax.swing.*;
 import java.awt.*;
 import java.util.Arrays;
+import java.util.HashMap;
+import java.util.Map;
 
 public class ScacchieraPanel extends JPanel {
     private final Casella[][] casellePanel;
     public final int DIMENSIONE = 8;
 
+    private final Map<Integer, String> numeroToLettera = new HashMap<>();
+
     public ScacchieraPanel(Pedina[][] scacchiera) {
+        numeroToLettera.put(1, "A");
+        numeroToLettera.put(2, "B");
+        numeroToLettera.put(3, "C");
+        numeroToLettera.put(4, "D");
+        numeroToLettera.put(5, "E");
+        numeroToLettera.put(6, "F");
+        numeroToLettera.put(7, "G");
+        numeroToLettera.put(8, "H");
+
         casellePanel = new Casella[DIMENSIONE][DIMENSIONE];
         inizializza();
         aggiornaScacchiera(scacchiera);
@@ -15,9 +28,12 @@ public class ScacchieraPanel extends JPanel {
     private void inizializza() {
         for (int i = 0; i < DIMENSIONE; i++) {
             for (int j = 0; j < DIMENSIONE; j++) {
-                if ((j + i) % 2 == 0) casellePanel[i][j] = new Casella(Color.red, 100);
-                else casellePanel[i][j] = new Casella(Color.green, 100);
-                casellePanel[i][j].setBounds(100, 100,100 * j, 100 * i);
+                Color c;
+                if ((j + i) % 2 == 0) c = new Color(240, 217, 181);
+                else c = new Color(161, 116, 79);
+
+                casellePanel[i][j] = new Casella(c, 100, numeroToLettera.get(j + 1) + (DIMENSIONE - i + 1));
+                casellePanel[i][j].setBounds(100 * j, 100 * i,100, 100);
             }
         }
     }
@@ -37,29 +53,36 @@ public class ScacchieraPanel extends JPanel {
                     case "Pedone":
                         if (colore == Color.white) casellePanel[i][j].setImg(IconaPedina.PEDONE_WHITE.getImageIcon());
                         else casellePanel[i][j].setImg(IconaPedina.PEDONE_BLACK.getImageIcon());
+                        break;
 
                     case "Re":
                         if (colore == Color.white) casellePanel[i][j].setImg(IconaPedina.RE_WHITE.getImageIcon());
                         else casellePanel[i][j].setImg(IconaPedina.RE_BLACK.getImageIcon());
+                        break;
 
                     case "Regina":
                         if (colore == Color.white) casellePanel[i][j].setImg(IconaPedina.REGINA_WHITE.getImageIcon());
                         else casellePanel[i][j].setImg(IconaPedina.REGINA_BLACK.getImageIcon());
+                        break;
 
                     case "Torre":
                         if (colore == Color.white) casellePanel[i][j].setImg(IconaPedina.TORRE_WHITE.getImageIcon());
                         else casellePanel[i][j].setImg(IconaPedina.TORRE_BLACK.getImageIcon());
+                        break;
 
                     case "Alfiere":
                         if (colore == Color.white) casellePanel[i][j].setImg(IconaPedina.ALFIERE_WHITE.getImageIcon());
                         else casellePanel[i][j].setImg(IconaPedina.ALFIERE_BLACK.getImageIcon());
+                        break;
 
                     case "Cavallo":
                         if (colore == Color.white) casellePanel[i][j].setImg(IconaPedina.CAVALLO_WHITE.getImageIcon());
                         else casellePanel[i][j].setImg(IconaPedina.CAVALLO_BLACK.getImageIcon());
+                        break;
 
                     case "null":
                         casellePanel[i][j].rimuoviImg();
+                        break;
                 }
             }
         }

@@ -1,7 +1,5 @@
 import javax.swing.*;
-import java.awt.Color;
-import java.awt.Dimension;
-import java.util.Arrays;
+import java.awt.*;
 
 public class Casella extends JPanel {
     private Color colore;
@@ -22,15 +20,15 @@ public class Casella extends JPanel {
         IconaPedina.PEDONE_BLACK.getImageIcon(),
     };
 
-    public Casella(Color colore, int lunghezzaLato) {
+    public Casella(Color colore, int lunghezzaLato, String id) {
         label = new JLabel();
-        this.setSize(lunghezzaLato, lunghezzaLato);
+        this.setSize(new Dimension(lunghezzaLato, lunghezzaLato));
         this.add(label);
         setColore(colore);
     }
 
-    public Casella(Color colore, int lunghezzaLato, ImageIcon img) {
-        this(colore, lunghezzaLato);
+    public Casella(Color colore, int lunghezzaLato, String id, ImageIcon img) {
+        this(colore, lunghezzaLato, id);
         setImg(img);
     }
 
@@ -48,26 +46,35 @@ public class Casella extends JPanel {
     }
 
     public void setImg(ImageIcon img) {
-//        for (ImageIcon i : iconeValide)
-//        if (!Arrays.asList(iconeValide).contains(img)) throw new IllegalArgumentException("Immagine non valida");
-        label.setIcon(img);
+        boolean trovato = false;
+        for (ImageIcon i : iconeValide) {
+            if (i.getDescription().equals(img.getDescription())) {
+                trovato = true;
+                break;
+            }
+        }
+
+        if (!trovato) throw new IllegalArgumentException("Immagine non valida");
+
+        Image scaled = img.getImage().getScaledInstance(100, 100, Image.SCALE_SMOOTH);
+        label.setIcon(new ImageIcon(scaled));
     }
 
     public void rimuoviImg() {
         label.setIcon(null);
     }
 
-    @Override
-    public void setSize(Dimension dimensione) {
-        if (dimensione.width != dimensione.height) throw new IllegalArgumentException("La casella deve essere un quadrato");
-        this.resize(dimensione);
-    }
-
-    @Override
-    public void setSize(int width, int height) {
-        if (width != height) throw new IllegalArgumentException("La casella deve essere un quadrato");
-        this.resize(width, height);
-    }
+//    @Override
+//    public void setSize(Dimension dimensione) {
+//        if (dimensione.width != dimensione.height) throw new IllegalArgumentException("La casella deve essere un quadrato");
+//        this.resize(dimensione);
+//    }
+//
+//    @Override
+//    public void setSize(int width, int height) {
+//        if (width != height) throw new IllegalArgumentException("La casella deve essere un quadrato");
+//        this.resize(width, height);
+//    }
 
     //fai setbounds
 }

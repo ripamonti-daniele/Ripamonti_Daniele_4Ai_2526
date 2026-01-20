@@ -95,4 +95,12 @@ public class ScacchieraPanel extends JPanel {
         }
         return copia;
     }
+
+    public void mettiASchermo(JPanel panel) {
+        for (int i = 0; i < DIMENSIONE; i++) {
+            for (int j = 0; j < DIMENSIONE; j++) {
+                panel.add(casellePanel[i][j]);
+            }
+        }
+    }
 }

@@ -31,6 +31,8 @@ public enum IconaPedina {
         return iconPath;
     }
     public ImageIcon getImageIcon() {
-        return new ImageIcon(iconPath);
+        ImageIcon img = new ImageIcon(iconPath);
+        img.setDescription(iconPath);
+        return img;
     }
 }

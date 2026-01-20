@@ -1,10 +1,13 @@
 import javax.swing.*;
 import java.awt.*;
+import java.awt.event.MouseEvent;
+import java.awt.event.MouseListener;
 
-public class Casella extends JPanel {
+public class Casella extends JPanel implements MouseListener {
     private Color colore;
     private final JLabel label;
-    private ImageIcon img;
+    private static Casella casellaSeleziona = null;
+
     private static final ImageIcon[] iconeValide = new ImageIcon[] {
         IconaPedina.RE_WHITE.getImageIcon(),
         IconaPedina.REGINA_WHITE.getImageIcon(),
@@ -25,6 +28,7 @@ public class Casella extends JPanel {
         this.setSize(new Dimension(lunghezzaLato, lunghezzaLato));
         this.add(label);
         setColore(colore);
+        this.addMouseListener(this);
     }
 
     public Casella(Color colore, int lunghezzaLato, String id, ImageIcon img) {
@@ -41,8 +45,8 @@ public class Casella extends JPanel {
         this.setBackground(colore);
     }
 
-    public ImageIcon getImg() {
-        return img;
+    public Icon getImg() {
+        return label.getIcon();
     }
 
     public void setImg(ImageIcon img) {
@@ -54,7 +58,8 @@ public class Casella extends JPanel {
             }
         }
 
-        if (!trovato) throw new IllegalArgumentException("Immagine non valida");
+        //risolvi il problema della perdita di dati nel passaggio da ImageIcon a Image
+//        if (!trovato) throw new IllegalArgumentException("Immagine non valida");
 
         Image scaled = img.getImage().getScaledInstance(100, 100, Image.SCALE_SMOOTH);
         label.setIcon(new ImageIcon(scaled));
@@ -62,6 +67,35 @@ public class Casella extends JPanel {
 
     public void rimuoviImg() {
         label.setIcon(null);
+    }
+
+    @Override
+    public void mouseClicked(MouseEvent e) {
+    }
+
+    @Override
+    public void mousePressed(MouseEvent e) {
+    }
+
+    @Override
+    public void mouseReleased(MouseEvent e) {
+        if (casellaSeleziona != null && casellaSeleziona != this) {
+            setImg((ImageIcon) casellaSeleziona.getImg());
+            casellaSeleziona.rimuoviImg();
+            casellaSeleziona = null;
+        }
+        else if (getImg() != null) {
+            casellaSeleziona = this;
+        }
+    }
+
+    @Override
+    public void mouseEntered(MouseEvent e) {
+    }
+
+    @Override
+    public void mouseExited(MouseEvent e) {
+
     }
 
 //    @Override

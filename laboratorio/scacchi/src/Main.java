@@ -11,17 +11,17 @@ void main() {
     Scacchiera scacchiera = new Scacchiera();
     ScacchieraPanel scacchieraPanel = new ScacchieraPanel(scacchiera.getScacchiera());
 
-    System.out.println(scacchiera);
-
-    Casella[][] caselle = scacchieraPanel.getCasellePanel();
+//    Path path = Path.of("src/Partita.txt");
+//    try {
+//        Files.writeString(path, scacchiera.toString() + "\n", StandardOpenOption.CREATE, StandardOpenOption.APPEND);
+//    }
+//    catch (IOException e) {
+//        System.out.println(e.getMessage());
+//    }
 
     JPanel board = new JPanel(null);
+    scacchieraPanel.mettiASchermo(board);
 
-    for (int i = 0; i < 8; i++) {
-        for (int j = 0; j < 8; j++) {
-            board.add(caselle[i][j]);
-        }
-    }
 
     frame.add(board);
     frame.setLocationRelativeTo(null);

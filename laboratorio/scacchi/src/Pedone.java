@@ -20,23 +20,36 @@ public class Pedone extends Pedina {
         return enpassant;
     }
 
+    public void rimuoviEnpassant() {
+        enpassant = false;
+    }
+
+    @Override
+    public void trovaMosseValide() {
+        mosseValide.clear();
+
+        if (colore == Color.white) {
+            if (posizione[0] < DIMENSIONE_SCACCHIERA - 1) {
+                mosseValide.add(new int[]{posizione[0] + 1, posizione[1]});
+                if (posizione[1] > 0) mosseValide.add(new int[]{posizione[0] + 1, posizione[1] - 1});
+                if (posizione[1] < DIMENSIONE_SCACCHIERA - 1) mosseValide.add(new int[]{posizione[0] + 1, posizione[1] + 1});
+            }
+            if (muoviDiDueCaselle) mosseValide.add(new int[]{posizione[0] + 2, posizione[1]});
+        }
+
+        else {
+            if (posizione[0] > 0) {
+                mosseValide.add(new int[]{posizione[0] - 1, posizione[1]});
+                if (posizione[1] > 0) mosseValide.add(new int[]{posizione[0] - 1, posizione[1] - 1});
+                if (posizione[1] < DIMENSIONE_SCACCHIERA - 1) mosseValide.add(new int[]{posizione[0] - 1, posizione[1] + 1});
+            }
+            if (muoviDiDueCaselle) mosseValide.add(new int[]{posizione[0] - 2, posizione[1]});
+        }
+    }
+
     @Override
     public void muovi(int[] posizione) {
-        int[] posizione_attuale = getPosizione();
-        if (getColore() == Color.white) {
-            if (posizione[0] > 7 || posizione[0] < 2 || posizione[1] < 0 || posizione[1] > DIMENSIONE_SCACCHIERA - 1) throw new IllegalArgumentException("Questa casella non esiste");
-            if (muoviDiDueCaselle && posizione_attuale[0] == posizione[0] + 2 && posizione_attuale[1] == posizione[1]) enpassant = true;
-            else if (posizione_attuale[0] != posizione[0] + 1) throw new IllegalArgumentException("Mossa non valida");
-            else if (posizione_attuale[1] != posizione[1] && posizione[1] != posizione_attuale[1] - 1 && posizione[1] != posizione_attuale[1] + 1) throw new IllegalArgumentException("Mossa non valida");
-            else enpassant = false;
-        }
-        else {
-            if (posizione[0] < 0 || posizione[0] > DIMENSIONE_SCACCHIERA - 3 || posizione[1] < 0 || posizione[1] > DIMENSIONE_SCACCHIERA - 1) throw new IllegalArgumentException("Questa casella non esiste");
-            if (muoviDiDueCaselle && posizione_attuale[0] == posizione[0] - 2 && posizione_attuale[1] == posizione[1]) enpassant = true;
-            else if (posizione_attuale[0] != posizione[0] - 1) throw new IllegalArgumentException("Mossa non valida");
-            else if (posizione_attuale[1] != posizione[1] && posizione[1] != posizione_attuale[1] - 1 && posizione[1] != posizione_attuale[1] + 1) throw new IllegalArgumentException("Mossa non valida");
-            else enpassant = false;
-        }
+        if (colore == Color.white && posizione[0] == this.posizione[0] + 2 || colore == Color.black && posizione[0] == this.posizione[0] - 2) enpassant = true;
         muoviDiDueCaselle = false;
         setPosizione(posizione);
     }

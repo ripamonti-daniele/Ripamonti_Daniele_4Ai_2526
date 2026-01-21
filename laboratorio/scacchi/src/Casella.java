@@ -7,24 +7,26 @@ public class Casella extends JPanel implements MouseListener {
     private Color colore;
     private final JLabel label;
     private static Casella casellaSeleziona = null;
+    private int lunghezzaLato;
 
-    private static final ImageIcon[] iconeValide = new ImageIcon[] {
-        IconaPedina.RE_WHITE.getImageIcon(),
-        IconaPedina.REGINA_WHITE.getImageIcon(),
-        IconaPedina.TORRE_WHITE.getImageIcon(),
-        IconaPedina.ALFIERE_WHITE.getImageIcon(),
-        IconaPedina.CAVALLO_WHITE.getImageIcon(),
-        IconaPedina.PEDONE_WHITE.getImageIcon(),
-        IconaPedina.RE_BLACK.getImageIcon(),
-        IconaPedina.REGINA_BLACK.getImageIcon(),
-        IconaPedina.TORRE_BLACK.getImageIcon(),
-        IconaPedina.ALFIERE_BLACK.getImageIcon(),
-        IconaPedina.CAVALLO_BLACK.getImageIcon(),
-        IconaPedina.PEDONE_BLACK.getImageIcon(),
-    };
+//    private static final ImageIcon[] iconeValide = new ImageIcon[] {
+//        IconaPedina.RE_WHITE.getImageIcon(),
+//        IconaPedina.REGINA_WHITE.getImageIcon(),
+//        IconaPedina.TORRE_WHITE.getImageIcon(),
+//        IconaPedina.ALFIERE_WHITE.getImageIcon(),
+//        IconaPedina.CAVALLO_WHITE.getImageIcon(),
+//        IconaPedina.PEDONE_WHITE.getImageIcon(),
+//        IconaPedina.RE_BLACK.getImageIcon(),
+//        IconaPedina.REGINA_BLACK.getImageIcon(),
+//        IconaPedina.TORRE_BLACK.getImageIcon(),
+//        IconaPedina.ALFIERE_BLACK.getImageIcon(),
+//        IconaPedina.CAVALLO_BLACK.getImageIcon(),
+//        IconaPedina.PEDONE_BLACK.getImageIcon(),
+//    };
 
     public Casella(Color colore, int lunghezzaLato, String id) {
         label = new JLabel();
+        setLunghezzaLato(lunghezzaLato);
         this.setSize(new Dimension(lunghezzaLato, lunghezzaLato));
         this.add(label);
         setColore(colore);
@@ -34,6 +36,15 @@ public class Casella extends JPanel implements MouseListener {
     public Casella(Color colore, int lunghezzaLato, String id, ImageIcon img) {
         this(colore, lunghezzaLato, id);
         setImg(img);
+    }
+
+    public int getLunghezzaLato() {
+        return lunghezzaLato;
+    }
+
+    private void setLunghezzaLato(int lunghezzaLato) {
+        if (lunghezzaLato <= 0) throw new IllegalArgumentException("La lunghezza del lato deve essere maggiore di 0");
+        this.lunghezzaLato = lunghezzaLato;
     }
 
     public Color getColore() {
@@ -50,19 +61,22 @@ public class Casella extends JPanel implements MouseListener {
     }
 
     public void setImg(ImageIcon img) {
-        boolean trovato = false;
-        for (ImageIcon i : iconeValide) {
-            if (i.getDescription().equals(img.getDescription())) {
-                trovato = true;
-                break;
-            }
-        }
-
+//        boolean trovato = false;
+//        for (ImageIcon i : iconeValide) {
+//            if (i.getDescription().equals(img.getDescription())) {
+//                trovato = true;
+//                break;
+//            }
+//        }
         //risolvi il problema della perdita di dati nel passaggio da ImageIcon a Image
 //        if (!trovato) throw new IllegalArgumentException("Immagine non valida");
 
-        Image scaled = img.getImage().getScaledInstance(100, 100, Image.SCALE_SMOOTH);
-        label.setIcon(new ImageIcon(scaled));
+        if (img.getIconWidth() != lunghezzaLato || img.getIconHeight() != lunghezzaLato) {
+            Image scaled = img.getImage().getScaledInstance(100, 100, Image.SCALE_SMOOTH);
+            label.setIcon(new ImageIcon(scaled));
+            System.out.println("borno");
+        }
+        else label.setIcon(img);
     }
 
     public void rimuoviImg() {

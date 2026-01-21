@@ -26,6 +26,11 @@ public class Re extends Pedina {
     }
 
     @Override
+    protected void trovaMosseValide() {
+
+    }
+
+    @Override
     public Pedina copy() {
         return new Re(this);
     }

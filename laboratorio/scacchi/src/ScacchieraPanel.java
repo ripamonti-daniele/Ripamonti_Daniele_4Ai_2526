@@ -51,33 +51,33 @@ public class ScacchieraPanel extends JPanel {
 
                 switch (classeOggetto) {
                     case "Pedone":
-                        if (colore == Color.white) casellePanel[i][j].setImg(IconaPedina.PEDONE_WHITE.getImageIcon());
-                        else casellePanel[i][j].setImg(IconaPedina.PEDONE_BLACK.getImageIcon());
+                        if (colore == Color.white) casellePanel[i][j].setImg(IconaPedina.PEDONE_WHITE.getImageIcon(100));
+                        else casellePanel[i][j].setImg(IconaPedina.PEDONE_BLACK.getImageIcon(100));
                         break;
 
                     case "Re":
-                        if (colore == Color.white) casellePanel[i][j].setImg(IconaPedina.RE_WHITE.getImageIcon());
-                        else casellePanel[i][j].setImg(IconaPedina.RE_BLACK.getImageIcon());
+                        if (colore == Color.white) casellePanel[i][j].setImg(IconaPedina.RE_WHITE.getImageIcon(100));
+                        else casellePanel[i][j].setImg(IconaPedina.RE_BLACK.getImageIcon(100));
                         break;
 
                     case "Regina":
-                        if (colore == Color.white) casellePanel[i][j].setImg(IconaPedina.REGINA_WHITE.getImageIcon());
-                        else casellePanel[i][j].setImg(IconaPedina.REGINA_BLACK.getImageIcon());
+                        if (colore == Color.white) casellePanel[i][j].setImg(IconaPedina.REGINA_WHITE.getImageIcon(100));
+                        else casellePanel[i][j].setImg(IconaPedina.REGINA_BLACK.getImageIcon(100));
                         break;
 
                     case "Torre":
-                        if (colore == Color.white) casellePanel[i][j].setImg(IconaPedina.TORRE_WHITE.getImageIcon());
-                        else casellePanel[i][j].setImg(IconaPedina.TORRE_BLACK.getImageIcon());
+                        if (colore == Color.white) casellePanel[i][j].setImg(IconaPedina.TORRE_WHITE.getImageIcon(100));
+                        else casellePanel[i][j].setImg(IconaPedina.TORRE_BLACK.getImageIcon(100));
                         break;
 
                     case "Alfiere":
-                        if (colore == Color.white) casellePanel[i][j].setImg(IconaPedina.ALFIERE_WHITE.getImageIcon());
-                        else casellePanel[i][j].setImg(IconaPedina.ALFIERE_BLACK.getImageIcon());
+                        if (colore == Color.white) casellePanel[i][j].setImg(IconaPedina.ALFIERE_WHITE.getImageIcon(100));
+                        else casellePanel[i][j].setImg(IconaPedina.ALFIERE_BLACK.getImageIcon(100));
                         break;
 
                     case "Cavallo":
-                        if (colore == Color.white) casellePanel[i][j].setImg(IconaPedina.CAVALLO_WHITE.getImageIcon());
-                        else casellePanel[i][j].setImg(IconaPedina.CAVALLO_BLACK.getImageIcon());
+                        if (colore == Color.white) casellePanel[i][j].setImg(IconaPedina.CAVALLO_WHITE.getImageIcon(100));
+                        else casellePanel[i][j].setImg(IconaPedina.CAVALLO_BLACK.getImageIcon(100));
                         break;
 
                     case "null":

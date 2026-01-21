@@ -26,6 +26,11 @@ public class Torre extends Pedina {
     }
 
     @Override
+    protected void trovaMosseValide() {
+
+    }
+
+    @Override
     public Pedina copy() {
         return new Torre(this);
     }

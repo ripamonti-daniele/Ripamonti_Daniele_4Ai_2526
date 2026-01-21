@@ -1,5 +1,5 @@
 import javax.swing.ImageIcon;
-import java.awt.Color;
+import java.awt.*;
 
 public enum IconaPedina {
     RE_WHITE(Color.WHITE,  "img/re_white.png"),
@@ -27,11 +27,14 @@ public enum IconaPedina {
     public Color getColore() {
         return colore;
     }
+
     public String getPath() {
         return iconPath;
     }
-    public ImageIcon getImageIcon() {
-        ImageIcon img = new ImageIcon(iconPath);
+
+    public ImageIcon getImageIcon(int dimensione) {
+        Image image = new ImageIcon(iconPath).getImage().getScaledInstance(dimensione, dimensione, Image.SCALE_SMOOTH);
+        ImageIcon img = new ImageIcon(image);
         img.setDescription(iconPath);
         return img;
     }

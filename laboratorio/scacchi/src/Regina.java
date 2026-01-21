@@ -17,6 +17,11 @@ public class Regina extends Pedina {
     }
 
     @Override
+    protected void trovaMosseValide() {
+
+    }
+
+    @Override
     public Pedina copy() {
         return new Regina(this);
     }

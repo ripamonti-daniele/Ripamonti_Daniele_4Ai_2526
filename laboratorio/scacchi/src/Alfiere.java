@@ -1,4 +1,6 @@
 import java.awt.Color;
+import java.util.ArrayList;
+import java.util.List;
 
 public class Alfiere extends Pedina {
     public Alfiere(Color colore, int[] posizione) {
@@ -10,10 +12,40 @@ public class Alfiere extends Pedina {
     }
 
     @Override
-    public void muovi(int[] posizione) {
-        int[] posizione_attuale = getPosizione();
-        if (Math.abs(posizione[0] - posizione_attuale[0]) != Math.abs(posizione[1] - posizione_attuale[1])) throw new IllegalArgumentException("Mossa non valida");
-        setPosizione(posizione);
+    public void trovaMosseValide() {
+        mosseValide.clear();
+
+        int i = posizione[0] + 1;
+        int j = posizione[1] + 1;
+        while (i < DIMENSIONE_SCACCHIERA && j < DIMENSIONE_SCACCHIERA) {
+            mosseValide.add(new int[]{i, j});
+            i++;
+            j++;
+        }
+
+        i = posizione[0] + 1;
+        j = posizione[1] - 1;
+        while (i < DIMENSIONE_SCACCHIERA && j >= 0) {
+            mosseValide.add(new int[]{i, j});
+            i++;
+            j--;
+        }
+
+        i = posizione[0] - 1;
+        j = posizione[1] + 1;
+        while (i >= 0 && j < DIMENSIONE_SCACCHIERA) {
+            mosseValide.add(new int[]{i, j});
+            i--;
+            j++;
+        }
+
+        i = posizione[0] - 1;
+        j = posizione[1] - 1;
+        while (i >= 0 && j >= 0) {
+            mosseValide.add(new int[]{i, j});
+            i--;
+            j--;
+        }
     }
 
     @Override

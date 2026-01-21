@@ -49,6 +49,7 @@ public class Pedone extends Pedina {
 
     @Override
     public void muovi(int[] posizione) {
+        if (!mosseValide.contains(posizione)) throw new IllegalArgumentException("Questa mossa non è valida");
         if (colore == Color.white && posizione[0] == this.posizione[0] + 2 || colore == Color.black && posizione[0] == this.posizione[0] - 2) enpassant = true;
         muoviDiDueCaselle = false;
         setPosizione(posizione);

@@ -60,7 +60,7 @@ public class Automobile {
 
     public static void controllaTarga(String targa) {
         targa = targa.trim().toUpperCase();
-        if (targa.matches("[A-Z]{2}[0-9]{3}[A-Z]{2}")) throw new IllegalArgumentException("Formato targa non valido");
+        if (!targa.matches("[A-Z]{2}[0-9]{3}[A-Z]{2}")) throw new IllegalArgumentException("Formato targa non valido");
         if (targheRegistrate.contains(targa)) throw new IllegalArgumentException("Targa già in uso");
     }
 
@@ -72,6 +72,7 @@ public class Automobile {
     }
 
     public void cambiaTarga(String targa) {
+        targa = targa.trim().toUpperCase();
         controllaTarga(targa);
         targheRegistrate.remove(this.targa);
         targheRegistrate.add(targa);

@@ -65,7 +65,7 @@ public abstract class Pedina {
     public List<int[]> getMosseValide() {
         trovaMosseValide();
         List<int[]> copia = new ArrayList<>(mosseValide.size());
-        for (int[] arr :mosseValide) copia.add(arr.clone());
+        for (int[] arr : mosseValide) copia.add(arr.clone());
         return copia;
     }
 

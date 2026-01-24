@@ -10,16 +10,47 @@ public class Regina extends Pedina {
     }
 
     @Override
-    public void muovi(int[] posizione) {
-        int[] posizione_attuale = getPosizione();
-        if (posizione[0] != posizione_attuale[0] && posizione[1] != posizione_attuale[1] && Math.abs(posizione[0] - posizione_attuale[0]) != Math.abs(posizione[1] - posizione_attuale[1])) throw new IllegalArgumentException("Mossa non valida");
-        setPosizione(posizione);
-    }
-
-    @Override
     protected void trovaMosseValide() {
+        mosseValide.clear();
 
+        for (int i = 0; i < DIMENSIONE_SCACCHIERA; i++) {
+            if (i != posizione[0]) mosseValide.add(new int[] {i, posizione[1]});
+            if (i != posizione[1]) mosseValide.add(new int[] {posizione[0], i});
+        }
+
+        int i = posizione[0] + 1;
+        int j = posizione[1] + 1;
+        while (i < DIMENSIONE_SCACCHIERA && j < DIMENSIONE_SCACCHIERA) {
+            mosseValide.add(new int[]{i, j});
+            i++;
+            j++;
+        }
+
+        i = posizione[0] + 1;
+        j = posizione[1] - 1;
+        while (i < DIMENSIONE_SCACCHIERA && j >= 0) {
+            mosseValide.add(new int[]{i, j});
+            i++;
+            j--;
+        }
+
+        i = posizione[0] - 1;
+        j = posizione[1] + 1;
+        while (i >= 0 && j < DIMENSIONE_SCACCHIERA) {
+            mosseValide.add(new int[]{i, j});
+            i--;
+            j++;
+        }
+
+        i = posizione[0] - 1;
+        j = posizione[1] - 1;
+        while (i >= 0 && j >= 0) {
+            mosseValide.add(new int[]{i, j});
+            i--;
+            j--;
+        }
     }
+
 
     @Override
     public Pedina copy() {

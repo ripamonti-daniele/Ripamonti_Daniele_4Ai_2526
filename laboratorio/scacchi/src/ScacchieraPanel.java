@@ -32,7 +32,7 @@ public class ScacchieraPanel extends JPanel {
                 if ((j + i) % 2 == 0) c = new Color(240, 217, 181);
                 else c = new Color(161, 116, 79);
 
-                casellePanel[i][j] = new Casella(c, 100, numeroToLettera.get(j + 1) + (DIMENSIONE - i + 1));
+                casellePanel[i][j] = new Casella(c, 100, numeroToLettera.get(j + 1) + (DIMENSIONE - i));
                 casellePanel[i][j].setBounds(100 * j, 100 * i,100, 100);
             }
         }

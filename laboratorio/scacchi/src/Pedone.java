@@ -16,6 +16,10 @@ public class Pedone extends Pedina {
         this.enpassant = originale.enpassant;
     }
 
+    public boolean getMuoviDiDueCaselle() {
+        return muoviDiDueCaselle;
+    }
+
     public boolean getEnpassant() {
         return enpassant;
     }

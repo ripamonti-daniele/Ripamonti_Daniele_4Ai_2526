@@ -1,6 +1,6 @@
 import java.awt.*;
-import java.util.Arrays;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 
 public class Scacchiera {
@@ -51,7 +51,6 @@ public class Scacchiera {
     public void reset() {
         mosseNeutre = 0;
         inizializza();
-        System.gc();
     }
 
     private Pedina copiaPedina(Pedina p) {
@@ -89,57 +88,33 @@ public class Scacchiera {
         return tipoPedine;
     }
 
-    public void muoviPedina(Pedina pedina, int[] posizione) {
-        if (posizione[0] < 0 || posizione[0] > 7 || posizione[1] < 0 || posizione[1] > DIMENSIONE - 1) throw new IllegalArgumentException("Non esiste questa posizione nella scacchiera");
+    public void muoviPedina(int[] pos_inizio, int[] pos_fine) {
+        if (pos_inizio[0] < 0 || pos_inizio[0] > DIMENSIONE - 1 || pos_inizio[1] < 0 || pos_inizio[1] > DIMENSIONE - 1) throw new IllegalArgumentException("Posizione iniziale non valida");
+        if (pos_fine[0] < 0 || pos_fine[0] > DIMENSIONE - 1 || pos_fine[1] < 0 || pos_fine[1] > DIMENSIONE - 1) throw new IllegalArgumentException("Posizione finale non valida");
+        if (caselle[pos_inizio[0]][pos_inizio[1]] == null) throw new IllegalArgumentException("La casella da cui vuoi prendere la pedina è vuota");
 
-        if (pedina instanceof Cavallo) {
-            if (caselle[posizione[0]][posizione[1]].getColore() == pedina.getColore()) throw new IllegalArgumentException("Il cavallo non può essere messo in una casella dove si trova una pedina del suo stesso colore");
-            else {
-                caselle[posizione[0]][posizione[1]] = caselle[pedina.getPosizione()[0]][pedina.getPosizione()[1]];
-                caselle[pedina.getPosizione()[0]][pedina.getPosizione()[1]] = null;
-                pedina.muovi(posizione);
+        Pedina p = caselle[pos_inizio[0]][pos_inizio[1]];
+        List<int[]> mosseValide = p.getMosseValide();
+
+        for (int i = 0; i < DIMENSIONE; i++) {
+            for (int j = 0; j < DIMENSIONE; j++) {
+                if (caselle[i][j] == null) continue;
+                if (caselle[i][j].getColore() == p.getColore()) mosseValide.remove(new int[] {i, j});
             }
         }
 
-        else if (pedina instanceof Pedone) {
-            int avanzamento = -1;
-            if (pedina.getColore() == Color.white) avanzamento = 1;
-            if (Math.abs(posizione[1] - pedina.getPosizione()[1]) == 1 && posizione[0] == pedina.getPosizione()[0] + avanzamento) {
-                //mossa normale
-                if (caselle[posizione[0]][posizione[1]] != null && caselle[posizione[0]][posizione[1]].getColore() != pedina.getColore()) {
-                    caselle[posizione[0]][posizione[1]] = null;
-                    pedina.muovi(posizione);
-                }
-                //en passant
-                else if (caselle[posizione[0]][posizione[1]] == null && caselle[posizione[0]][posizione[1] - avanzamento].getColore() != pedina.getColore() && caselle[posizione[0]][posizione[1] - avanzamento] instanceof Pedone && ((Pedone) caselle[posizione[0]][posizione[1] - avanzamento]).getEnpassant()) {
-                    caselle[posizione[0]][posizione[1] - avanzamento] = null;
-                    pedina.muovi(posizione);
-                }
-            }
-
-            //mossa normale
-            else if (mosseIntermedieValide(pedina, posizione, false, true, 0, avanzamento) && caselle[posizione[0]][posizione[1]] == null) {
-                caselle[pedina.getPosizione()[0]][pedina.getPosizione()[0]] = null;
-                pedina.muovi(posizione);
-            }
-
-            else throw new IllegalArgumentException("Mossa non valida");
-
-            //promozione
-            if (pedina.getColore() == Color.white && pedina.getPosizione()[0] == DIMENSIONE - 1 || pedina.getColore() == Color.black && pedina.getPosizione()[0] == 0) {
-                promuoviPedone(pedina);
+        boolean valido = false;
+        for (int[] mossa : mosseValide) {
+            if (mossa == pos_fine) {
+                valido = true;
+                break;
             }
         }
 
-        else if (pedina instanceof Torre) {
-            int avanzamento = 1;
-            if (posizione[0] == pedina.getPosizione()[0]) {
-                if (posizione[1] - pedina.getPosizione()[1] < 0) {
-                    avanzamento = -1;
-
-                }
-            }
-        }
+        if (!valido) throw new IllegalArgumentException("Mossa non valida");
+        p.muovi(pos_fine);
+        caselle[pos_inizio[0]][pos_inizio[1]] = null;
+        caselle[pos_fine[0]][pos_fine[1]] = p;
     }
 
     private boolean mosseIntermedieValide(Pedina pedina, int[] posizione, boolean orizzontale, boolean verticale, int incrementoOrizzontale, int incrementoVerticale) {

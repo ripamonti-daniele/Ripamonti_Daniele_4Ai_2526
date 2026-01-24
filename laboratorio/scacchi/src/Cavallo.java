@@ -1,4 +1,4 @@
-import java.awt.*;
+import java.awt.Color;
 
 public class Cavallo extends Pedina {
     public Cavallo(Color colore, int[] posizione) {

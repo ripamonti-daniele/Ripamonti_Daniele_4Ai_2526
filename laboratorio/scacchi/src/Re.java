@@ -18,16 +18,28 @@ public class Re extends Pedina {
     }
 
     @Override
-    public void muovi(int[] posizione) {
-        int[] posizione_attuale = getPosizione();
-        if (Math.abs(posizione_attuale[0] - posizione[0]) > 1 || Math.abs(posizione_attuale[1] - posizione[1]) > 1) throw new IllegalArgumentException("Mossa non valida");
-        setPosizione(posizione);
-        arrocco = false;
+    protected void trovaMosseValide() {
+        mosseValide.clear();
+
+        if (arrocco) {
+            mosseValide.add(new int[] {posizione[0], posizione[1] + 2});
+            mosseValide.add(new int[] {posizione[0], posizione[1] - 2});
+        }
+
+        for (int i = -1; i <= 1; i++) {
+            if (posizione[0] + i < 0 || posizione[0] + i >= DIMENSIONE_SCACCHIERA) continue;
+            for (int j = -1; j <= 1; j++) {
+                if (posizione[1] + j < 0 || posizione[1] + j >= DIMENSIONE_SCACCHIERA || i == 0 && j == 0) continue;
+                mosseValide.add(new int[] {posizione[0] + i, posizione[1] + j});
+            }
+        }
     }
 
     @Override
-    protected void trovaMosseValide() {
-
+    public void muovi(int[] posizione) {
+        if (!mosseValide.contains(posizione)) throw new IllegalArgumentException("Questa mossa non è valida");
+        setPosizione(posizione);
+        arrocco = false;
     }
 
     @Override

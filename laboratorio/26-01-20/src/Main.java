@@ -109,7 +109,7 @@ void main() {
     ottieniImg.put("verde", new ImageIcon("img/macchina_verde.png"));
     ottieniImg.put("viola", new ImageIcon("img/macchina_viola.png"));
     ottieniImg.put("giallo", new ImageIcon("img/macchina_gialla.png"));
-    
+
     JFrame frame = new JFrame("Automobile");
     frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
     frame.setSize(300, 200);

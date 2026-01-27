@@ -89,11 +89,14 @@ public class ScacchieraPanel extends JPanel {
     }
 
     public Casella[][] getCasellePanel() {
-        Casella[][] copia = new Casella[DIMENSIONE][DIMENSIONE];
-        for (int i = 0; i < DIMENSIONE; i++) {
-            copia[i] = Arrays.copyOf(casellePanel[i], casellePanel[i].length);
-        }
-        return copia;
+//        Casella[][] copia = new Casella[DIMENSIONE][DIMENSIONE];
+//        for (int i = 0; i < DIMENSIONE; i++) {
+//            for (int j = 0; j < DIMENSIONE; j++) {
+//                copia[i][j] = new Casella(casellePanel[i][j]);
+//            }
+//        }
+//        return copia;
+        return casellePanel;
     }
 
     public void mettiASchermo(JPanel panel) {

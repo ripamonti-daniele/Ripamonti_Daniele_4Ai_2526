@@ -1,4 +1,5 @@
 import java.awt.*;
+import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -8,6 +9,8 @@ public class Scacchiera {
     private final Pedina[][] caselle;
     private int mosseNeutre;
     private final Map<Integer, String> numeroToLettera = new HashMap<>();
+    private int[] casella_selezionata;
+    private List<int[]> mosseValide;
 
     public Scacchiera() {
         numeroToLettera.put(1, "A");
@@ -21,6 +24,8 @@ public class Scacchiera {
 
         caselle = new Pedina[DIMENSIONE][DIMENSIONE];
         mosseNeutre = 0;
+        casella_selezionata = null;
+        mosseValide = new ArrayList<>();
         inizializza();
     }
 
@@ -88,14 +93,14 @@ public class Scacchiera {
         return tipoPedine;
     }
 
-    public void muoviPedina(int[] pos_inizio, int[] pos_fine) {
-        if (pos_inizio[0] < 0 || pos_inizio[0] > DIMENSIONE - 1 || pos_inizio[1] < 0 || pos_inizio[1] > DIMENSIONE - 1) throw new IllegalArgumentException("Posizione iniziale non valida");
-        if (pos_fine[0] < 0 || pos_fine[0] > DIMENSIONE - 1 || pos_fine[1] < 0 || pos_fine[1] > DIMENSIONE - 1) throw new IllegalArgumentException("Posizione finale non valida");
-        if (caselle[pos_inizio[0]][pos_inizio[1]] == null) throw new IllegalArgumentException("La casella da cui vuoi prendere la pedina è vuota");
+    public List<int[]> selezionaPedina(int[] pos) {
+        if (pos[0] < 0 || pos[0] > DIMENSIONE - 1 || pos[1] < 0 || pos[1] > DIMENSIONE - 1) throw new IllegalArgumentException("Posizione non valida");
+        if (caselle[pos[0]][pos[1]] == null) throw new IllegalArgumentException("La casella da cui vuoi prendere la pedina è vuota");
 
-        Pedina p = caselle[pos_inizio[0]][pos_inizio[1]];
+        Pedina p = caselle[pos[0]][pos[1]];
         List<int[]> mosseValide = p.getMosseValide();
 
+        //da implementare correttamente
         for (int i = 0; i < DIMENSIONE; i++) {
             for (int j = 0; j < DIMENSIONE; j++) {
                 if (caselle[i][j] == null) continue;
@@ -103,41 +108,38 @@ public class Scacchiera {
             }
         }
 
+        if (mosseValide.isEmpty()) throw new IllegalStateException("Questa pedina non può essere mossa al momento");
+
+        this.casella_selezionata = pos;
+        this.mosseValide = mosseValide;
+        return mosseValide;
+    }
+
+    public void muoviPedina(int[] pos) {
+        if (casella_selezionata == null) throw new IllegalStateException("Devi prima selezionare una pedina per poterla muovere");
+        if (pos[0] < 0 || pos[0] > DIMENSIONE - 1 || pos[1] < 0 || pos[1] > DIMENSIONE - 1) throw new IllegalArgumentException("Posizione non valida");
+
         boolean valido = false;
         for (int[] mossa : mosseValide) {
-            if (mossa == pos_fine) {
+            if (mossa == pos) {
                 valido = true;
                 break;
             }
         }
 
-        if (!valido) throw new IllegalArgumentException("Mossa non valida");
-        p.muovi(pos_fine);
-        caselle[pos_inizio[0]][pos_inizio[1]] = null;
-        caselle[pos_fine[0]][pos_fine[1]] = p;
+        if (!valido) {
+            casella_selezionata = null;
+            throw new IllegalArgumentException("Mossa non valida");
+        }
+        caselle[casella_selezionata[0]][casella_selezionata[1]].muovi(pos);
+        caselle[pos[0]][pos[1]] = caselle[casella_selezionata[0]][casella_selezionata[1]];
+        caselle[casella_selezionata[0]][casella_selezionata[1]] = null;
+        casella_selezionata = null;
     }
 
-    private boolean mosseIntermedieValide(Pedina pedina, int[] posizione, boolean orizzontale, boolean verticale, int incrementoOrizzontale, int incrementoVerticale) {
-        if (verticale && orizzontale) {
-            int j = posizione[1] + incrementoOrizzontale;
-            for (int i = posizione[0] + incrementoVerticale; i < pedina.getPosizione()[0]; i += incrementoVerticale) {
-                if (caselle[i][j] != null) return false;
-                j += incrementoOrizzontale;
-            }
-        }
-
-        else if (verticale) {
-            for (int i = posizione[0] + incrementoVerticale; i < pedina.getPosizione()[0]; i += incrementoVerticale) {
-                if (caselle[i][posizione[1]] != null) return false;
-            }
-        }
-
-        else if (orizzontale) {
-            for (int i = posizione[1] + incrementoOrizzontale; i < pedina.getPosizione()[1]; i += incrementoOrizzontale) {
-                if (caselle[posizione[0]][i] != null) return false;
-            }
-        }
-        return true;
+    public int[] getCasella_selezionata() {
+        if (casella_selezionata == null) return null;
+        return casella_selezionata.clone();
     }
 
     private void promuoviPedone(Pedina pedina) {
@@ -146,20 +148,24 @@ public class Scacchiera {
 
     @Override
     public String toString() {
-        String str = "";
-        for (int i = 0; i < DIMENSIONE; i++) {
-            for (int j = 0; j < DIMENSIONE; j++) {
-                if (caselle[i][j] == null) str += "null null " +  numeroToLettera.get(j + 1) + (i + 1) + "\n";
-                else {
-                    Color colore = caselle[i][j].getColore();
-                    String c = colore.getRed() + "_" + colore.getGreen() + "_" + colore.getBlue();
-                    if (c.equals("255_255_255")) c = "white";
-                    else if (c.equals("0_0_0")) c = "black";
-
-                    str += caselle[i][j].getClass().getSimpleName() + " " + c + " " + numeroToLettera.get(j + 1) + (DIMENSIONE - i) + "\n";
+        StringBuilder sb = new StringBuilder();
+        for (int i = 0; i < 8; i++) {
+            for (int j = 0; j < 8; j++) {
+                Pedina p = caselle[i][j];
+                switch (p) {
+                    case null -> sb.append(". "); // casella vuota
+                    case Pedone pedone -> sb.append("P ");
+                    case Torre torre -> sb.append("T ");
+                    case Cavallo cavallo -> sb.append("C ");
+                    case Alfiere alfiere -> sb.append("A ");
+                    case Regina regina -> sb.append("Q ");
+                    case Re re -> sb.append("K ");
+                    default -> {
+                    }
                 }
             }
+            sb.append("\n");
         }
-        return str;
+        return sb.toString();
     }
 }

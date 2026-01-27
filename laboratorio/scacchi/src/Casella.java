@@ -12,6 +12,7 @@ public class Casella extends JPanel implements MouseListener {
     private String id;
     private static String casellaSelezionata = null;
     private static final List<String> idUtilizzati = new ArrayList<>();
+    private casellaClickListener listener;
 
 //    private static final ImageIcon[] iconeValide = new ImageIcon[] {
 //        IconaPedina.RE_WHITE.getImageIcon(),
@@ -41,6 +42,13 @@ public class Casella extends JPanel implements MouseListener {
     public Casella(Color colore, int lunghezzaLato, String id, ImageIcon img) {
         this(colore, lunghezzaLato, id);
         setImg(img);
+    }
+
+    public Casella(Casella originale) {
+        this.colore = originale.colore;
+        this.lunghezzaLato = originale.lunghezzaLato;
+        this.label = originale.label;
+        this.id = originale.id;
     }
 
     public int getLunghezzaLato() {
@@ -73,7 +81,7 @@ public class Casella extends JPanel implements MouseListener {
         idUtilizzati.add(this.id);
     }
 
-    public static String getCasellaSelezionata() {
+    public static String getIdCasellaSelezionata() {
         return casellaSelezionata;
     }
 
@@ -104,6 +112,10 @@ public class Casella extends JPanel implements MouseListener {
         label.setIcon(null);
     }
 
+    public void setListener(casellaClickListener l) {
+        this.listener = l;
+    }
+
     @Override
     public void mouseClicked(MouseEvent e) {
     }
@@ -111,7 +123,8 @@ public class Casella extends JPanel implements MouseListener {
     @Override
     public void mousePressed(MouseEvent e) {
         casellaSelezionata = id;
-        System.out.println(casellaSelezionata);
+        if (listener != null) listener.casellaCliccata();
+        else System.out.println("sdfsedrbgv");
     }
 
     @Override

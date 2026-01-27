@@ -4,6 +4,7 @@
 //filtra per tempo
 import javax.swing.*;
 import java.awt.*;
+import java.awt.event.ActionListener;
 import java.util.List;
 
 int chiediNumero(String msg) {
@@ -80,6 +81,7 @@ boolean create(List<Automobile> magazzino, String marca, String modello, String 
     if (valida) {
         magazzino.add(new Automobile(marca, modello, targa, colore, km, data));
     }
+    mostraErrore.setText(label);
 
     return valida;
 }
@@ -94,13 +96,20 @@ void main() {
     List<Automobile> magazzino = new ArrayList<>();
     inizializza(magazzino);
 
-//    Map<Integer, Color> ottieniColore = new HashMap<>();
-//    ottieniColore.put(1, Color.red);
-//    ottieniColore.put(2, Color.blue);
-//    ottieniColore.put(3, Color.green);
-//    ottieniColore.put(4, Color.magenta);
-//    ottieniColore.put(5, Color.yellow);
+    Map<String, Color> ottieniColore = new HashMap<>();
+    ottieniColore.put("rosso", Color.red);
+    ottieniColore.put("blu", Color.blue);
+    ottieniColore.put("verde", Color.green);
+    ottieniColore.put("viola", Color.magenta);
+    ottieniColore.put("giallo", Color.yellow);
 
+    Map<String, ImageIcon> ottieniImg = new HashMap<>();
+    ottieniImg.put("rosso", new ImageIcon("img/macchina_rossa.png"));
+    ottieniImg.put("blu", new ImageIcon("img/macchina_blu.png"));
+    ottieniImg.put("verde", new ImageIcon("img/macchina_verde.png"));
+    ottieniImg.put("viola", new ImageIcon("img/macchina_viola.png"));
+    ottieniImg.put("giallo", new ImageIcon("img/macchina_gialla.png"));
+    
     JFrame frame = new JFrame("Automobile");
     frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
     frame.setSize(300, 200);
@@ -133,6 +142,9 @@ void main() {
     mostraErrore.setVerticalAlignment(SwingConstants.TOP);
     mostraErrore.setBounds(0, 430, 1000, 200);
 
+    JLabel labelImg = new JLabel();
+    labelImg.setBounds(400, 120, 500, 250);
+
     frame.add(labelTarga);
     frame.add(labelMarca);
     frame.add(labelModello);
@@ -142,6 +154,7 @@ void main() {
     frame.add(scriviModello);
     frame.add(spinnerKm);
     frame.add(mostraErrore);
+    frame.add(labelImg);
 
     JLabel labelColore = new JLabel("Scegli il colore");
     labelColore.setBounds(275, 110, 150, 50);
@@ -156,11 +169,11 @@ void main() {
     r3.setBounds(275, 220, 100, 20);
     r4.setBounds(275, 250, 100, 20);
     r5.setBounds(275, 280, 100, 20);
-    r1.putClientProperty("color", Color.red);
-    r2.putClientProperty("color", Color.blue);
-    r3.putClientProperty("color", Color.green);
-    r4.putClientProperty("color", Color.magenta);
-    r5.putClientProperty("color", Color.yellow);
+    r1.setActionCommand("rosso");
+    r2.setActionCommand("blu");
+    r3.setActionCommand("verde");
+    r4.setActionCommand("viola");
+    r5.setActionCommand("giallo");
 
     ButtonGroup group = new ButtonGroup();
     group.add(r1);
@@ -168,6 +181,16 @@ void main() {
     group.add(r3);
     group.add(r4);
     group.add(r5);
+
+    ActionListener listener = e -> {
+        String valore = e.getActionCommand();
+        labelImg.setIcon(ottieniImg.get(valore));
+    };
+    r1.addActionListener(listener);
+    r2.addActionListener(listener);
+    r3.addActionListener(listener);
+    r4.addActionListener(listener);
+    r5.addActionListener(listener);
 
     frame.add(labelColore);
     frame.add(r1);
@@ -178,19 +201,19 @@ void main() {
 
     JLabel labelGiorno = new JLabel("Inserisci il giorno di acquisto");
     labelGiorno.setBounds(0, 110, 250, 50);
-    SpinnerNumberModel modelGiorno = new SpinnerNumberModel(1, 1, 31, 1);
+    SpinnerNumberModel modelGiorno = new SpinnerNumberModel(LocalDate.now().getDayOfMonth(), 1, 31, 1);
     JSpinner spinnerGiorno = new JSpinner(modelGiorno);
     spinnerGiorno.setBounds(0, 160, 250, 50);
 
     JLabel labelMese = new JLabel("Inserisci il mese di acquisto");
     labelMese.setBounds(0, 210, 250, 50);
-    SpinnerNumberModel modelMese = new SpinnerNumberModel(1, 1, 12, 1);
+    SpinnerNumberModel modelMese = new SpinnerNumberModel(LocalDate.now().getMonthValue(), 1, 12, 1);
     JSpinner spinnerMese = new JSpinner(modelMese);
     spinnerMese.setBounds(0, 260, 250, 50);
 
     JLabel labelAnno = new JLabel("Inserisci l'anno di acquisto");
     labelAnno.setBounds(0, 310, 250, 50);
-    SpinnerNumberModel modelAnno = new SpinnerNumberModel(2000, 1800, LocalDate.now().getYear(), 1);
+    SpinnerNumberModel modelAnno = new SpinnerNumberModel(LocalDate.now().getYear(), 1800, LocalDate.now().getYear(), 1);
     JSpinner spinnerAnno = new JSpinner(modelAnno);
     spinnerAnno.setBounds(0, 360, 250, 50);
 
@@ -209,24 +232,29 @@ void main() {
         Color colore = null;
         boolean errore = false;
         try {
-            //da sistemare la scelta del colore
             String valore = group.getSelection().getActionCommand();
-            System.out.println("x");
-            System.out.println("Hai scelto: " + valore);
+            colore = ottieniColore.get(valore);
             data = LocalDate.of((int) spinnerAnno.getValue(), (int) spinnerMese.getValue(), (int) spinnerGiorno.getValue());
-            System.out.println("a");
-            JRadioButton selected = (JRadioButton) group.getSelection().getSelectedObjects()[0];
-            System.out.println("b");
-            colore = (Color) selected.getClientProperty("color");
-            System.out.println("c");
         }
         catch (Exception exc) {
-            mostraErrore.setText(exc.getMessage());
+            mostraErrore.setText("Compila i campi correttamente");
             errore = true;
         }
 
         if (!errore) {
-            create(magazzino, scriviMarca.getText(), scriviModello.getText(), scriviTarga.getText(), (int)spinnerKm.getValue(), colore, data, mostraErrore);
+            boolean corretto = create(magazzino, scriviMarca.getText(), scriviModello.getText(), scriviTarga.getText(), (int)spinnerKm.getValue(), colore, data, mostraErrore);
+            if (corretto) {
+                scriviTarga.setText(null);
+                scriviMarca.setText(null);
+                scriviModello.setText(null);
+                spinnerKm.setValue(0);
+                spinnerGiorno.setValue(LocalDate.now().getDayOfMonth());
+                spinnerMese.setValue(LocalDate.now().getMonthValue());
+                spinnerAnno.setValue(LocalDate.now().getYear());
+                group.clearSelection();
+                labelImg.setIcon(null);
+                mostraErrore.setText("Macchina aggiunta correttamente");
+            }
         }
     });
 

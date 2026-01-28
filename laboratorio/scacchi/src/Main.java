@@ -4,7 +4,6 @@ import java.awt.*;
 //void aggiungiStatoJSON(JSONObject)
 
 int[] idToPos(String id) {
-    System.out.println(id);
     Map<String, Integer> letteraToNumero = new HashMap<>();
     letteraToNumero.put("A", 1);
     letteraToNumero.put("B", 2);
@@ -16,13 +15,13 @@ int[] idToPos(String id) {
     letteraToNumero.put("H", 8);
 
     int[] pos = new int[2];
-    pos[0] = letteraToNumero.get(id.substring(0, 1));
-    pos[1] = Integer.parseInt(id.substring(1, 2));
+    pos[0] = 8 - Integer.parseInt(id.substring(1, 2));
+    pos[1] = letteraToNumero.get(id.substring(0, 1)) - 1;
 
     return pos;
 }
 
-void aggiungiListener(Casella[][] caselle, Scacchiera s) {
+void aggiungiListener(Casella[][] caselle, Scacchiera s, ScacchieraPanel sp) {
     for (int i = 0; i < caselle.length; i++) {
         for (int j = 0; j < caselle[i].length; j++) {
             final int r = i;
@@ -46,6 +45,10 @@ void aggiungiListener(Casella[][] caselle, Scacchiera s) {
                         System.out.println(e.getMessage());
                     }
                 }
+                sp.aggiornaScacchiera(s.getScacchiera());
+                for (Casella[] y : caselle) {
+                    for (Casella x : y) x.repaint();
+                }
             });
         }
     }
@@ -67,8 +70,8 @@ void main() {
 //        System.out.println(e.getMessage());
 //    }
 
-    System.out.println(scacchiera);
-    aggiungiListener(scacchieraPanel.getCasellePanel(), scacchiera);
+//    System.out.println(scacchiera);
+    aggiungiListener(scacchieraPanel.getCasellePanel(), scacchiera, scacchieraPanel);
     JPanel board = new JPanel(null);
     scacchieraPanel.mettiASchermo(board);
 

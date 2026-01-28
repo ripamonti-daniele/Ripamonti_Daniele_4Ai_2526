@@ -44,7 +44,7 @@ public abstract class Pedina {
 
     protected void setPosizione(int[] posizione) {
         if (posizione[0] < 0 || posizione[0] > 7 || posizione[1] < 0 || posizione[1] > DIMENSIONE_SCACCHIERA - 1) throw new IllegalArgumentException("Non esiste questa posizione nella scacchiera");
-        if (this.posizione == posizione) throw new IllegalArgumentException("La pedina si trova già sulla casella che hai scelto");
+        if (this.posizione != null && this.posizione[0] == posizione[0] && this.posizione[1] == posizione[1]) throw new IllegalArgumentException("La pedina si trova già sulla casella che hai scelto");
         this.posizione = posizione;
     }
 
@@ -58,7 +58,17 @@ public abstract class Pedina {
     }
 
     public void muovi(int[] posizione) {
-        if (!mosseValide.contains(posizione)) throw new IllegalArgumentException("Questa mossa non è valida");
+        boolean valido = false;
+        for (int[] mossa : mosseValide) {
+            if (mossa[0] == posizione[0] && mossa[1] == posizione[1]) {
+                valido = true;
+                break;
+            }
+        }
+        if (!valido) {
+            throw new IllegalArgumentException("Questa mossa non è valida");
+        }
+
         setPosizione(posizione);
     }
 

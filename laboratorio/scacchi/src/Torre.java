@@ -32,7 +32,16 @@ public class Torre extends Pedina {
 
     @Override
     public void muovi(int[] posizione) {
-        if (!mosseValide.contains(posizione)) throw new IllegalArgumentException("Questa mossa non è valida");
+        boolean valido = false;
+        for (int[] mossa : mosseValide) {
+            if (mossa[0] == posizione[0] && mossa[1] == posizione[1]) {
+                valido = true;
+                break;
+            }
+        }
+        if (!valido) {
+            throw new IllegalArgumentException("Questa mossa non è valida");
+        }
         setPosizione(posizione);
         arrocco = false;
     }

@@ -33,15 +33,6 @@ public class Pedone extends Pedina {
         mosseValide.clear();
 
         if (colore == Color.white) {
-            if (posizione[0] < DIMENSIONE_SCACCHIERA - 1) {
-                mosseValide.add(new int[]{posizione[0] + 1, posizione[1]});
-                if (posizione[1] > 0) mosseValide.add(new int[]{posizione[0] + 1, posizione[1] - 1});
-                if (posizione[1] < DIMENSIONE_SCACCHIERA - 1) mosseValide.add(new int[]{posizione[0] + 1, posizione[1] + 1});
-            }
-            if (muoviDiDueCaselle) mosseValide.add(new int[]{posizione[0] + 2, posizione[1]});
-        }
-
-        else {
             if (posizione[0] > 0) {
                 mosseValide.add(new int[]{posizione[0] - 1, posizione[1]});
                 if (posizione[1] > 0) mosseValide.add(new int[]{posizione[0] - 1, posizione[1] - 1});
@@ -49,12 +40,31 @@ public class Pedone extends Pedina {
             }
             if (muoviDiDueCaselle) mosseValide.add(new int[]{posizione[0] - 2, posizione[1]});
         }
+
+        else {
+            if (posizione[0] < DIMENSIONE_SCACCHIERA - 1) {
+                mosseValide.add(new int[]{posizione[0] + 1, posizione[1]});
+                if (posizione[1] > 0) mosseValide.add(new int[]{posizione[0] + 1, posizione[1] - 1});
+                if (posizione[1] < DIMENSIONE_SCACCHIERA - 1) mosseValide.add(new int[]{posizione[0] + 1, posizione[1] + 1});
+            }
+            if (muoviDiDueCaselle) mosseValide.add(new int[]{posizione[0] + 2, posizione[1]});
+        }
     }
 
     @Override
     public void muovi(int[] posizione) {
-        if (!mosseValide.contains(posizione)) throw new IllegalArgumentException("Questa mossa non è valida");
-        if (colore == Color.white && posizione[0] == this.posizione[0] + 2 || colore == Color.black && posizione[0] == this.posizione[0] - 2) enpassant = true;
+        boolean valido = false;
+        for (int[] mossa : mosseValide) {
+            if (mossa[0] == posizione[0] && mossa[1] == posizione[1]) {
+                valido = true;
+                break;
+            }
+        }
+        if (!valido) {
+            throw new IllegalArgumentException("Questa mossa non è valida");
+        }
+
+        if (colore == Color.white && posizione[0] == this.posizione[0] - 2 || colore == Color.black && posizione[0] == this.posizione[0] + 2) enpassant = true;
         muoviDiDueCaselle = false;
         setPosizione(posizione);
     }

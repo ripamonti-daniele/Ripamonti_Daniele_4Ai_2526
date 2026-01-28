@@ -94,6 +94,8 @@ public class Scacchiera {
     }
 
     public List<int[]> selezionaPedina(int[] pos) {
+//        System.out.println(pos[0] + " " + pos[1]);
+//        System.out.println(caselle[pos[0]][pos[1]]);
         if (pos[0] < 0 || pos[0] > DIMENSIONE - 1 || pos[1] < 0 || pos[1] > DIMENSIONE - 1) throw new IllegalArgumentException("Posizione non valida");
         if (caselle[pos[0]][pos[1]] == null) throw new IllegalArgumentException("La casella da cui vuoi prendere la pedina è vuota");
 
@@ -101,10 +103,12 @@ public class Scacchiera {
         List<int[]> mosseValide = p.getMosseValide();
 
         //da implementare correttamente
-        for (int i = 0; i < DIMENSIONE; i++) {
-            for (int j = 0; j < DIMENSIONE; j++) {
+        for (int i = DIMENSIONE - 1; i >= 0; i--) {
+            for (int j = DIMENSIONE - 1; j >= 0; j--) {
                 if (caselle[i][j] == null) continue;
-                if (caselle[i][j].getColore() == p.getColore()) mosseValide.remove(new int[] {i, j});
+                if (caselle[i][j].getColore() == p.getColore()) {
+                    mosseValide.remove(caselle[i][j]);
+                }
             }
         }
 
@@ -112,6 +116,7 @@ public class Scacchiera {
 
         this.casella_selezionata = pos;
         this.mosseValide = mosseValide;
+//        for (int[] i : mosseValide) System.out.println(i[0] + " " + i[1]);
         return mosseValide;
     }
 
@@ -121,7 +126,7 @@ public class Scacchiera {
 
         boolean valido = false;
         for (int[] mossa : mosseValide) {
-            if (mossa == pos) {
+            if (mossa[0] == pos[0] && mossa[1] == pos[1]) {
                 valido = true;
                 break;
             }

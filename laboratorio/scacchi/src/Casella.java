@@ -124,19 +124,10 @@ public class Casella extends JPanel implements MouseListener {
     public void mousePressed(MouseEvent e) {
         casellaSelezionata = id;
         if (listener != null) listener.casellaCliccata();
-        else System.out.println("sdfsedrbgv");
     }
 
     @Override
     public void mouseReleased(MouseEvent e) {
-//        if (casellaSeleziona != null && casellaSeleziona != this) {
-//            setImg((ImageIcon) casellaSeleziona.getImg());
-//            casellaSeleziona.rimuoviImg();
-//            casellaSeleziona = null;
-//        }
-//        else if (getImg() != null) {
-//            casellaSeleziona = this;
-//        }
     }
 
     @Override
@@ -145,7 +136,16 @@ public class Casella extends JPanel implements MouseListener {
 
     @Override
     public void mouseExited(MouseEvent e) {
+    }
 
+    @Override
+    protected void paintComponent(Graphics g) {
+        super.paintComponent(g);
+        Graphics2D g2d = (Graphics2D) g;
+
+        g2d.setColor(Color.black);
+        g2d.setStroke(new BasicStroke(5));
+        if (this.id.equals(casellaSelezionata)) g2d.drawRect(0, 0, getWidth(), getHeight());
     }
 
 //    @Override

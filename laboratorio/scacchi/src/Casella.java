@@ -13,6 +13,7 @@ public class Casella extends JPanel implements MouseListener {
     private static String casellaSelezionata = null;
     private static final List<String> idUtilizzati = new ArrayList<>();
     private casellaClickListener listener;
+    public boolean mossaValida;
 
 //    private static final ImageIcon[] iconeValide = new ImageIcon[] {
 //        IconaPedina.RE_WHITE.getImageIcon(),
@@ -37,6 +38,7 @@ public class Casella extends JPanel implements MouseListener {
         this.setSize(new Dimension(lunghezzaLato, lunghezzaLato));
         this.add(label);
         this.addMouseListener(this);
+        mossaValida = false;
     }
 
     public Casella(Color colore, int lunghezzaLato, String id, ImageIcon img) {
@@ -49,6 +51,7 @@ public class Casella extends JPanel implements MouseListener {
         this.lunghezzaLato = originale.lunghezzaLato;
         this.label = originale.label;
         this.id = originale.id;
+        this.listener = originale.listener;
     }
 
     public int getLunghezzaLato() {
@@ -145,7 +148,17 @@ public class Casella extends JPanel implements MouseListener {
 
         g2d.setColor(Color.black);
         g2d.setStroke(new BasicStroke(5));
-        if (this.id.equals(casellaSelezionata)) g2d.drawRect(0, 0, getWidth(), getHeight());
+        if (this.id.equals(casellaSelezionata)) g2d.drawRect(0, 0, getWidth() - 1, getHeight() - 1);
+//        else if (mossaValida) {
+//            Composite old = g2d.getComposite();
+//
+//            g2d.setComposite(AlphaComposite.getInstance(
+//                    AlphaComposite.SRC_OVER, 0.5f));
+//
+//            g2d.fillOval(lunghezzaLato / 4, lunghezzaLato / 4, lunghezzaLato / 2, lunghezzaLato / 2);
+//
+//            g2d.setComposite(old);
+//        }
     }
 
 //    @Override

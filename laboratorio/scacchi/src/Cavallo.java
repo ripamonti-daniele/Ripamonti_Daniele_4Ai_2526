@@ -26,8 +26,8 @@ public class Cavallo extends Pedina {
                 if (posizione[1] + 1 < DIMENSIONE_SCACCHIERA) mosseValide.add(new int[]{posizione[0] + i, posizione[1] + 1});
             }
             if (posizione[1] + i >= 0 && posizione[1] + i < DIMENSIONE_SCACCHIERA) {
-                if (posizione[0] - 1 >= 0) mosseValide.add(new int[]{posizione[1] + i, posizione[0] - 1});
-                if (posizione[0] + 1 < DIMENSIONE_SCACCHIERA) mosseValide.add(new int[]{posizione[1] + i, posizione[0] + 1});
+                if (posizione[0] - 1 >= 0) mosseValide.add(new int[]{posizione[0] - 1, posizione[1] + i});
+                if (posizione[0] + 1 < DIMENSIONE_SCACCHIERA) mosseValide.add(new int[]{posizione[0] + 1, posizione[1] + i});
             }
         }
     }

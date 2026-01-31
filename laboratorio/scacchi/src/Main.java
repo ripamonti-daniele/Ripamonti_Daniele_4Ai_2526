@@ -3,6 +3,8 @@ import java.awt.*;
 
 //void aggiungiStatoJSON(JSONObject)
 
+//Prossima cosa da fare: sistemare la grafica (mostra le mosse disponibili, dai il contorno alla casella quando la seleziono oltre che a quando la muovo)
+
 int[] idToPos(String id) {
     Map<String, Integer> letteraToNumero = new HashMap<>();
     letteraToNumero.put("A", 1);
@@ -26,10 +28,11 @@ void aggiungiListener(Casella[][] caselle, Scacchiera s, ScacchieraPanel sp) {
         for (int j = 0; j < caselle[i].length; j++) {
             final int r = i;
             final int c = j;
-            caselle[i][j].setListener(() -> {
+            sp.setListener(j, i, () -> {
+                sp.resetMosseValide();
                 if (s.getCasella_selezionata() == null) {
                     try {
-                        s.selezionaPedina(idToPos(caselle[r][c].getId()));
+                        sp.mostraMosseValide(s.selezionaPedina(idToPos(caselle[r][c].getId())));
                     }
                     catch (Exception e) {
                         System.out.println("prova1");

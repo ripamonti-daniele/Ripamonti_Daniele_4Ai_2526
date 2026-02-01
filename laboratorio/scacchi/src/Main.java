@@ -1,5 +1,6 @@
 import javax.swing.*;
 import java.awt.*;
+import java.util.List;
 
 //void aggiungiStatoJSON(JSONObject)
 
@@ -30,28 +31,14 @@ void aggiungiListener(Casella[][] caselle, Scacchiera s, ScacchieraPanel sp) {
             final int c = j;
             sp.setListener(j, i, () -> {
                 sp.resetMosseValide();
-                if (s.getCasella_selezionata() == null) {
-                    try {
-                        sp.mostraMosseValide(s.selezionaPedina(idToPos(caselle[r][c].getId())));
-                    }
-                    catch (Exception e) {
-                        System.out.println("prova1");
-                        System.out.println(e.getMessage());
-                    }
+
+                if (s.getCasella_selezionata() == null || !s.muoviPedina(idToPos(caselle[r][c].getId()))) { //se la casella selezionata è null allora seleziona la pedina; se è null prova a spostarla e se non riesce seleziona la pedina dove si intendeva spostare quella selezionata precedentemente
+                    List<int[]> mosseValide = s.selezionaPedina(idToPos(caselle[r][c].getId()));
+                    if (mosseValide != null) sp.mostraMosseValide(mosseValide);
                 }
-                else {
-                    try {
-                        s.muoviPedina(idToPos(caselle[r][c].getId()));
-                    }
-                    catch (Exception e) {
-                        System.out.println("prova2");
-                        System.out.println(e.getMessage());
-                    }
-                }
+
                 sp.aggiornaScacchiera(s.getScacchiera());
-                for (Casella[] y : caselle) {
-                    for (Casella x : y) x.repaint();
-                }
+                sp.disegna();
             });
         }
     }

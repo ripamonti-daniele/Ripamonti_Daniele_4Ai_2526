@@ -52,6 +52,7 @@ public class Casella extends JPanel implements MouseListener {
         this.label = originale.label;
         this.id = originale.id;
         this.listener = originale.listener;
+        this.mossaValida = originale.mossaValida;
     }
 
     public int getLunghezzaLato() {
@@ -104,9 +105,8 @@ public class Casella extends JPanel implements MouseListener {
 //        if (!trovato) throw new IllegalArgumentException("Immagine non valida");
 
         if (img.getIconWidth() != lunghezzaLato || img.getIconHeight() != lunghezzaLato) {
-            Image scaled = img.getImage().getScaledInstance(100, 100, Image.SCALE_SMOOTH);
+            Image scaled = img.getImage().getScaledInstance(lunghezzaLato, lunghezzaLato, Image.SCALE_SMOOTH);
             label.setIcon(new ImageIcon(scaled));
-            System.out.println("borno");
         }
         else label.setIcon(img);
     }
@@ -126,6 +126,7 @@ public class Casella extends JPanel implements MouseListener {
     @Override
     public void mousePressed(MouseEvent e) {
         casellaSelezionata = id;
+        repaint();
         if (listener != null) listener.casellaCliccata();
     }
 
@@ -148,17 +149,14 @@ public class Casella extends JPanel implements MouseListener {
 
         g2d.setColor(Color.black);
         g2d.setStroke(new BasicStroke(5));
-        if (this.id.equals(casellaSelezionata)) g2d.drawRect(0, 0, getWidth() - 1, getHeight() - 1);
-//        else if (mossaValida) {
-//            Composite old = g2d.getComposite();
-//
-//            g2d.setComposite(AlphaComposite.getInstance(
-//                    AlphaComposite.SRC_OVER, 0.5f));
-//
-//            g2d.fillOval(lunghezzaLato / 4, lunghezzaLato / 4, lunghezzaLato / 2, lunghezzaLato / 2);
-//
-//            g2d.setComposite(old);
-//        }
+        if (this.id.equals(casellaSelezionata) && this.label.getIcon() != null) g2d.drawRect(0, 0, getWidth() - 1, getHeight() - 1);
+        else if (mossaValida) {
+            Composite old = g2d.getComposite();
+            g2d.setComposite(AlphaComposite.getInstance(AlphaComposite.SRC_OVER, 0.5f));
+            if (this.label.getIcon() != null) g2d.drawOval(lunghezzaLato / 25, lunghezzaLato / 25, lunghezzaLato - 2 * lunghezzaLato / 25 - 1, lunghezzaLato - 2 * lunghezzaLato / 25 - 1);
+            else g2d.fillOval(lunghezzaLato / 4, lunghezzaLato / 4, lunghezzaLato / 2, lunghezzaLato / 2);
+            g2d.setComposite(old);
+        }
     }
 
 //    @Override

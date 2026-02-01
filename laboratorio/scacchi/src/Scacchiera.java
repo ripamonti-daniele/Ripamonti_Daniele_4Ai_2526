@@ -94,10 +94,8 @@ public class Scacchiera {
     }
 
     public List<int[]> selezionaPedina(int[] pos) {
-//        System.out.println(pos[0] + " " + pos[1]);
-//        System.out.println(caselle[pos[0]][pos[1]]);
         if (pos[0] < 0 || pos[0] > DIMENSIONE - 1 || pos[1] < 0 || pos[1] > DIMENSIONE - 1) throw new IllegalArgumentException("Posizione non valida");
-        if (caselle[pos[0]][pos[1]] == null) throw new IllegalArgumentException("La casella da cui vuoi prendere la pedina è vuota");
+        if (caselle[pos[0]][pos[1]] == null) return null;
 
         Pedina p = caselle[pos[0]][pos[1]];
         List<int[]> mosseValide = p.getMosseValide();
@@ -110,16 +108,14 @@ public class Scacchiera {
             if (caselle[y][x] != null && caselle[y][x].getColore() == p.getColore()) mosseValide.remove(i);
         }
 
-        if (mosseValide.isEmpty()) throw new IllegalStateException("Questa pedina non può essere mossa al momento");
-
         this.casella_selezionata = pos;
         this.mosseValide = mosseValide;
         return mosseValide;
     }
 
-    public void muoviPedina(int[] pos) {
-        if (casella_selezionata == null) throw new IllegalStateException("Devi prima selezionare una pedina per poterla muovere");
+    public boolean muoviPedina(int[] pos) {
         if (pos[0] < 0 || pos[0] > DIMENSIONE - 1 || pos[1] < 0 || pos[1] > DIMENSIONE - 1) throw new IllegalArgumentException("Posizione non valida");
+        if (casella_selezionata == null) return false;
 
         boolean valido = false;
         for (int[] mossa : mosseValide) {
@@ -129,14 +125,13 @@ public class Scacchiera {
             }
         }
 
-        if (!valido) {
-            casella_selezionata = null;
-            throw new IllegalArgumentException("Mossa non valida");
+        if (valido) {
+            caselle[casella_selezionata[0]][casella_selezionata[1]].muovi(pos);
+            caselle[pos[0]][pos[1]] = caselle[casella_selezionata[0]][casella_selezionata[1]];
+            caselle[casella_selezionata[0]][casella_selezionata[1]] = null;
         }
-        caselle[casella_selezionata[0]][casella_selezionata[1]].muovi(pos);
-        caselle[pos[0]][pos[1]] = caselle[casella_selezionata[0]][casella_selezionata[1]];
-        caselle[casella_selezionata[0]][casella_selezionata[1]] = null;
         casella_selezionata = null;
+        return valido;
     }
 
     public int[] getCasella_selezionata() {

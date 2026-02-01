@@ -286,4 +286,10 @@ public class ScacchieraPanel extends JPanel {
             casellePanel[m[0]][m[1]].mossaValida = true;
         }
     }
+
+    public void disegna() {
+        for (Casella[] y : casellePanel) {
+            for (Casella x : y) x.repaint();
+        }
+    }
 }

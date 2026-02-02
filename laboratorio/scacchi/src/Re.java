@@ -37,17 +37,7 @@ public class Re extends Pedina {
 
     @Override
     public void muovi(int[] posizione) {
-        boolean valido = false;
-        for (int[] mossa : mosseValide) {
-            if (mossa[0] == posizione[0] && mossa[1] == posizione[1]) {
-                valido = true;
-                break;
-            }
-        }
-        if (!valido) {
-            throw new IllegalArgumentException("Questa mossa non è valida");
-        }
-        setPosizione(posizione);
+        super.muovi(posizione);
         arrocco = false;
     }
 

@@ -4,8 +4,6 @@ import java.util.List;
 
 //void aggiungiStatoJSON(JSONObject)
 
-//Prossima cosa da fare: sistemare la grafica (mostra le mosse disponibili, dai il contorno alla casella quando la seleziono oltre che a quando la muovo)
-
 int[] idToPos(String id) {
     Map<String, Integer> letteraToNumero = new HashMap<>();
     letteraToNumero.put("A", 1);

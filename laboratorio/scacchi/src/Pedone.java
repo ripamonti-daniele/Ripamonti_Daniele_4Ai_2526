@@ -53,20 +53,10 @@ public class Pedone extends Pedina {
 
     @Override
     public void muovi(int[] posizione) {
-        boolean valido = false;
-        for (int[] mossa : mosseValide) {
-            if (mossa[0] == posizione[0] && mossa[1] == posizione[1]) {
-                valido = true;
-                break;
-            }
-        }
-        if (!valido) {
-            throw new IllegalArgumentException("Questa mossa non è valida");
-        }
-
-        if (colore == Color.white && posizione[0] == this.posizione[0] - 2 || colore == Color.black && posizione[0] == this.posizione[0] + 2) enpassant = true;
+        boolean temporaneo = colore == Color.white && posizione[0] == this.posizione[0] - 2 || colore == Color.black && posizione[0] == this.posizione[0] + 2;
+        super.muovi(posizione);
+        enpassant = temporaneo;
         muoviDiDueCaselle = false;
-        setPosizione(posizione);
     }
 
     @Override

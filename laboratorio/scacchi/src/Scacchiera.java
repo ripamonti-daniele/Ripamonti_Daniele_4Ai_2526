@@ -8,20 +8,10 @@ public class Scacchiera {
     public final int DIMENSIONE = 8;
     private final Pedina[][] caselle;
     private int mosseNeutre;
-    private final Map<Integer, String> numeroToLettera = new HashMap<>();
     private int[] casella_selezionata;
     private List<int[]> mosseValide;
 
     public Scacchiera() {
-        numeroToLettera.put(1, "A");
-        numeroToLettera.put(2, "B");
-        numeroToLettera.put(3, "C");
-        numeroToLettera.put(4, "D");
-        numeroToLettera.put(5, "E");
-        numeroToLettera.put(6, "F");
-        numeroToLettera.put(7, "G");
-        numeroToLettera.put(8, "H");
-
         caselle = new Pedina[DIMENSIONE][DIMENSIONE];
         mosseNeutre = 0;
         casella_selezionata = null;
@@ -93,6 +83,62 @@ public class Scacchiera {
         return tipoPedine;
     }
 
+    private List<int[]> filtraMossePedone(int[] pos, List<int[]> mosseValide) {
+        if (caselle[pos[0]][pos[1]] == null || !(caselle[pos[0]][pos[1]] instanceof Pedone)) throw new IllegalArgumentException("Puoi fare questi controlli solo sui pedoni");
+        List<int[]> mosseFiltrate = new ArrayList<>();
+        for (int[] mossa : mosseValide) {
+            if (mossa[1] != pos[1] && caselle[mossa[0]][mossa[1]] != null) mosseFiltrate.add(mossa);
+            else if (mossa[1] != pos[1] && caselle[pos[0]][pos[1]].colore == Color.black && pos[0] == DIMENSIONE - 4) {
+                if (caselle[mossa[0] - 1][mossa[1]] != null && caselle[mossa[0] - 1][mossa[1]] instanceof Pedone && ((Pedone) caselle[mossa[0] - 1][mossa[1]]).getEnpassant()) mosseFiltrate.add(mossa);
+            }
+            else if (mossa[1] != pos[1] && caselle[pos[0]][pos[1]].colore == Color.white && pos[0] == 3) {
+                if (caselle[mossa[0] + 1][mossa[1]] != null && caselle[mossa[0] + 1][mossa[1]] instanceof Pedone && ((Pedone) caselle[mossa[0] + 1][mossa[1]]).getEnpassant()) mosseFiltrate.add(mossa);
+            }
+            else if (mossa[1] == pos[1] && caselle[mossa[0]][mossa[1]] == null) {
+                if (Math.abs(mossa[0] - pos[0]) == 1) mosseFiltrate.add(mossa);
+                else if (caselle[pos[0]][pos[1]].colore == Color.white && caselle[mossa[0] + 1][mossa[1]] == null) mosseFiltrate.add(mossa);
+                else if (caselle[pos[0]][pos[1]].colore == Color.black && caselle[mossa[0] - 1][mossa[1]] == null) mosseFiltrate.add(mossa);
+            }
+        }
+        return mosseFiltrate;
+    }
+
+    private List<int[]> filtraMosseAlfiere(int[] pos, List<int[]> mosseValide) {
+        if (caselle[pos[0]][pos[1]] == null || !(caselle[pos[0]][pos[1]] instanceof Alfiere || caselle[pos[0]][pos[1]] instanceof Regina)) throw new IllegalArgumentException("Puoi fare questi controlli solo sugli alfieri o sulle regine");
+        List<int[]> mosseFiltrate = new ArrayList<>();
+
+        //vincoli da implementare
+
+        return mosseFiltrate;
+    }
+
+    private List<int[]> filtraMosseTorre(int[] pos, List<int[]> mosseValide) {
+        if (caselle[pos[0]][pos[1]] == null || !(caselle[pos[0]][pos[1]] instanceof Torre || caselle[pos[0]][pos[1]] instanceof Regina)) throw new IllegalArgumentException("Puoi fare questi controlli solo sulle torri o sulle regine");
+        List<int[]> mosseFiltrate = new ArrayList<>();
+
+        int YAlto = 0;
+        int YBasso = DIMENSIONE - 1;
+        int XSinistra = 0;
+        int XDestra = DIMENSIONE - 1;
+
+        for (int i = 0; i < DIMENSIONE; i++) {
+            if (i < pos[0] && i > YAlto && caselle[i][pos[1]] != null) YAlto = i;
+            else if (i > pos[0] && i < YBasso && caselle[i][pos[1]] != null) YBasso = i;
+            if (i < pos[1] && i > XSinistra && caselle[pos[0]][i] != null) XSinistra = i;
+            else if (i > pos[1] && i < XDestra && caselle[pos[0]][i] != null) XDestra = i;
+        }
+
+        for (int[] mossa : mosseValide) {
+            if (mossa[1] == pos[1] && mossa[0] < pos[0] && mossa[0] >= YAlto) mosseFiltrate.add(mossa);
+            if (mossa[1] == pos[1] && mossa[0] > pos[0] && mossa[0] <= YBasso) mosseFiltrate.add(mossa);
+            if (mossa[0] == pos[0] && mossa[1] < pos[1] && mossa[1] >= XSinistra) mosseFiltrate.add(mossa);
+            if (mossa[0] == pos[0] && mossa[1] > pos[1] && mossa[1] <= XDestra) mosseFiltrate.add(mossa);
+            if (caselle[pos[0]][pos[1]] instanceof Regina && mossa[0] != pos[0] && mossa[1] != pos[1]) mosseFiltrate.add(mossa);
+        }
+
+        return mosseFiltrate;
+    }
+
     public List<int[]> selezionaPedina(int[] pos) {
         if (pos[0] < 0 || pos[0] > DIMENSIONE - 1 || pos[1] < 0 || pos[1] > DIMENSIONE - 1) throw new IllegalArgumentException("Posizione non valida");
         if (caselle[pos[0]][pos[1]] == null) return null;
@@ -108,6 +154,19 @@ public class Scacchiera {
             if (caselle[y][x] != null && caselle[y][x].getColore() == p.getColore()) mosseValide.remove(i);
         }
 
+        switch (p) {
+            case Pedone _ -> mosseValide = filtraMossePedone(pos, mosseValide);
+            case Alfiere _ -> {
+                int a = 0;//mosseValide = filtraMosseAlfiere(pos, mosseValide);
+            }
+            case Torre _ -> mosseValide = filtraMosseTorre(pos, mosseValide);
+            case Regina _ -> {
+                mosseValide = filtraMosseTorre(pos, mosseValide);
+            }
+            case Cavallo _, Re _ -> {}
+            default -> throw new IllegalStateException("Tipo pedina non valido: " + p);
+        }
+
         this.casella_selezionata = pos;
         this.mosseValide = mosseValide;
         return mosseValide;
@@ -120,12 +179,17 @@ public class Scacchiera {
         boolean valido = false;
         for (int[] mossa : mosseValide) {
             if (mossa[0] == pos[0] && mossa[1] == pos[1]) {
+                if (caselle[casella_selezionata[0]][casella_selezionata[1]] != null && caselle[casella_selezionata[0]][casella_selezionata[1]] instanceof Pedone && mossa[1] != casella_selezionata[1] && caselle[mossa[0]][mossa[1]] == null) {
+                    if (caselle[casella_selezionata[0]][casella_selezionata[1]].colore == Color.white) caselle[mossa[0] + 1][mossa[1]] = null;
+                    if (caselle[casella_selezionata[0]][casella_selezionata[1]].colore == Color.black) caselle[mossa[0] - 1][mossa[1]] = null;
+                }
                 valido = true;
                 break;
             }
         }
 
         if (valido) {
+            for (Pedina[] riga : caselle) for (Pedina p : riga) if (p instanceof Pedone && p.colore != caselle[casella_selezionata[0]][casella_selezionata[1]].colore) ((Pedone) p).rimuoviEnpassant();
             caselle[casella_selezionata[0]][casella_selezionata[1]].muovi(pos);
             caselle[pos[0]][pos[1]] = caselle[casella_selezionata[0]][casella_selezionata[1]];
             caselle[casella_selezionata[0]][casella_selezionata[1]] = null;

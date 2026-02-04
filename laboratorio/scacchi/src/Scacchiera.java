@@ -1,8 +1,6 @@
 import java.awt.*;
 import java.util.ArrayList;
-import java.util.HashMap;
 import java.util.List;
-import java.util.Map;
 
 public class Scacchiera {
     public final int DIMENSIONE = 8;
@@ -107,7 +105,64 @@ public class Scacchiera {
         if (caselle[pos[0]][pos[1]] == null || !(caselle[pos[0]][pos[1]] instanceof Alfiere || caselle[pos[0]][pos[1]] instanceof Regina)) throw new IllegalArgumentException("Puoi fare questi controlli solo sugli alfieri o sulle regine");
         List<int[]> mosseFiltrate = new ArrayList<>();
 
-        //vincoli da implementare
+        int[][] vincoli = new int[4][2];
+        for (int i = 0; i < 4; i++) vincoli[i] = null;
+
+        int i = pos[0] + 1;
+        int j = pos[1] + 1;
+        while (i < DIMENSIONE && j < DIMENSIONE) {
+            if (caselle[i][j] != null) {
+                vincoli[0] = new int[]{i, j};
+                break;
+            }
+            i++;
+            j++;
+        }
+        if (vincoli[0] == null) vincoli[0] = new int[]{--i, --j};
+
+        i = pos[0] + 1;
+        j = pos[1] - 1;
+        while (i < DIMENSIONE && j >= 0) {
+            if (caselle[i][j] != null) {
+                vincoli[1] = new int[]{i, j};
+                break;
+            }
+            i++;
+            j--;
+        }
+        if (vincoli[1] == null) vincoli[1] = new int[]{--i, ++j};
+
+        i = pos[0] - 1;
+        j = pos[1] + 1;
+        while (i >= 0 && j < DIMENSIONE) {
+            if (caselle[i][j] != null) {
+                vincoli[2] = new int[]{i, j};
+                break;
+            }
+            i--;
+            j++;
+        }
+        if (vincoli[2] == null) vincoli[2] = new int[]{++i, --j};
+
+        i = pos[0] - 1;
+        j = pos[1] - 1;
+        while (i >= 0 && j >= 0) {
+            if (caselle[i][j] != null) {
+                vincoli[3] = new int[]{i, j};
+                break;
+            }
+            i--;
+            j--;
+        }
+        if (vincoli[3] == null) vincoli[3] = new int[]{++i, ++j};
+
+        for (int[] mossa : mosseValide) {
+            if (mossa[0] > pos[0] && mossa[1] > pos[1] && mossa[0] <= vincoli[0][0] && mossa[1] <= vincoli[0][1]) mosseFiltrate.add(mossa);
+            else if (mossa[0] > pos[0] && mossa[1] < pos[1] && mossa[0] <= vincoli[1][0] && mossa[1] >= vincoli[1][1]) mosseFiltrate.add(mossa);
+            else if (mossa[0] < pos[0] && mossa[1] > pos[1] && mossa[0] >= vincoli[2][0] && mossa[1] <= vincoli[2][1]) mosseFiltrate.add(mossa);
+            else if (mossa[0] < pos[0] && mossa[1] < pos[1] && mossa[0] >= vincoli[3][0] && mossa[1] >= vincoli[3][1]) mosseFiltrate.add(mossa);
+            if (caselle[pos[0]][pos[1]] instanceof Regina && mossa[0] == pos[0] || mossa[1] == pos[1]) mosseFiltrate.add(mossa);
+        }
 
         return mosseFiltrate;
     }
@@ -139,6 +194,21 @@ public class Scacchiera {
         return mosseFiltrate;
     }
 
+    private List<int[]> filtraMosseRe(int[] pos, List<int[]> mosseValide) {
+        if (caselle[pos[0]][pos[1]] == null || !(caselle[pos[0]][pos[1]] instanceof Re)) throw new IllegalArgumentException("Puoi fare questi controlli solo sul re");
+        List<int[]> mosseFiltrate = new ArrayList<>();
+
+        for (int[] mossa : mosseValide) {
+            if (Math.abs(pos[1] - mossa[1]) == 2) {
+                if (pos[1] - mossa[1] == 2 && caselle[pos[0]][pos[1] - 1] == null && caselle[pos[0]][pos[1] - 2] == null && ((Re) caselle[pos[0]][pos[1]]).getArrocco() && (caselle[pos[0]][0] instanceof Torre) && ((Torre) caselle[pos[0]][0]).getArrocco()) mosseFiltrate.add(mossa);
+                if (pos[1] - mossa[1] == - 2 && caselle[pos[0]][pos[1] + 1] == null && caselle[pos[0]][pos[1] + 2] == null && ((Re) caselle[pos[0]][pos[1]]).getArrocco() && (caselle[pos[0]][DIMENSIONE - 1] instanceof Torre) && ((Torre) caselle[pos[0]][DIMENSIONE - 1]).getArrocco()) mosseFiltrate.add(mossa);
+            }
+            else mosseFiltrate.add(mossa);
+        }
+
+        return mosseFiltrate;
+    }
+
     public List<int[]> selezionaPedina(int[] pos) {
         if (pos[0] < 0 || pos[0] > DIMENSIONE - 1 || pos[1] < 0 || pos[1] > DIMENSIONE - 1) throw new IllegalArgumentException("Posizione non valida");
         if (caselle[pos[0]][pos[1]] == null) return null;
@@ -156,14 +226,11 @@ public class Scacchiera {
 
         switch (p) {
             case Pedone _ -> mosseValide = filtraMossePedone(pos, mosseValide);
-            case Alfiere _ -> {
-                int a = 0;//mosseValide = filtraMosseAlfiere(pos, mosseValide);
-            }
+            case Alfiere _ -> mosseValide = filtraMosseAlfiere(pos, mosseValide);
             case Torre _ -> mosseValide = filtraMosseTorre(pos, mosseValide);
-            case Regina _ -> {
-                mosseValide = filtraMosseTorre(pos, mosseValide);
-            }
-            case Cavallo _, Re _ -> {}
+            case Regina _ -> mosseValide = filtraMosseTorre(pos, filtraMosseAlfiere(pos, mosseValide));
+            case Re _ -> mosseValide = filtraMosseRe(pos, mosseValide);
+            case Cavallo _ -> {}
             default -> throw new IllegalStateException("Tipo pedina non valido: " + p);
         }
 
@@ -190,6 +257,18 @@ public class Scacchiera {
 
         if (valido) {
             for (Pedina[] riga : caselle) for (Pedina p : riga) if (p instanceof Pedone && p.colore != caselle[casella_selezionata[0]][casella_selezionata[1]].colore) ((Pedone) p).rimuoviEnpassant();
+
+            if (caselle[casella_selezionata[0]][casella_selezionata[1]] instanceof Re && casella_selezionata[1] - pos[1] == 2) {
+                caselle[pos[0]][0].muovi(new int[]{pos[0], pos[1] + 1});
+                caselle[pos[0]][pos[1] + 1] = caselle[pos[0]][0];
+                caselle[pos[0]][0] = null;
+            }
+            else if (caselle[casella_selezionata[0]][casella_selezionata[1]] instanceof Re && casella_selezionata[1] - pos[1] == - 2) {
+                caselle[pos[0]][DIMENSIONE - 1].muovi(new int[]{pos[0], pos[1] - 1});
+                caselle[pos[0]][pos[1] - 1] = caselle[pos[0]][DIMENSIONE - 1];
+                caselle[pos[0]][DIMENSIONE - 1] = null;
+            }
+
             caselle[casella_selezionata[0]][casella_selezionata[1]].muovi(pos);
             caselle[pos[0]][pos[1]] = caselle[casella_selezionata[0]][casella_selezionata[1]];
             caselle[casella_selezionata[0]][casella_selezionata[1]] = null;

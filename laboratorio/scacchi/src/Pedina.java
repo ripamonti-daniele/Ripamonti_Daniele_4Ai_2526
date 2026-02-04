@@ -13,6 +13,7 @@ public abstract class Pedina {
         setColore(colore);
         setPosizione(posizione);
         mosseValide = new ArrayList<>();
+        trovaMosseValide();
     }
 
     public Pedina(Color colore, int[] posizione, int materiale) {
@@ -20,6 +21,7 @@ public abstract class Pedina {
         setPosizione(posizione);
         setMateriale(materiale);
         mosseValide = new ArrayList<>();
+        trovaMosseValide();
     }
 
     protected Pedina(Pedina originale) {
@@ -59,6 +61,7 @@ public abstract class Pedina {
 
     public void muovi(int[] posizione) {
         boolean valido = false;
+
         for (int[] mossa : mosseValide) {
             if (mossa[0] == posizione[0] && mossa[1] == posizione[1]) {
                 valido = true;
@@ -70,6 +73,7 @@ public abstract class Pedina {
         }
 
         setPosizione(posizione);
+        trovaMosseValide();
     }
 
     public List<int[]> getMosseValide() {
@@ -79,7 +83,7 @@ public abstract class Pedina {
         return copia;
     }
 
-    protected abstract void trovaMosseValide();
+    protected abstract void trovaMosseValide(); //sistema quando vengono trovate le mosse valide
 
     public abstract Pedina copy();
 }

@@ -38,4 +38,8 @@ public enum IconaPedina {
         img.setDescription(iconPath);
         return img;
     }
+
+    public ImageIcon getImageIcon() {
+        return getImageIcon(100);
+    }
 }

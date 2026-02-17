@@ -36,7 +36,7 @@ public abstract class Pedina {
     }
 
     private void setColore(Color colore) {
-        if (colore != Color.white && colore != Color.black) throw new IllegalArgumentException("Colore non valido");
+        if (!colore.equals(Color.white) && !colore.equals(Color.black)) throw new IllegalArgumentException("Colore non valido");
         this.colore = colore;
     }
 

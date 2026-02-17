@@ -136,7 +136,6 @@ public class ScacchieraPanel extends JPanel {
             }
         }
         return copia;
-//        return casellePanel;
     }
 
     private void controllaImmagini(ImageIcon daControllare, ImageIcon img1, ImageIcon img2, ImageIcon img3, ImageIcon img4, ImageIcon img5, ImageIcon img6, ImageIcon img7, ImageIcon img8, ImageIcon img9, ImageIcon img10, ImageIcon img11) {

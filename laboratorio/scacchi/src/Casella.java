@@ -126,7 +126,6 @@ public class Casella extends JPanel implements MouseListener {
     @Override
     public void mousePressed(MouseEvent e) {
         casellaSelezionata = id;
-        repaint();
         if (listener != null) listener.casellaCliccata();
     }
 

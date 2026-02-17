@@ -6,12 +6,14 @@ public class Scacchiera {
     public final int DIMENSIONE = 8;
     private final Pedina[][] caselle;
     private int mosseNeutre;
+    private Color turno;
     private int[] casella_selezionata;
     private List<int[]> mosseValide;
 
     public Scacchiera() {
         caselle = new Pedina[DIMENSIONE][DIMENSIONE];
         mosseNeutre = 0;
+        turno = Color.white;
         casella_selezionata = null;
         mosseValide = new ArrayList<>();
         inizializza();
@@ -209,11 +211,14 @@ public class Scacchiera {
         return mosseFiltrate;
     }
 
-    public List<int[]> selezionaPedina(int[] pos) {
+    public List<int[]> selezionaPedina(int[] pos, Color turno) {
         if (pos[0] < 0 || pos[0] > DIMENSIONE - 1 || pos[1] < 0 || pos[1] > DIMENSIONE - 1) throw new IllegalArgumentException("Posizione non valida");
+        if (!turno.equals(Color.white) && !turno.equals(Color.black)) throw new IllegalArgumentException("Il colore del turno può essere solo bianco o nero");
         if (caselle[pos[0]][pos[1]] == null) return null;
 
         Pedina p = caselle[pos[0]][pos[1]];
+        if (!p.getColore().equals(turno)) return null;
+
         List<int[]> mosseValide = p.getMosseValide();
 
         //da implementare correttamente
@@ -286,6 +291,15 @@ public class Scacchiera {
 
     }
 
+    public Color getTurno() {
+        return turno;
+    }
+
+    public void cambiaTurno() {
+        if (turno == Color.white) turno = Color.black;
+        else turno = Color.white;
+    }
+
     @Override
     public String toString() {
         StringBuilder sb = new StringBuilder();
@@ -300,8 +314,7 @@ public class Scacchiera {
                     case Alfiere alfiere -> sb.append("A ");
                     case Regina regina -> sb.append("Q ");
                     case Re re -> sb.append("K ");
-                    default -> {
-                    }
+                    default -> {}
                 }
             }
             sb.append("\n");

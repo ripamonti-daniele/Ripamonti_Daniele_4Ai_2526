@@ -211,6 +211,65 @@ public class Scacchiera {
         return mosseFiltrate;
     }
 
+//    private int[] trovaPosRe(Color c) {
+//        for (Pedina[] riga : caselle) {
+//            for (Pedina p : riga) {
+//                if (p instanceof Re && p.getColore() == c) return p.getPosizione();
+//            }
+//        }
+//        return null;
+//    }
+
+    private boolean controllaScaccoRe(int[] pos, Color c) { //da sistemare potenziale override per colore
+        if (!(caselle[pos[0]][pos[1]] instanceof Re)) throw new IllegalArgumentException("Puoi fare questi controlli solo sul re");
+
+        boolean nord = true; //logica booleana sbagliata
+        boolean sud = true;
+        boolean est = true;
+        boolean ovest = true;
+        boolean nordest = true;
+        boolean nordovest = true;
+        boolean sudest = true;
+        boolean sudovest = true;
+
+        for (int i = 0; i < DIMENSIONE; i++) {
+            if (nord && pos[0] + i < DIMENSIONE && caselle[pos[0] + i][pos[1]] != null) {
+                if (caselle[pos[0] + i][pos[1]].getColore() == c) return true; //sbagliato
+                else nord = false; //sbagliato
+            }
+            if (sud && pos[0] - i >= 0 && caselle[pos[0] - i][pos[1]] != null) {
+                if (caselle[pos[0] - i][pos[1]].getColore() == c) return true;
+                else sud = false;
+            }
+            if (est && pos[1] + i < DIMENSIONE && caselle[pos[0]][pos[1] + i] != null) {
+                if (caselle[pos[0]][pos[1] + i].getColore() == c) return true;
+                else est = false;
+            }
+            if (ovest && pos[1] - i >= 0 && caselle[pos[0]][pos[1] - i] != null) {
+                if (caselle[pos[0]][pos[1] - i].getColore() == c) return true;
+                else ovest = false;
+            }
+            if (nordest && pos[0] + i < DIMENSIONE && pos[1] + i < DIMENSIONE && caselle[pos[0] + i][pos[1] + i] != null) {
+                if (caselle[pos[0] + i][pos[1] + i].getColore() == c) return true;
+                else nordest = false;
+            }
+            if (nordovest && pos[0] + i < DIMENSIONE && pos[1] - i >= 0 && caselle[pos[0] + i][pos[1] - i] != null) {
+                if (caselle[pos[0] + i][pos[1] - i].getColore() == c) return true;
+                else nordovest = false;
+            }
+            if (sudest && pos[0] - i >= 0 && pos[1] + i < DIMENSIONE && caselle[pos[0] - i][pos[1] + i] != null) {
+                if (caselle[pos[0] - i][pos[1] + i].getColore() == c) return true;
+                else sudest = false;
+            }
+            if (sudovest && pos[0] - i >= 0 && pos[1] - i >= 0 && caselle[pos[0] - i][pos[1] - i] != null) {
+                if (caselle[pos[0] - i][pos[1] - i].getColore() == c) return true;
+                else sudovest = false;
+            }
+        }
+
+        return false;
+    }
+
     public List<int[]> selezionaPedina(int[] pos, Color turno) {
         if (pos[0] < 0 || pos[0] > DIMENSIONE - 1 || pos[1] < 0 || pos[1] > DIMENSIONE - 1) throw new IllegalArgumentException("Posizione non valida");
         if (!turno.equals(Color.white) && !turno.equals(Color.black)) throw new IllegalArgumentException("Il colore del turno può essere solo bianco o nero");
@@ -221,7 +280,6 @@ public class Scacchiera {
 
         List<int[]> mosseValide = p.getMosseValide();
 
-        //da implementare correttamente
         int x, y;
         for (int i = mosseValide.size() - 1; i >= 0; i--) {
             y = mosseValide.get(i)[0];

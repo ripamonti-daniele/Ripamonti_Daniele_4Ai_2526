@@ -201,6 +201,8 @@ public class Scacchiera {
         List<int[]> mosseFiltrate = new ArrayList<>();
 
         for (int[] mossa : mosseValide) {
+            if (controllaScaccoRe(mossa, caselle[pos[0]][pos[1]].getColore())) continue;
+
             if (Math.abs(pos[1] - mossa[1]) == 2) {
                 if (pos[1] - mossa[1] == 2 && caselle[pos[0]][pos[1] - 1] == null && caselle[pos[0]][pos[1] - 2] == null && ((Re) caselle[pos[0]][pos[1]]).getArrocco() && (caselle[pos[0]][0] instanceof Torre) && ((Torre) caselle[pos[0]][0]).getArrocco()) mosseFiltrate.add(mossa);
                 if (pos[1] - mossa[1] == - 2 && caselle[pos[0]][pos[1] + 1] == null && caselle[pos[0]][pos[1] + 2] == null && ((Re) caselle[pos[0]][pos[1]]).getArrocco() && (caselle[pos[0]][DIMENSIONE - 1] instanceof Torre) && ((Torre) caselle[pos[0]][DIMENSIONE - 1]).getArrocco()) mosseFiltrate.add(mossa);
@@ -211,19 +213,50 @@ public class Scacchiera {
         return mosseFiltrate;
     }
 
-//    private int[] trovaPosRe(Color c) {
-//        for (Pedina[] riga : caselle) {
-//            for (Pedina p : riga) {
-//                if (p instanceof Re && p.getColore() == c) return p.getPosizione();
-//            }
-//        }
-//        return null;
-//    }
+    private int[] trovaPosRe(Color c) {
+        for (Pedina[] riga : caselle) {
+            for (Pedina p : riga) {
+                if (p instanceof Re && p.getColore() == c) return p.getPosizione();
+            }
+        }
+        return null;
+    }
 
-    private boolean controllaScaccoRe(int[] pos, Color c) { //da sistemare potenziale override per colore
-        if (!(caselle[pos[0]][pos[1]] instanceof Re)) throw new IllegalArgumentException("Puoi fare questi controlli solo sul re");
+    private boolean controllaScaccoRe(int[] posRe, Color coloreRe, int[] posPedinaOld, int[] posPedinaNew) {
+        if (posRe == null) throw new IllegalArgumentException("La posizione del re non può essere null");
+        if (caselle[posRe[0]][posRe[1]] instanceof Re) coloreRe = caselle[posRe[0]][posRe[1]].getColore();
+        if (!coloreRe.equals(Color.white) && !coloreRe.equals(Color.black)) throw new IllegalArgumentException("Il colore del re può essere solo bianco o nero");
+        if (posPedinaOld == null && posPedinaNew != null || posPedinaOld != null && posPedinaNew == null) throw new IllegalArgumentException("Non puoi dichiarare solo una delle due posizioni della pedina da spostare");
+        boolean controllaPosPedinaNew = false;
+        if (posPedinaOld != null) {
+            if (caselle[posPedinaOld[0]][posPedinaOld[1]] == null) throw new IllegalArgumentException("Deve esserci una pedina nella posizione old");
+            if (caselle[posPedinaOld[0]][posPedinaOld[1]].getColore() != coloreRe) throw new IllegalArgumentException("Il colore della pedina da spostare deve essere lo stesso di quello del re");
+            controllaPosPedinaNew = true;
+        }
 
-        boolean nord = true; //logica booleana sbagliata
+
+        for (int i = - 2; i <= 2; i += 4) {
+            Pedina cavallo;
+            if (posRe[0] + i >= 0 && posRe[0] + i < DIMENSIONE && posRe[1] + 1 < DIMENSIONE) {
+                cavallo = caselle[posRe[0] + i][posRe[1] + 1];
+                if (cavallo instanceof Cavallo && cavallo.getColore() != coloreRe) return true;
+            }
+            if (posRe[0] + i >= 0 && posRe[0] + i < DIMENSIONE && posRe[1] - 1 >= 0) {
+                cavallo = caselle[posRe[0] + i][posRe[1] - 1];
+                if (cavallo instanceof Cavallo && cavallo.getColore() != coloreRe) return true;
+            }
+            if (posRe[1] + i >= 0 && posRe[1] + i < DIMENSIONE && posRe[0] + 1 < DIMENSIONE) {
+                cavallo = caselle[posRe[0] + 1][posRe[1] + i];
+                if (cavallo instanceof Cavallo && cavallo.getColore() != coloreRe) return true;
+            }
+            if (posRe[1] + i >= 0 && posRe[1] + i < DIMENSIONE && posRe[0] - 1 >= 0) {
+                cavallo = caselle[posRe[0] - 1][posRe[1] + i];
+                if (cavallo instanceof Cavallo && cavallo.getColore() != coloreRe) return true;
+            }
+        }
+
+        //DA RIFARE
+        boolean nord = true;
         boolean sud = true;
         boolean est = true;
         boolean ovest = true;
@@ -232,42 +265,77 @@ public class Scacchiera {
         boolean sudest = true;
         boolean sudovest = true;
 
-        for (int i = 0; i < DIMENSIONE; i++) {
-            if (nord && pos[0] + i < DIMENSIONE && caselle[pos[0] + i][pos[1]] != null) {
-                if (caselle[pos[0] + i][pos[1]].getColore() == c) return true; //sbagliato
-                else nord = false; //sbagliato
+        for (int i = 1; i < DIMENSIONE; i++) {
+            if (nord && posRe[0] - i >= 0 && caselle[posRe[0] - i][posRe[1]] != null && (posPedinaOld == null || !(posRe[0] - i == posPedinaOld[0] && posRe[1] == posPedinaOld[1]))) {
+                if (caselle[posRe[0] - i][posRe[1]].getColore() == coloreRe && !(caselle[posRe[0] - i][posRe[1]] instanceof Re) || controllaPosPedinaNew && posRe[0] - i == posPedinaNew[0] && posRe[1] == posPedinaNew[1]) nord = false;
+                else {
+                    System.out.println("pos re: " + posRe[0] + " " + posRe[1]);
+                    System.out.println("pos offest: " + (posRe[0] - i) + " " + posRe[1]);
+                    return true;
+                }
             }
-            if (sud && pos[0] - i >= 0 && caselle[pos[0] - i][pos[1]] != null) {
-                if (caselle[pos[0] - i][pos[1]].getColore() == c) return true;
-                else sud = false;
+            if (sud && posRe[0] + i < DIMENSIONE && caselle[posRe[0] + i][posRe[1]] != null && (posPedinaOld == null || !(posRe[0] + i == posPedinaOld[0] && posRe[1] == posPedinaOld[1]))) {
+                if (caselle[posRe[0] + i][posRe[1]].getColore() == coloreRe && !(caselle[posRe[0] + i][posRe[1]] instanceof Re) || controllaPosPedinaNew && posRe[0] + i == posPedinaNew[0] && posRe[1] == posPedinaNew[1]) sud = false;
+                else {
+                    System.out.println("pos re: " + posRe[0] + " " + posRe[1]);
+                    System.out.println("pos offest: " + (posRe[0] + i) + " " + posRe[1]);
+                    return true;
+                }
             }
-            if (est && pos[1] + i < DIMENSIONE && caselle[pos[0]][pos[1] + i] != null) {
-                if (caselle[pos[0]][pos[1] + i].getColore() == c) return true;
-                else est = false;
+            if (est && posRe[1] + i < DIMENSIONE && caselle[posRe[0]][posRe[1] + i] != null && (posPedinaOld == null || !(posRe[0] == posPedinaOld[0] && posRe[1] + i == posPedinaOld[1]))) {
+                if (caselle[posRe[0]][posRe[1] + i].getColore() == coloreRe && !(caselle[posRe[0]][posRe[1] + i] instanceof Re) || controllaPosPedinaNew && posRe[0] == posPedinaNew[0] && posRe[1] + i == posPedinaNew[1]) est = false;
+                else {
+                    System.out.println("pos re: " + posRe[0] + " " + posRe[1]);
+                    System.out.println("pos offest: " + posRe[0] + " " + (posRe[1] + i));
+                    return true;
+                }
             }
-            if (ovest && pos[1] - i >= 0 && caselle[pos[0]][pos[1] - i] != null) {
-                if (caselle[pos[0]][pos[1] - i].getColore() == c) return true;
-                else ovest = false;
+            if (ovest && posRe[1] - i >= 0 && caselle[posRe[0]][posRe[1] - i] != null && (posPedinaOld == null || !(posRe[0] == posPedinaOld[0] && posRe[1] - i == posPedinaOld[1]))) {
+                if (caselle[posRe[0]][posRe[1] - i].getColore() == coloreRe && !(caselle[posRe[0]][posRe[1] - i] instanceof Re) || controllaPosPedinaNew && posRe[0] == posPedinaNew[0] && posRe[1] - i == posPedinaNew[1]) ovest = false;
+                else {
+                    System.out.println("pos re: " + posRe[0] + " " + posRe[1]);
+                    System.out.println("pos offest: " + posRe[0] + " " + (posRe[1] - i));
+                    return true;
+                }
             }
-            if (nordest && pos[0] + i < DIMENSIONE && pos[1] + i < DIMENSIONE && caselle[pos[0] + i][pos[1] + i] != null) {
-                if (caselle[pos[0] + i][pos[1] + i].getColore() == c) return true;
-                else nordest = false;
+            if (nordest && posRe[0] - i >= 0 && posRe[1] + i < DIMENSIONE && caselle[posRe[0] - i][posRe[1] + i] != null && (posPedinaOld == null || !(posRe[0] - i == posPedinaOld[0] && posRe[1] + i == posPedinaOld[1]))) {
+                if (caselle[posRe[0] - i][posRe[1] + i].getColore() == coloreRe && !(caselle[posRe[0] - i][posRe[1] + i] instanceof Re) || controllaPosPedinaNew && posRe[0] - i == posPedinaNew[0] && posRe[1] + i == posPedinaNew[1]) nordest = false;
+                else {
+                    System.out.println("pos re: " + posRe[0] + " " + posRe[1]);
+                    System.out.println("pos offest: " + (posRe[0] - i) + " " + (posRe[1] + i));
+                    return true;
+                }
             }
-            if (nordovest && pos[0] + i < DIMENSIONE && pos[1] - i >= 0 && caselle[pos[0] + i][pos[1] - i] != null) {
-                if (caselle[pos[0] + i][pos[1] - i].getColore() == c) return true;
-                else nordovest = false;
+            if (nordovest && posRe[0] - i >= 0 && posRe[1] - i >= 0 && caselle[posRe[0] - i][posRe[1] - i] != null && (posPedinaOld == null || !(posRe[0] - i == posPedinaOld[0] && posRe[1] - i == posPedinaOld[1]))) {
+                if (caselle[posRe[0] - i][posRe[1] - i].getColore() == coloreRe && !(caselle[posRe[0] - i][posRe[1] - i] instanceof Re) || controllaPosPedinaNew && posRe[0] - i == posPedinaNew[0] && posRe[1] - i == posPedinaNew[1]) nordovest = false;
+                else {
+                    System.out.println("pos re: " + posRe[0] + " " + posRe[1]);
+                    System.out.println("pos offest: " + (posRe[0] - i) + " " + (posRe[1] - i));
+                    return true;
+                }
             }
-            if (sudest && pos[0] - i >= 0 && pos[1] + i < DIMENSIONE && caselle[pos[0] - i][pos[1] + i] != null) {
-                if (caselle[pos[0] - i][pos[1] + i].getColore() == c) return true;
-                else sudest = false;
+            if (sudest && posRe[0] + i < DIMENSIONE && posRe[1] + i < DIMENSIONE && caselle[posRe[0] + i][posRe[1] + i] != null && (posPedinaOld == null || !(posRe[0] + i == posPedinaOld[0] && posRe[1] + i == posPedinaOld[1]))) {
+                if (caselle[posRe[0] + i][posRe[1] + i].getColore() == coloreRe && !(caselle[posRe[0] + i][posRe[1] + i] instanceof Re) || controllaPosPedinaNew && posRe[0] + i == posPedinaNew[0] && posRe[1] + i == posPedinaNew[1]) sudest = false;
+                else {
+                    System.out.println("pos re: " + posRe[0] + " " + posRe[1]);
+                    System.out.println("pos offest: " + (posRe[0] + i) + " " + (posRe[1] + i));
+                    return true;
+                }
             }
-            if (sudovest && pos[0] - i >= 0 && pos[1] - i >= 0 && caselle[pos[0] - i][pos[1] - i] != null) {
-                if (caselle[pos[0] - i][pos[1] - i].getColore() == c) return true;
-                else sudovest = false;
+            if (sudovest && posRe[0] + i < DIMENSIONE && posRe[1] - i >= 0 && caselle[posRe[0] + i][posRe[1] - i] != null && (posPedinaOld == null || !(posRe[0] + i == posPedinaOld[0] && posRe[1] - i == posPedinaOld[1]))) {
+                if (caselle[posRe[0] + i][posRe[1] - i].getColore() == coloreRe && !(caselle[posRe[0] + i][posRe[1] - i] instanceof Re) || controllaPosPedinaNew && posRe[0] + i == posPedinaNew[0] && posRe[1] - i == posPedinaNew[1]) sudovest = false;
+                else {
+                    System.out.println("pos re: " + posRe[0] + " " + posRe[1]);
+                    System.out.println("pos offest: " + (posRe[0] + i) + " " + (posRe[1] - i));
+                    return true;
+                }
             }
         }
-
         return false;
+    }
+
+    boolean controllaScaccoRe(int[] posRe, Color coloreRe) {
+        return controllaScaccoRe(posRe, coloreRe, null, null);
     }
 
     public List<int[]> selezionaPedina(int[] pos, Color turno) {
@@ -295,6 +363,16 @@ public class Scacchiera {
             case Re _ -> mosseValide = filtraMosseRe(pos, mosseValide);
             case Cavallo _ -> {}
             default -> throw new IllegalStateException("Tipo pedina non valido: " + p);
+        }
+
+        if (!(p instanceof Re)) {
+            List<int[]> mosseSenzaScacco = new ArrayList<>();
+
+            for (int[] mossa : mosseValide) {
+                if (!controllaScaccoRe(trovaPosRe(turno), turno, pos, mossa)) mosseSenzaScacco.add(mossa);
+            }
+
+            mosseValide = mosseSenzaScacco;
         }
 
         this.casella_selezionata = pos;

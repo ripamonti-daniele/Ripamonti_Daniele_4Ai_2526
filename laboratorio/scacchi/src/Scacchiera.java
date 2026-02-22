@@ -45,6 +45,8 @@ public class Scacchiera {
 
     public void reset() {
         mosseNeutre = 0;
+        turno = Color.white;
+        casella_selezionata = null;
         inizializza();
     }
 
@@ -200,14 +202,31 @@ public class Scacchiera {
         if (caselle[pos[0]][pos[1]] == null || !(caselle[pos[0]][pos[1]] instanceof Re)) throw new IllegalArgumentException("Puoi fare questi controlli solo sul re");
         List<int[]> mosseFiltrate = new ArrayList<>();
 
+        boolean annullaArroccoSx = controllaScacco && controllaScaccoRe(pos);
+        boolean annullaArroccoDx = annullaArroccoSx;
+
         for (int[] mossa : mosseValide) {
-            if (controllaScacco && controllaScaccoRe(mossa, caselle[pos[0]][pos[1]].getColore())) continue;
+            if (controllaScacco && controllaScaccoRe(mossa, caselle[pos[0]][pos[1]].getColore())) {
+                if ((mossa[0] == 0 || mossa[0] == DIMENSIONE - 1) && mossa[1] == pos[1] + 1) annullaArroccoDx = true;
+                else if ((mossa[0] == 0 || mossa[0] == DIMENSIONE - 1) && mossa[1] == pos[1] - 1) annullaArroccoSx = true;
+                continue;
+            }
 
             if (Math.abs(pos[1] - mossa[1]) == 2) {
                 if (pos[1] - mossa[1] == 2 && caselle[pos[0]][pos[1] - 1] == null && caselle[pos[0]][pos[1] - 2] == null && caselle[pos[0]][pos[1] - 3] == null && ((Re) caselle[pos[0]][pos[1]]).getArrocco() && (caselle[pos[0]][0] instanceof Torre) && ((Torre) caselle[pos[0]][0]).getArrocco()) mosseFiltrate.add(mossa);
                 if (pos[1] - mossa[1] == - 2 && caselle[pos[0]][pos[1] + 1] == null && caselle[pos[0]][pos[1] + 2] == null && ((Re) caselle[pos[0]][pos[1]]).getArrocco() && (caselle[pos[0]][DIMENSIONE - 1] instanceof Torre) && ((Torre) caselle[pos[0]][DIMENSIONE - 1]).getArrocco()) mosseFiltrate.add(mossa);
             }
             else mosseFiltrate.add(mossa);
+        }
+
+        if (annullaArroccoDx || annullaArroccoSx) {
+            int[][] eliminaArrocco = new int[][]{null, null};
+            for (int[] mossa : mosseFiltrate) {
+                if (mossa[1] - pos[1] == 2 && annullaArroccoDx) eliminaArrocco[0] = mossa;
+                else if (mossa[1] - pos[1] == - 2 && annullaArroccoSx) eliminaArrocco[1] = mossa;
+            }
+            mosseFiltrate.remove(eliminaArrocco[0]);
+            mosseFiltrate.remove(eliminaArrocco[1]);
         }
 
         return rimuoviMosseStessoColore(mosseFiltrate, caselle[pos[0]][pos[1]].getColore());
@@ -274,6 +293,29 @@ public class Scacchiera {
         return controllaScaccoRe(posRe, caselle[posRe[0]][posRe[1]].getColore());
     }
 
+    private List<int[]> filtraMosseScacco(int[] pos, List<int[]> mosseValide) {
+        if (pos == null || caselle[pos[0]][pos[1]] == null) throw new IllegalArgumentException("La posizione della pedina da controllare non può avere valore null e non può essere null nella scacchiera");
+        List<int[]> mosseFiltrate = new ArrayList<>();
+        Color c = caselle[pos[0]][pos[1]].getColore();
+
+//        System.out.println(caselle[pos[0]][pos[1]] instanceof Re);
+
+        for (int[] mossa : mosseValide) {
+            Pedina temp1 = caselle[pos[0]][pos[1]];
+            Pedina temp2 = caselle[mossa[0]][mossa[1]];
+
+            caselle[mossa[0]][mossa[1]] = temp1;
+            caselle[pos[0]][pos[1]] = null;
+
+            if (!(temp1 instanceof Re) && !controllaScaccoRe(c) || temp1 instanceof Re && !controllaScaccoRe(mossa, c)) mosseFiltrate.add(mossa);
+
+            caselle[pos[0]][pos[1]] = temp1;
+            caselle[mossa[0]][mossa[1]] = temp2;
+        }
+
+        return mosseFiltrate;
+    }
+
     public List<int[]> selezionaPedina(int[] pos, Color turno) {
         if (pos[0] < 0 || pos[0] > DIMENSIONE - 1 || pos[1] < 0 || pos[1] > DIMENSIONE - 1) throw new IllegalArgumentException("Posizione non valida");
         if (!turno.equals(Color.white) && !turno.equals(Color.black)) throw new IllegalArgumentException("Il colore del turno può essere solo bianco o nero");
@@ -282,7 +324,8 @@ public class Scacchiera {
         Pedina p = caselle[pos[0]][pos[1]];
         if (!p.getColore().equals(turno)) return null;
 
-        this.mosseValide = ottieniMosseFiltrate(pos, true);
+        this.mosseValide = filtraMosseScacco(pos, ottieniMosseFiltrate(pos, true));
+//        this.mosseValide = ottieniMosseFiltrate(pos, true);
         this.casella_selezionata = pos;
         return mosseValide;
     }
@@ -321,8 +364,8 @@ public class Scacchiera {
             caselle[pos[0]][pos[1]] = caselle[casella_selezionata[0]][casella_selezionata[1]];
             caselle[casella_selezionata[0]][casella_selezionata[1]] = null;
 
-            if (controllaScaccoRe(Color.white)) System.out.println("Re bianco in scacco");
-            if (controllaScaccoRe(Color.black)) System.out.println("Re nero in scacco");
+//            if (controllaScaccoRe(Color.white)) System.out.println("Re bianco in scacco");
+//            if (controllaScaccoRe(Color.black)) System.out.println("Re nero in scacco");
         }
         casella_selezionata = null;
         return valido;

@@ -2,6 +2,8 @@ import java.awt.*;
 import java.util.ArrayList;
 import java.util.List;
 
+//crea un metodo che per ogni posizione della scacchiera restituisce che pedina c'è e il suo colore (da usare in ScacchieraPanel)
+
 public class Scacchiera {
     public final int DIMENSIONE = 8;
     private final Pedina[][] caselle;
@@ -47,18 +49,19 @@ public class Scacchiera {
         mosseNeutre = 0;
         turno = Color.white;
         casella_selezionata = null;
+        mosseValide.clear();
         inizializza();
     }
 
     private Pedina copiaPedina(Pedina p) {
         if (p == null) return null;
-        return switch (p.getClass().getSimpleName()) {
-            case "Pedone" -> new Pedone((Pedone) p);
-            case "Alfiere" -> new Alfiere((Alfiere) p);
-            case "Cavallo" -> new Cavallo((Cavallo) p);
-            case "Torre" -> new Torre((Torre) p);
-            case "Regina" -> new Regina((Regina) p);
-            case "Re" -> new Re((Re) p);
+        return switch (p) {
+            case Pedone _ -> new Pedone((Pedone) p);
+            case Alfiere _ -> new Alfiere((Alfiere) p);
+            case Cavallo _ -> new Cavallo((Cavallo) p);
+            case Torre _ -> new Torre((Torre) p);
+            case Regina _ -> new Regina((Regina) p);
+            case Re _ -> new Re((Re) p);
             default -> throw new IllegalArgumentException("Tipo di pedina non valido");
         };
     }
@@ -249,7 +252,7 @@ public class Scacchiera {
             case Regina _ -> mosseValide = filtraMosseTorre(pos, filtraMosseAlfiere(pos, mosseValide));
             case Re _ -> mosseValide = filtraMosseRe(pos, mosseValide, controllaScacco);
             case Cavallo _ -> mosseValide = rimuoviMosseStessoColore(mosseValide, p.getColore());
-            default -> throw new IllegalStateException("Tipo pedina non valido: " + p);
+            default -> throw new IllegalStateException("Tipo pedina non valido: " + p.getClass().getSimpleName());
         }
         return mosseValide;
     }
@@ -364,8 +367,7 @@ public class Scacchiera {
             caselle[pos[0]][pos[1]] = caselle[casella_selezionata[0]][casella_selezionata[1]];
             caselle[casella_selezionata[0]][casella_selezionata[1]] = null;
 
-//            if (controllaScaccoRe(Color.white)) System.out.println("Re bianco in scacco");
-//            if (controllaScaccoRe(Color.black)) System.out.println("Re nero in scacco");
+            mosseValide.clear();
         }
         casella_selezionata = null;
         return valido;
@@ -397,12 +399,12 @@ public class Scacchiera {
                 Pedina p = caselle[i][j];
                 switch (p) {
                     case null -> sb.append(". "); // casella vuota
-                    case Pedone pedone -> sb.append("P ");
-                    case Torre torre -> sb.append("T ");
-                    case Cavallo cavallo -> sb.append("C ");
-                    case Alfiere alfiere -> sb.append("A ");
-                    case Regina regina -> sb.append("Q ");
-                    case Re re -> sb.append("K ");
+                    case Pedone _ -> sb.append("P ");
+                    case Torre _ -> sb.append("T ");
+                    case Cavallo _ -> sb.append("C ");
+                    case Alfiere _ -> sb.append("A ");
+                    case Regina _ -> sb.append("Q ");
+                    case Re _ -> sb.append("K ");
                     default -> {}
                 }
             }

@@ -5,7 +5,7 @@ import java.awt.event.MouseListener;
 import java.util.ArrayList;
 import java.util.List;
 
-public class Casella extends JPanel implements MouseListener {
+public class CasellaOld extends JPanel implements MouseListener {
     private Color colore;
     private final JLabel label;
     private int lunghezzaLato;
@@ -30,7 +30,7 @@ public class Casella extends JPanel implements MouseListener {
 //        IconaPedina.PEDONE_BLACK.getImageIcon(),
 //    };
 
-    public Casella(Color colore, int lunghezzaLato, String id) {
+    public CasellaOld(Color colore, int lunghezzaLato, String id) {
         label = new JLabel();
         setLunghezzaLato(lunghezzaLato);
         setColore(colore);
@@ -41,12 +41,12 @@ public class Casella extends JPanel implements MouseListener {
         mossaValida = false;
     }
 
-    public Casella(Color colore, int lunghezzaLato, String id, ImageIcon img) {
+    public CasellaOld(Color colore, int lunghezzaLato, String id, ImageIcon img) {
         this(colore, lunghezzaLato, id);
         setImg(img);
     }
 
-    public Casella(Casella originale) {
+    public CasellaOld(CasellaOld originale) {
         this.colore = originale.colore;
         this.lunghezzaLato = originale.lunghezzaLato;
         this.label = originale.label;

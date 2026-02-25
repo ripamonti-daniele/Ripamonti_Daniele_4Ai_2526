@@ -1,0 +1,4 @@
+Alessio;Amato;42
+Carlo;Bacuzzi;18
+Cicco;Pasticcio;55
+a;a;-1

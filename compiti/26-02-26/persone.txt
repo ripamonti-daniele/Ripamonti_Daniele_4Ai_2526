@@ -1,0 +1,6 @@
+Persona;Alessio;Amato;42
+Bambino;Enis;Gjnini;3;2023-02-11
+Persona;Cicco;Pasticcio;55
+Bambino;Ignazio;Silvestri;0;2026-02-25
+Bambino;Giovanni;Ferrai;1;2024-07-18
+Persona;Cicco;Pasticcio;55

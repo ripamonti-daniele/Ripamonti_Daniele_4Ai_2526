@@ -9,7 +9,9 @@ import java.util.List;
 
 public class ScacchieraPanel extends JPanel {
     private final Casella[][] casellePanel;
+    private final Casella[] opzioniPromozione;
     private final Scacchiera scacchiera;
+    public final int lunghezzaScacchiera;
     public final int DIMENSIONE = 8;
     private ImageIcon pedoneW;
     private ImageIcon alfiereW;
@@ -26,7 +28,7 @@ public class ScacchieraPanel extends JPanel {
 
     private final Map<Integer, String> numeroToLettera = new HashMap<>();
 
-    public ScacchieraPanel(Scacchiera scacchiera, ImageIcon pedoneW, ImageIcon alfiereW, ImageIcon cavalloW, ImageIcon torreW, ImageIcon reginaW, ImageIcon reW, ImageIcon pedoneB, ImageIcon alfiereB, ImageIcon cavalloB, ImageIcon torreB, ImageIcon reginaB, ImageIcon reB) {
+    public ScacchieraPanel(Scacchiera scacchiera, int lunghezzaScacchiera, ImageIcon pedoneW, ImageIcon alfiereW, ImageIcon cavalloW, ImageIcon torreW, ImageIcon reginaW, ImageIcon reW, ImageIcon pedoneB, ImageIcon alfiereB, ImageIcon cavalloB, ImageIcon torreB, ImageIcon reginaB, ImageIcon reB) {
         numeroToLettera.put(1, "A");
         numeroToLettera.put(2, "B");
         numeroToLettera.put(3, "C");
@@ -50,37 +52,46 @@ public class ScacchieraPanel extends JPanel {
         setReB(reB);
 
         this.scacchiera = scacchiera;
+        this.lunghezzaScacchiera = lunghezzaScacchiera;
         casellePanel = new Casella[DIMENSIONE][DIMENSIONE];
+        opzioniPromozione = new Casella[4];
         inizializza();
         aggiornaScacchiera(scacchiera.getScacchiera());
     }
 
-    public ScacchieraPanel(Scacchiera scacchiera) {
-        this(scacchiera, IconaPedina.PEDONE_WHITE.getImageIcon(100),
-                         IconaPedina.ALFIERE_WHITE.getImageIcon(100),
-                         IconaPedina.CAVALLO_WHITE.getImageIcon(100),
-                         IconaPedina.TORRE_WHITE.getImageIcon(100),
-                         IconaPedina.REGINA_WHITE.getImageIcon(100),
-                         IconaPedina.RE_WHITE.getImageIcon(100),
-                         IconaPedina.PEDONE_BLACK.getImageIcon(100),
-                         IconaPedina.ALFIERE_BLACK.getImageIcon(100),
-                         IconaPedina.CAVALLO_BLACK.getImageIcon(100),
-                         IconaPedina.TORRE_BLACK.getImageIcon(100),
-                         IconaPedina.REGINA_BLACK.getImageIcon(100),
-                         IconaPedina.RE_BLACK.getImageIcon(100));
+    public ScacchieraPanel(Scacchiera scacchiera, int lunghezzaScacchiera) {
+        int lunghezzaCasella = lunghezzaScacchiera / 8;
+        this(scacchiera, lunghezzaScacchiera,IconaPedina.PEDONE_WHITE.getImageIcon(lunghezzaCasella),
+                         IconaPedina.ALFIERE_WHITE.getImageIcon(lunghezzaCasella),
+                         IconaPedina.CAVALLO_WHITE.getImageIcon(lunghezzaCasella),
+                         IconaPedina.TORRE_WHITE.getImageIcon(lunghezzaCasella),
+                         IconaPedina.REGINA_WHITE.getImageIcon(lunghezzaCasella),
+                         IconaPedina.RE_WHITE.getImageIcon(lunghezzaCasella),
+                         IconaPedina.PEDONE_BLACK.getImageIcon(lunghezzaCasella),
+                         IconaPedina.ALFIERE_BLACK.getImageIcon(lunghezzaCasella),
+                         IconaPedina.CAVALLO_BLACK.getImageIcon(lunghezzaCasella),
+                         IconaPedina.TORRE_BLACK.getImageIcon(lunghezzaCasella),
+                         IconaPedina.REGINA_BLACK.getImageIcon(lunghezzaCasella),
+                         IconaPedina.RE_BLACK.getImageIcon(lunghezzaCasella));
     }
 
     private void inizializza() {
+        int lunghezzaCasella = lunghezzaScacchiera / 8;
         for (int i = 0; i < DIMENSIONE; i++) {
             for (int j = 0; j < DIMENSIONE; j++) {
                 Color c;
                 if ((j + i) % 2 == 0) c = new Color(240, 217, 181);
                 else c = new Color(161, 116, 79);
 
-                casellePanel[i][j] = new Casella(c, 100, numeroToLettera.get(j + 1) + (DIMENSIONE - i));
-                casellePanel[i][j].setBounds(100 * j, 100 * i,100, 100);
+                casellePanel[i][j] = new Casella(c, lunghezzaCasella, numeroToLettera.get(j + 1) + (DIMENSIONE - i));
+                casellePanel[i][j].setBounds(lunghezzaCasella * j, lunghezzaCasella * i, lunghezzaCasella, lunghezzaCasella);
                 setListener(i, j);
             }
+        }
+        for (int i = 0; i < 4; i++) {
+//            opzioniPromozione[i] = new Casella(new Color(0, 0, 0, 0), lunghezzaCasella, "PROMOZIONE");
+            opzioniPromozione[i] = new Casella(Color.red, lunghezzaCasella, "PROMOZIONE");
+            opzioniPromozione[i].setBounds(lunghezzaScacchiera,  lunghezzaCasella * (2 + i), lunghezzaCasella, lunghezzaCasella);
         }
     }
 
@@ -137,6 +148,9 @@ public class ScacchieraPanel extends JPanel {
     }
 
     public void mettiASchermo(JPanel panel) {
+        for (int i = 0; i < 4; i++) {
+            panel.add(opzioniPromozione[i]);
+        }
         for (int i = 0; i < DIMENSIONE; i++) {
             for (int j = 0; j < DIMENSIONE; j++) {
                 panel.add(casellePanel[i][j]);
@@ -276,7 +290,7 @@ public class ScacchieraPanel extends JPanel {
         this.reB = reB;
     }
 
-    private class Casella extends JPanel implements MouseListener {
+    private static class Casella extends JPanel implements MouseListener {
         private Color colore;
         private final JLabel label;
         private int lunghezzaLato;
@@ -336,11 +350,13 @@ public class ScacchieraPanel extends JPanel {
 
         private void setId(String id) {
             id = id.trim().toUpperCase();
-            if (idUtilizzati.contains(id)) throw new IllegalArgumentException("Id " + id + " già in uso");
-            if (!id.matches("[A-H][1-8]"))
-                throw new IllegalArgumentException("Formato id non valido (esempio corretto: A1)");
-            this.id = id;
-            idUtilizzati.add(this.id);
+            if ("PROMOZIONE".equals(id)) this.id = id;
+            else {
+                if (idUtilizzati.contains(id)) throw new IllegalArgumentException("Id " + id + " già in uso");
+                if (!id.matches("[A-H][1-8]")) throw new IllegalArgumentException("Formato id non valido (esempio corretto: A1)");
+                this.id = id;
+                idUtilizzati.add(this.id);
+            }
         }
 
         public static String getIdCasellaSelezionata() {
@@ -395,8 +411,7 @@ public class ScacchieraPanel extends JPanel {
 
             g2d.setColor(Color.black);
             g2d.setStroke(new BasicStroke(5));
-            if (this.id.equals(casellaSelezionata) && this.label.getIcon() != null)
-                g2d.drawRect(0, 0, getWidth() - 1, getHeight() - 1);
+            if (this.id.equals(casellaSelezionata) && this.label.getIcon() != null) g2d.drawRect(0, 0, getWidth() - 1, getHeight() - 1);
             else if (mossaValida) {
                 Composite old = g2d.getComposite();
                 g2d.setComposite(AlphaComposite.getInstance(AlphaComposite.SRC_OVER, 0.5f));

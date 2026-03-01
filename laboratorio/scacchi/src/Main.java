@@ -1,22 +1,23 @@
 //TODO
+// promozione pedoni
 // rotazione scacchiera
 // condizioni vittoria/pareggio
 // pareggi per ripetizione/mosse neutre
-// rotazione scacchiera
-// promozione pedoni
-// condizioni vittoria/pareggio
+// override dei metodi di JPanel di Casella in modo da renderli inutilizzabili dall'esterno
+// funzione metti a schermo aggiunge a un JFrame o a un JPanel un JPanel con dentro le caselle
 // pulsante gioca ancora
 // scrittura su file della situazione della scacchiera a ogni mossa fatta
 // aggiornamento di scacchieraPanel con lettura file
-// timer
 // nomi giocatori
+// timer
 // materiale
+// possibilità di spostarsi avanti e indietro nello stato della partita
 // grafica migliore
+// controllo finale per ottimizzazione codice
+// debug generale
 
 import javax.swing.*;
 import java.awt.*;
-
-//void aggiungiStatoJSON(JSONObject)
 
 void main() {
     Dimension screenSize = Toolkit.getDefaultToolkit().getScreenSize();

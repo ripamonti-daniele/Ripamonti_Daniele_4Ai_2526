@@ -77,6 +77,11 @@ public class Scacchiera {
         return copia;
     }
 
+    public Pedina getPedina(int[] pos) {
+        if (caselle[pos[0]][pos[1]] == null) return null;
+        return caselle[pos[0]][pos[1]].copy();
+    }
+
     public String[][] getTipoPedine() {
         String[][] tipoPedine = new String[DIMENSIONE][DIMENSIONE];
         for (int i = 0; i < tipoPedine.length; i++) {
@@ -281,7 +286,9 @@ public class Scacchiera {
         for (int i = 0; i < DIMENSIONE; i++) {
             for (int j = 0; j < DIMENSIONE; j++) {
                 if (caselle[i][j] == null || caselle[i][j].getColore() == coloreRe) continue;
-                for (int[] mossa : ottieniMosseFiltrate(new int[]{i, j})) if (mossa[0] == posRe[0] && mossa[1] == posRe[1]) return true;
+                for (int[] mossa : ottieniMosseFiltrate(new int[]{i, j})) {
+                    if (mossa[0] == posRe[0] && mossa[1] == posRe[1] && !(caselle[i][j] instanceof Pedone && mossa[1] == j)) return true;
+                }
             }
         }
 
@@ -378,8 +385,17 @@ public class Scacchiera {
         return casella_selezionata.clone();
     }
 
-    private void promuoviPedone(int[] pos) {
+    public void promuoviPedone(int[] pos, int numeroPedina) {
+        if (!((pos[0] == 0 || pos[0] == 7) && caselle[pos[0]][pos[1]] instanceof Pedone)) throw new IllegalArgumentException("La pedina che hai scelto non è un pedone in fondo alla scacchiera");
+        Color c = caselle[pos[0]][pos[1]].getColore();
 
+        switch (numeroPedina) {
+            case 1: caselle[pos[0]][pos[1]] = new Regina(c, pos);
+            case 2: caselle[pos[0]][pos[1]] = new Torre(c, pos);
+            case 3: caselle[pos[0]][pos[1]] = new Alfiere(c, pos);
+            case 4: caselle[pos[0]][pos[1]] = new Cavallo(c, pos);
+            default: caselle[pos[0]][pos[1]] = new Regina(c, pos);
+        }
     }
 
     public Color getTurno() {

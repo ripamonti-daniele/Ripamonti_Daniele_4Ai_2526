@@ -9,8 +9,10 @@ import java.util.List;
 
 public class ScacchieraPanel extends JPanel {
     private final Casella[][] casellePanel;
-    private final Casella[] opzioniPromozione;
+    private final Casella[] casellePromozione;
     private final Scacchiera scacchiera;
+    private boolean promozione;
+    private int[] posPromozione;
     public final int lunghezzaScacchiera;
     public final int DIMENSIONE = 8;
     private ImageIcon pedoneW;
@@ -27,6 +29,7 @@ public class ScacchieraPanel extends JPanel {
     private ImageIcon reB;
 
     private final Map<Integer, String> numeroToLettera = new HashMap<>();
+//    private final Map<String, Integer> letteraToNumero = new HashMap<>();
 
     public ScacchieraPanel(Scacchiera scacchiera, int lunghezzaScacchiera, ImageIcon pedoneW, ImageIcon alfiereW, ImageIcon cavalloW, ImageIcon torreW, ImageIcon reginaW, ImageIcon reW, ImageIcon pedoneB, ImageIcon alfiereB, ImageIcon cavalloB, ImageIcon torreB, ImageIcon reginaB, ImageIcon reB) {
         numeroToLettera.put(1, "A");
@@ -37,6 +40,14 @@ public class ScacchieraPanel extends JPanel {
         numeroToLettera.put(6, "F");
         numeroToLettera.put(7, "G");
         numeroToLettera.put(8, "H");
+//        letteraToNumero.put("A", 1);
+//        letteraToNumero.put("B", 2);
+//        letteraToNumero.put("C", 3);
+//        letteraToNumero.put("D", 4);
+//        letteraToNumero.put("E", 5);
+//        letteraToNumero.put("F", 6);
+//        letteraToNumero.put("G", 7);
+//        letteraToNumero.put("H", 8);
 
         setPedoneW(pedoneW);
         setAlfiereW(alfiereW);
@@ -54,7 +65,9 @@ public class ScacchieraPanel extends JPanel {
         this.scacchiera = scacchiera;
         this.lunghezzaScacchiera = lunghezzaScacchiera;
         casellePanel = new Casella[DIMENSIONE][DIMENSIONE];
-        opzioniPromozione = new Casella[4];
+        casellePromozione = new Casella[4];
+        promozione = false;
+        posPromozione = new int[2];
         inizializza();
         aggiornaScacchiera(scacchiera.getScacchiera());
     }
@@ -89,9 +102,10 @@ public class ScacchieraPanel extends JPanel {
             }
         }
         for (int i = 0; i < 4; i++) {
-//            opzioniPromozione[i] = new Casella(new Color(0, 0, 0, 0), lunghezzaCasella, "PROMOZIONE");
-            opzioniPromozione[i] = new Casella(Color.red, lunghezzaCasella, "PROMOZIONE");
-            opzioniPromozione[i].setBounds(lunghezzaScacchiera,  lunghezzaCasella * (2 + i), lunghezzaCasella, lunghezzaCasella);
+            casellePromozione[i] = new Casella(new Color(0, 0, 0, 0), lunghezzaCasella, "PROMOZIONE");
+//            casellePromozione[i] = new Casella(Color.red, lunghezzaCasella, "PROMOZIONE");
+            casellePromozione[i].setBounds(lunghezzaScacchiera,  lunghezzaCasella * (2 + i), lunghezzaCasella, lunghezzaCasella);
+            setListenerPromozione(i);
         }
     }
 
@@ -134,22 +148,60 @@ public class ScacchieraPanel extends JPanel {
 
     private void setListener(int y, int x) {
         casellePanel[y][x].setListener(() -> {
-            resetMosseValide();
+            if (!promozione) {
+                resetMosseValide();
 
-            if (scacchiera.getCasella_selezionata() == null || !scacchiera.muoviPedina(new int[]{y, x})) { //se la casella selezionata non è null allora seleziona la pedina; se è null prova a spostarla e se non riesce seleziona la pedina dove si intendeva spostare quella selezionata precedentemente
-                List<int[]> mosseValide = scacchiera.selezionaPedina(new int[]{y, x}, scacchiera.getTurno());
-                if (mosseValide != null) mostraMosseValide(mosseValide);
+                if (scacchiera.getCasella_selezionata() == null || !scacchiera.muoviPedina(new int[]{y, x})) { //se la casella selezionata non è null allora seleziona la pedina; se è null prova a spostarla e se non riesce seleziona la pedina dove si intendeva spostare quella selezionata precedentemente
+                    List<int[]> mosseValide = scacchiera.selezionaPedina(new int[]{y, x}, scacchiera.getTurno());
+                    if (mosseValide != null) mostraMosseValide(mosseValide);
+                }
+                else if ((y == 0 || y == 7) && scacchiera.getPedina(new int[]{y, x}) instanceof Pedone) {
+                    promozione = true;
+                    Casella.sceltaPromozione = true;
+                    posPromozione = new int[]{y, x};
+                    setImgCasellePromozione(scacchiera.getPedina(posPromozione).getColore());
+                }
+                else scacchiera.cambiaTurno();
+
+                aggiornaScacchiera(scacchiera.getScacchiera());
+                disegna();
             }
-            else scacchiera.cambiaTurno();
+        });
+    }
 
-            aggiornaScacchiera(scacchiera.getScacchiera());
-            disegna();
+    private void setImgCasellePromozione(Color c) {
+        int lunghezzaCasella = lunghezzaScacchiera / 8;
+        if (c.equals(Color.white)) {
+            casellePromozione[0].setImg(IconaPedina.REGINA_WHITE.getImageIcon(lunghezzaCasella));
+            casellePromozione[1].setImg(IconaPedina.TORRE_WHITE.getImageIcon(lunghezzaCasella));
+            casellePromozione[2].setImg(IconaPedina.ALFIERE_WHITE.getImageIcon(lunghezzaCasella));
+            casellePromozione[3].setImg(IconaPedina.CAVALLO_WHITE.getImageIcon(lunghezzaCasella));
+        }
+        else {
+            casellePromozione[0].setImg(IconaPedina.REGINA_BLACK.getImageIcon(lunghezzaCasella));
+            casellePromozione[1].setImg(IconaPedina.TORRE_BLACK.getImageIcon(lunghezzaCasella));
+            casellePromozione[2].setImg(IconaPedina.ALFIERE_BLACK.getImageIcon(lunghezzaCasella));
+            casellePromozione[3].setImg(IconaPedina.CAVALLO_BLACK.getImageIcon(lunghezzaCasella));
+        }
+    }
+
+    private void setListenerPromozione(int i) {
+        casellePromozione[i].setListener(() -> {
+            if (promozione) {
+                scacchiera.promuoviPedone(posPromozione, i + 1);
+                promozione = false;
+                Casella.sceltaPromozione = true;
+                for (Casella c : casellePromozione) c.rimuoviImg();
+                scacchiera.cambiaTurno();
+                aggiornaScacchiera(scacchiera.getScacchiera());
+                disegna();
+            }
         });
     }
 
     public void mettiASchermo(JPanel panel) {
         for (int i = 0; i < 4; i++) {
-            panel.add(opzioniPromozione[i]);
+            panel.add(casellePromozione[i]);
         }
         for (int i = 0; i < DIMENSIONE; i++) {
             for (int j = 0; j < DIMENSIONE; j++) {
@@ -175,6 +227,7 @@ public class ScacchieraPanel extends JPanel {
         for (Casella[] riga : casellePanel) {
             for (Casella c : riga) c.repaint();
         }
+        for (Casella c : casellePromozione) c.repaint();
     }
 
     private void controllaImmagini(ImageIcon daControllare, ImageIcon img1, ImageIcon img2, ImageIcon img3, ImageIcon img4, ImageIcon img5, ImageIcon img6, ImageIcon img7, ImageIcon img8, ImageIcon img9, ImageIcon img10, ImageIcon img11) {
@@ -299,6 +352,7 @@ public class ScacchieraPanel extends JPanel {
         private static final List<String> idUtilizzati = new ArrayList<>();
         private casellaClickListener listener;
         public boolean mossaValida;
+        private static boolean sceltaPromozione = false;
 
         public Casella(Color colore, int lunghezzaLato, String id) {
             label = new JLabel();
@@ -371,7 +425,8 @@ public class ScacchieraPanel extends JPanel {
             if (img.getIconWidth() != lunghezzaLato || img.getIconHeight() != lunghezzaLato) {
                 Image scaled = img.getImage().getScaledInstance(lunghezzaLato, lunghezzaLato, Image.SCALE_SMOOTH);
                 label.setIcon(new ImageIcon(scaled));
-            } else label.setIcon(img);
+            }
+            else label.setIcon(img);
         }
 
         public void rimuoviImg() {
@@ -388,7 +443,7 @@ public class ScacchieraPanel extends JPanel {
 
         @Override
         public void mousePressed(MouseEvent e) {
-            casellaSelezionata = id;
+            if (!id.equals("PROMOZIONE")) casellaSelezionata = id;
             if (listener != null) listener.casellaCliccata();
         }
 
@@ -411,7 +466,7 @@ public class ScacchieraPanel extends JPanel {
 
             g2d.setColor(Color.black);
             g2d.setStroke(new BasicStroke(5));
-            if (this.id.equals(casellaSelezionata) && this.label.getIcon() != null) g2d.drawRect(0, 0, getWidth() - 1, getHeight() - 1);
+            if (sceltaPromozione && this.id.equals("PROMOZIONE") || this.id.equals(casellaSelezionata) && this.label.getIcon() != null) g2d.drawRect(0, 0, getWidth() - 1, getHeight() - 1);
             else if (mossaValida) {
                 Composite old = g2d.getComposite();
                 g2d.setComposite(AlphaComposite.getInstance(AlphaComposite.SRC_OVER, 0.5f));

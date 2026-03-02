@@ -1,7 +1,10 @@
+import java.io.Serial;
 import java.time.LocalDate;
 
 public class Bambino extends Persona {
     private LocalDate dataDiNascita;
+    @Serial
+    private static final long serialVersionUID = 2L;
 
     public Bambino(String nome, String cognome, int eta, LocalDate dataDiNascita) {
         super(nome, cognome, eta);

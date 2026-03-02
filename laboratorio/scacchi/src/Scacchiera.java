@@ -390,11 +390,10 @@ public class Scacchiera {
         Color c = caselle[pos[0]][pos[1]].getColore();
 
         switch (numeroPedina) {
-            case 1: caselle[pos[0]][pos[1]] = new Regina(c, pos);
-            case 2: caselle[pos[0]][pos[1]] = new Torre(c, pos);
-            case 3: caselle[pos[0]][pos[1]] = new Alfiere(c, pos);
-            case 4: caselle[pos[0]][pos[1]] = new Cavallo(c, pos);
-            default: caselle[pos[0]][pos[1]] = new Regina(c, pos);
+            case 2 -> caselle[pos[0]][pos[1]] = new Torre(c, pos);
+            case 3 -> caselle[pos[0]][pos[1]] = new Alfiere(c, pos);
+            case 4 -> caselle[pos[0]][pos[1]] = new Cavallo(c, pos);
+            default -> caselle[pos[0]][pos[1]] = new Regina(c, pos);
         }
     }
 

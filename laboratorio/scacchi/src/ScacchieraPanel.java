@@ -27,9 +27,7 @@ public class ScacchieraPanel extends JPanel {
     private ImageIcon torreB;
     private ImageIcon reginaB;
     private ImageIcon reB;
-
     private final Map<Integer, String> numeroToLettera = new HashMap<>();
-//    private final Map<String, Integer> letteraToNumero = new HashMap<>();
 
     public ScacchieraPanel(Scacchiera scacchiera, int lunghezzaScacchiera, ImageIcon pedoneW, ImageIcon alfiereW, ImageIcon cavalloW, ImageIcon torreW, ImageIcon reginaW, ImageIcon reW, ImageIcon pedoneB, ImageIcon alfiereB, ImageIcon cavalloB, ImageIcon torreB, ImageIcon reginaB, ImageIcon reB) {
         numeroToLettera.put(1, "A");
@@ -40,14 +38,6 @@ public class ScacchieraPanel extends JPanel {
         numeroToLettera.put(6, "F");
         numeroToLettera.put(7, "G");
         numeroToLettera.put(8, "H");
-//        letteraToNumero.put("A", 1);
-//        letteraToNumero.put("B", 2);
-//        letteraToNumero.put("C", 3);
-//        letteraToNumero.put("D", 4);
-//        letteraToNumero.put("E", 5);
-//        letteraToNumero.put("F", 6);
-//        letteraToNumero.put("G", 7);
-//        letteraToNumero.put("H", 8);
 
         setPedoneW(pedoneW);
         setAlfiereW(alfiereW);
@@ -103,8 +93,9 @@ public class ScacchieraPanel extends JPanel {
         }
         for (int i = 0; i < 4; i++) {
             casellePromozione[i] = new Casella(new Color(0, 0, 0, 0), lunghezzaCasella, "PROMOZIONE");
-//            casellePromozione[i] = new Casella(Color.red, lunghezzaCasella, "PROMOZIONE");
-            casellePromozione[i].setBounds(lunghezzaScacchiera,  lunghezzaCasella * (2 + i), lunghezzaCasella, lunghezzaCasella);
+            int offset = lunghezzaCasella + lunghezzaCasella / 2 + i * (lunghezzaCasella + lunghezzaCasella / 3);
+            casellePromozione[i].setBounds(lunghezzaScacchiera, offset, lunghezzaCasella, lunghezzaCasella);
+            casellePromozione[i].setOpaque(false);
             setListenerPromozione(i);
         }
     }
@@ -190,7 +181,7 @@ public class ScacchieraPanel extends JPanel {
             if (promozione) {
                 scacchiera.promuoviPedone(posPromozione, i + 1);
                 promozione = false;
-                Casella.sceltaPromozione = true;
+                Casella.sceltaPromozione = false;
                 for (Casella c : casellePromozione) c.rimuoviImg();
                 scacchiera.cambiaTurno();
                 aggiornaScacchiera(scacchiera.getScacchiera());
@@ -463,16 +454,28 @@ public class ScacchieraPanel extends JPanel {
         protected void paintComponent(Graphics g) {
             super.paintComponent(g);
             Graphics2D g2d = (Graphics2D) g;
-
             g2d.setColor(Color.black);
             g2d.setStroke(new BasicStroke(5));
-            if (sceltaPromozione && this.id.equals("PROMOZIONE") || this.id.equals(casellaSelezionata) && this.label.getIcon() != null) g2d.drawRect(0, 0, getWidth() - 1, getHeight() - 1);
+
+            if (sceltaPromozione && this.id.equals("PROMOZIONE")) {
+                g2d.setColor(new Color(0, 128, 200, 100));
+                g2d.fillRect(0, 0, getWidth() - 1, getHeight() - 1);
+                g2d.setColor(Color.black);
+                g2d.drawRect(0, 0, getWidth() - 1, getHeight() - 1);
+            }
+            else if (this.id.equals(casellaSelezionata) && this.label.getIcon() != null) g2d.drawRect(0, 0, getWidth() - 1, getHeight() - 1);
             else if (mossaValida) {
                 Composite old = g2d.getComposite();
                 g2d.setComposite(AlphaComposite.getInstance(AlphaComposite.SRC_OVER, 0.5f));
-                if (this.label.getIcon() != null)
-                    g2d.drawOval(lunghezzaLato / 25, lunghezzaLato / 25, lunghezzaLato - 2 * lunghezzaLato / 25 - 1, lunghezzaLato - 2 * lunghezzaLato / 25 - 1);
-                else g2d.fillOval(lunghezzaLato / 4, lunghezzaLato / 4, lunghezzaLato / 2, lunghezzaLato / 2);
+                int offset;
+                if (this.label.getIcon() != null) {
+                    offset = lunghezzaLato / 25;
+                    g2d.drawOval(offset, offset, lunghezzaLato - 2 * offset - 1, lunghezzaLato - 2 * offset - 1);
+                }
+                else {
+                    offset = lunghezzaLato / 4;
+                    g2d.fillOval(offset, offset, offset * 2, offset * 2);
+                }
                 g2d.setComposite(old);
             }
         }

@@ -1,5 +1,4 @@
 //TODO
-// promozione pedoni
 // rotazione scacchiera
 // condizioni vittoria/pareggio
 // pareggi per ripetizione/mosse neutre

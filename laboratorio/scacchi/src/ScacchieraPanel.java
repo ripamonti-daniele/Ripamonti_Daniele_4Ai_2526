@@ -434,7 +434,7 @@ public class ScacchieraPanel extends JPanel {
 
         @Override
         public void mousePressed(MouseEvent e) {
-            if (!id.equals("PROMOZIONE")) casellaSelezionata = id;
+            if (!id.equals("PROMOZIONE") && !sceltaPromozione) casellaSelezionata = id;
             if (listener != null) listener.casellaCliccata();
         }
 

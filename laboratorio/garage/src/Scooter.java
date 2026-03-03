@@ -1,9 +1,13 @@
+import java.io.Serial;
+import java.io.Serializable;
 import java.security.InvalidParameterException;
 import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.List;
 
-public class Scooter {
+public class Scooter implements Serializable {
+    @Serial
+    private static final long serialVersionUID = 2L;
     private String targa;
     private int km;
     private String modello;

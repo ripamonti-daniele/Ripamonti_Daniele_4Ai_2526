@@ -1,9 +1,13 @@
+import java.io.Serial;
+import java.io.Serializable;
 import java.io.StringReader;
 import java.security.InvalidParameterException;
 import java.util.ArrayList;
 import java.util.List;
 
-public class Proprietario {
+public class Proprietario implements Serializable {
+    @Serial
+    private static final long serialVersionUID = 1L;
     private String CF;
     private String nome;
     private String cognome;

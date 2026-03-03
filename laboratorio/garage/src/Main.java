@@ -292,7 +292,77 @@ void visualizzaScooterPerProprietario(HashMap<String, Scooter> scooter, List<Pro
     }
 }
 
-boolean menu(HashMap<String, Scooter> scooter, List<Proprietario> anagrafica) {
+@SuppressWarnings("unchecked")
+List<Proprietario> deSerializzaProprietario(String nomeFile) {
+    List<Proprietario> p = new ArrayList<>();
+    try {
+        FileInputStream file = new FileInputStream(nomeFile);
+        ObjectInputStream input = new ObjectInputStream(file);
+        p = (List<Proprietario>) input.readObject();
+        input.close();
+        file.close();
+        System.out.println("de-serializzazione proprietari riuscita");
+        return p;
+    }
+    catch (IOException e) {
+        System.out.println("Errore nella lettura del file " + nomeFile);
+    }
+    catch (ClassNotFoundException e) {
+        System.out.println(e.getMessage());
+    }
+    return p;
+}
+
+@SuppressWarnings("unchecked")
+HashMap<String, Scooter> deSerializzaScooter(String nomeFile) {
+    HashMap<String, Scooter> s = new HashMap<>();
+    try {
+        FileInputStream file = new FileInputStream(nomeFile);
+        ObjectInputStream input = new ObjectInputStream(file);
+        s = (HashMap<String, Scooter>) input.readObject();
+        input.close();
+        file.close();
+        System.out.println("de-serializzazione scooter riuscita");
+        return s;
+    }
+    catch (IOException e) {
+        System.out.println("Errore nella lettura del file " + nomeFile);
+    }
+    catch (ClassNotFoundException e) {
+        System.out.println(e.getMessage());
+    }
+    return s;
+}
+
+public static void serializzaProprietario(List<Proprietario> anagrafica, String nomeFile) {
+    try {
+        FileOutputStream file = new FileOutputStream(nomeFile);
+        ObjectOutputStream output = new ObjectOutputStream(file);
+        output.writeObject(anagrafica);
+        output.close();
+        file.close();
+        System.out.println("Serializzazione proprietari riuscita");
+    }
+    catch (IOException e) {
+        System.out.println("Errore nella scrittura del file " + nomeFile);
+    }
+}
+
+public static void serializzaScooter(HashMap<String, Scooter> scooter, String nomeFile) {
+    try {
+        FileOutputStream file = new FileOutputStream(nomeFile);
+        ObjectOutputStream output = new ObjectOutputStream(file);
+        output.writeObject(scooter);
+        output.close();
+        file.close();
+        System.out.println("Serializzazione scooter riuscita");
+    }
+    catch (IOException e) {
+        System.out.println("Errore nella scrittura del file " + nomeFile);
+    }
+}
+
+boolean menu(HashMap<String, Scooter> scooter, List<Proprietario> anagrafica) throws IOException {
     System.out.println("\nInserisci 1 per aggiungere uno scooter");
     System.out.println("Inserisci 2 per visualizzare gli scooter");
     System.out.println("Inserisci 3 per eliminare uno scooter");
@@ -304,10 +374,12 @@ boolean menu(HashMap<String, Scooter> scooter, List<Proprietario> anagrafica) {
     System.out.println("Inserisci 9 per visualizzare i proprietari");
     System.out.println("Inserisci 10 per eliminare un proprietario");
     System.out.println("Inserisci 11 per visualizzare gli scooter di ogni proprietario");
+    System.out.println("Inserisci 12 per serializzare gli scooter e i proprietari");
+    System.out.println("Inserisci 13 per de-serializzare gli scooter e i proprietari");
     System.out.println("Inserisci 0 per uscire");
 
     int scelta = -1;
-    while (scelta < 0 || scelta > 11) {
+    while (scelta < 0 || scelta > 13) {
         scelta = chiediNumero("Inserisci un'opzione: ");
     }
     switch (scelta) {
@@ -344,6 +416,18 @@ boolean menu(HashMap<String, Scooter> scooter, List<Proprietario> anagrafica) {
         case 11:
             visualizzaScooterPerProprietario(scooter, anagrafica);
             break;
+        case 12:
+            serializzaProprietario(anagrafica, "anagrafica.ser");
+            serializzaScooter(scooter, "scooter.ser");
+            break;
+        case 13:
+            List<Proprietario> a = deSerializzaProprietario("anagrafica.ser");
+            anagrafica.clear();
+            anagrafica.addAll(a);
+            HashMap<String, Scooter> s = deSerializzaScooter("scooter.ser");
+            scooter.clear();
+            scooter.putAll(s);
+            break;
         case 0:
             return false;
     }
@@ -366,7 +450,7 @@ void inizializza(HashMap<String, Scooter> scooter, List<Proprietario> anagrafica
     scooter.put(s4.getTarga(), s4);
 }
 
-void main() {
+void main() throws IOException {
     HashMap<String, Scooter> scooter = new HashMap<>();
     List<Proprietario> anagrafica = new ArrayList<>();
     inizializza(scooter, anagrafica);

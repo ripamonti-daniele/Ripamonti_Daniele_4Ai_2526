@@ -7,7 +7,7 @@ import java.util.HashMap;
 import java.util.Map;
 import java.util.List;
 
-public class ScacchieraPanel extends JPanel {
+public class GestoreGrafico {
     private final Casella[][] casellePanel;
     private final Casella[] casellePromozione;
     private final Scacchiera scacchiera;
@@ -29,7 +29,7 @@ public class ScacchieraPanel extends JPanel {
     private ImageIcon reB;
     private final Map<Integer, String> numeroToLettera = new HashMap<>();
 
-    public ScacchieraPanel(Scacchiera scacchiera, int lunghezzaScacchiera, ImageIcon pedoneW, ImageIcon alfiereW, ImageIcon cavalloW, ImageIcon torreW, ImageIcon reginaW, ImageIcon reW, ImageIcon pedoneB, ImageIcon alfiereB, ImageIcon cavalloB, ImageIcon torreB, ImageIcon reginaB, ImageIcon reB) {
+    public GestoreGrafico(Scacchiera scacchiera, int lunghezzaScacchiera, ImageIcon pedoneW, ImageIcon alfiereW, ImageIcon cavalloW, ImageIcon torreW, ImageIcon reginaW, ImageIcon reW, ImageIcon pedoneB, ImageIcon alfiereB, ImageIcon cavalloB, ImageIcon torreB, ImageIcon reginaB, ImageIcon reB) {
         numeroToLettera.put(1, "A");
         numeroToLettera.put(2, "B");
         numeroToLettera.put(3, "C");
@@ -62,7 +62,7 @@ public class ScacchieraPanel extends JPanel {
         aggiornaScacchiera(scacchiera.getScacchiera());
     }
 
-    public ScacchieraPanel(Scacchiera scacchiera, int lunghezzaScacchiera) {
+    public GestoreGrafico(Scacchiera scacchiera, int lunghezzaScacchiera) {
         int lunghezzaCasella = lunghezzaScacchiera / 8;
         this(scacchiera, lunghezzaScacchiera,IconaPedina.PEDONE_WHITE.getImageIcon(lunghezzaCasella),
                          IconaPedina.ALFIERE_WHITE.getImageIcon(lunghezzaCasella),
@@ -79,6 +79,7 @@ public class ScacchieraPanel extends JPanel {
     }
 
     private void inizializza() {
+        Casella.gestisciGrafica = true;
         int lunghezzaCasella = lunghezzaScacchiera / 8;
         for (int i = 0; i < DIMENSIONE; i++) {
             for (int j = 0; j < DIMENSIONE; j++) {
@@ -98,6 +99,7 @@ public class ScacchieraPanel extends JPanel {
             casellePromozione[i].setOpaque(false);
             setListenerPromozione(i);
         }
+        Casella.gestisciGrafica = false;
     }
 
     private void setImgCasella(Color col, Casella c, ImageIcon imgW, ImageIcon imgB) {
@@ -105,7 +107,7 @@ public class ScacchieraPanel extends JPanel {
         else c.setImg(imgB);
     }
 
-    public void aggiornaScacchiera(Pedina[][] scacchiera) {
+    private void aggiornaScacchiera(Pedina[][] scacchiera) {
         for (int i = 0; i < DIMENSIONE; i++) {
             for (int j = 0; j < DIMENSIONE; j++) {
                 Pedina p = scacchiera[i][j];
@@ -152,7 +154,10 @@ public class ScacchieraPanel extends JPanel {
                     posPromozione = new int[]{y, x};
                     setImgCasellePromozione(scacchiera.getPedina(posPromozione).getColore());
                 }
-                else scacchiera.cambiaTurno();
+                else {
+                    scacchiera.cambiaTurno();
+                    ruotaScacchiera(scacchiera.getTurno());
+                }
 
                 aggiornaScacchiera(scacchiera.getScacchiera());
                 disegna();
@@ -184,6 +189,7 @@ public class ScacchieraPanel extends JPanel {
                 Casella.sceltaPromozione = false;
                 for (Casella c : casellePromozione) c.rimuoviImg();
                 scacchiera.cambiaTurno();
+                ruotaScacchiera(scacchiera.getTurno());
                 aggiornaScacchiera(scacchiera.getScacchiera());
                 disegna();
             }
@@ -191,14 +197,13 @@ public class ScacchieraPanel extends JPanel {
     }
 
     public void mettiASchermo(JPanel panel) {
-        for (int i = 0; i < 4; i++) {
-            panel.add(casellePromozione[i]);
-        }
-        for (int i = 0; i < DIMENSIONE; i++) {
-            for (int j = 0; j < DIMENSIONE; j++) {
-                panel.add(casellePanel[i][j]);
-            }
-        }
+        for (int i = 0; i < 4; i++) panel.add(casellePromozione[i]);
+        for (int i = 0; i < DIMENSIONE; i++) for (int j = 0; j < DIMENSIONE; j++) panel.add(casellePanel[i][j]);
+    }
+
+    public void mettiASchermo(JFrame frame) {
+        for (int i = 0; i < 4; i++) frame.add(casellePromozione[i]);
+        for (int i = 0; i < DIMENSIONE; i++) for (int j = 0; j < DIMENSIONE; j++) frame.add(casellePanel[i][j]);
     }
 
     private void resetMosseValide() {
@@ -212,6 +217,24 @@ public class ScacchieraPanel extends JPanel {
         for (int[] m : mosseValide) {
             casellePanel[m[0]][m[1]].mossaValida = true;
         }
+    }
+
+    private void ruotaScacchiera(Color c) {
+        Casella.gestisciGrafica = true;
+        int lunghezzaCasella = lunghezzaScacchiera / 8;
+        for (int i = 0; i < DIMENSIONE; i++) {
+            for (int j = 0; j < DIMENSIONE; j++) {
+                if (c.equals(Color.white)) {
+                    casellePanel[i][j].setBounds(lunghezzaCasella * j, lunghezzaCasella * i, lunghezzaCasella, lunghezzaCasella);
+                    Casella.scacchieraGirtata = false;
+                }
+                else {
+                    casellePanel[i][j].setBounds(lunghezzaScacchiera - lunghezzaCasella * (j + 1),  lunghezzaScacchiera - lunghezzaCasella * (i + 1), lunghezzaCasella, lunghezzaCasella);
+                    Casella.scacchieraGirtata = true;
+                }
+            }
+        }
+        Casella.gestisciGrafica = false;
     }
 
     private void disegna() {
@@ -344,6 +367,8 @@ public class ScacchieraPanel extends JPanel {
         private casellaClickListener listener;
         public boolean mossaValida;
         private static boolean sceltaPromozione = false;
+        private static boolean scacchieraGirtata = false;
+        private static boolean gestisciGrafica = false;
 
         public Casella(Color colore, int lunghezzaLato, String id) {
             label = new JLabel();
@@ -454,8 +479,10 @@ public class ScacchieraPanel extends JPanel {
         protected void paintComponent(Graphics g) {
             super.paintComponent(g);
             Graphics2D g2d = (Graphics2D) g;
-            g2d.setColor(Color.black);
             g2d.setStroke(new BasicStroke(5));
+            disegnaCoordinata(g2d);
+            g2d.setColor(Color.black);
+            g2d.setRenderingHint(RenderingHints.KEY_ANTIALIASING, RenderingHints.VALUE_ANTIALIAS_ON);
 
             if (sceltaPromozione && this.id.equals("PROMOZIONE")) {
                 g2d.setColor(new Color(0, 128, 200, 100));
@@ -478,6 +505,81 @@ public class ScacchieraPanel extends JPanel {
                 }
                 g2d.setComposite(old);
             }
+        }
+
+        private void disegnaCoordinata(Graphics2D g2d) {
+            if (!scacchieraGirtata && (id.charAt(0) == 'A' || id.charAt(1) == '1') || scacchieraGirtata && (id.charAt(0) == 'H' || id.charAt(1) == '8')) {
+                g2d.setRenderingHint(RenderingHints.KEY_TEXT_ANTIALIASING, RenderingHints.VALUE_TEXT_ANTIALIAS_ON);
+                Font font = new Font("Arial", Font.BOLD, 20);
+                g2d.setFont(font);
+                Color a = new Color(240, 217, 181);
+                Color b = new Color(161, 116, 79);
+                if (colore.equals(a)) g2d.setColor(b);
+                else g2d.setColor(a);
+
+                if (!scacchieraGirtata) {
+                    if (id.equals("A1")) g2d.drawString(id, lunghezzaLato / 15, lunghezzaLato / 5);
+                    else if (id.charAt(0) == 'A') g2d.drawString(String.valueOf(id.charAt(1)), lunghezzaLato / 15, lunghezzaLato / 5);
+                    else g2d.drawString(String.valueOf(id.charAt(0)), lunghezzaLato / 15, lunghezzaLato / 5);
+                }
+                else {
+                    if (id.equals("H8")) g2d.drawString(id, lunghezzaLato / 15, lunghezzaLato / 5);
+                    else if (id.charAt(0) == 'H') g2d.drawString(String.valueOf(id.charAt(1)), lunghezzaLato / 15, lunghezzaLato / 5);
+                    else g2d.drawString(String.valueOf(id.charAt(0)), lunghezzaLato / 15, lunghezzaLato / 5);
+                }
+            }
+        }
+
+        @Override
+        public void setBounds(Rectangle r) {
+            if (gestisciGrafica) super.setBounds(r);
+        }
+
+        @Override
+        public void setBounds(int x, int y, int width, int height) {
+            if (gestisciGrafica) super.setBounds(x, y, width, height);
+        }
+
+        @Override
+        public void setLayout(LayoutManager mgr) {
+            if (gestisciGrafica) super.setLayout(mgr);
+        }
+
+        @Override
+        public void removeAll() {
+            if (gestisciGrafica) super.removeAll();
+        }
+
+        @Override
+        public void remove(int index) {
+            if (gestisciGrafica) super.remove(index);
+        }
+
+        @Override
+        public void remove(Component comp) {
+            if (gestisciGrafica) super.remove(comp);
+        }
+
+        @Override
+        public Component[] getComponents() {
+            if (gestisciGrafica) return super.getComponents();
+            return null;
+        }
+
+//        @Override
+//        public Component getComponent(int n) {
+//            if (gestisciGrafica) return super.getComponent(n);
+//            return null;
+//        }
+
+        @Override
+        public void setSize(Dimension d) {
+            if (gestisciGrafica) super.setSize(d);
+        }
+
+        @Override
+        public void setSize(int width, int height) {
+            if (gestisciGrafica) super.setSize(width, height);
         }
     }
 }

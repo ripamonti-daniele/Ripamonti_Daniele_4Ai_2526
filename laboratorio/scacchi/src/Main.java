@@ -1,9 +1,6 @@
 //TODO
-// rotazione scacchiera
 // condizioni vittoria/pareggio
 // pareggi per ripetizione/mosse neutre
-// override dei metodi di JPanel di Casella in modo da renderli inutilizzabili dall'esterno
-// funzione metti a schermo aggiunge a un JFrame o a un JPanel un JPanel con dentro le caselle
 // pulsante gioca ancora
 // scrittura su file della situazione della scacchiera a ogni mossa fatta
 // aggiornamento di scacchieraPanel con lettura file
@@ -30,17 +27,19 @@ void main() {
     frame.setExtendedState(JFrame.MAXIMIZED_BOTH);
 
     Scacchiera scacchiera = new Scacchiera();
-    ScacchieraPanel scacchieraPanel = new ScacchieraPanel(scacchiera, (int) Math.round(height * 0.8));
+    GestoreGrafico gestoreGrafico = new GestoreGrafico(scacchiera, (int) Math.round(height * 0.8));
 //    ScacchieraPanel scacchieraPanel = new ScacchieraPanel(scacchiera, 500);
 
     frame.setVisible(true);
     JPanel board = new JPanel(null);
-    scacchieraPanel.mettiASchermo(board);
+    gestoreGrafico.mettiASchermo(board);
+
+//    JButton giocaAncora = new JButton("Gioca ancora")
 
     Insets insets = frame.getInsets();
     int contentHeight = frame.getHeight() - insets.top - insets.bottom;
 
-    board.setBounds(width / 10, (contentHeight - scacchieraPanel.lunghezzaScacchiera) / 2, scacchieraPanel.lunghezzaScacchiera + scacchieraPanel.lunghezzaScacchiera / 8, scacchieraPanel.lunghezzaScacchiera);
+    board.setBounds(width / 10, (contentHeight - gestoreGrafico.lunghezzaScacchiera) / 2, gestoreGrafico.lunghezzaScacchiera + gestoreGrafico.lunghezzaScacchiera / 8, gestoreGrafico.lunghezzaScacchiera);
 //    board.setBounds(width / 10, (contentHeight - scacchieraPanel.lunghezzaScacchiera) / 2, scacchieraPanel.lunghezzaScacchiera * 2, scacchieraPanel.lunghezzaScacchiera * 2);
     frame.add(board);
     frame.setLocationRelativeTo(null);

@@ -308,8 +308,6 @@ public class Scacchiera {
         List<int[]> mosseFiltrate = new ArrayList<>();
         Color c = caselle[pos[0]][pos[1]].getColore();
 
-//        System.out.println(caselle[pos[0]][pos[1]] instanceof Re);
-
         for (int[] mossa : mosseValide) {
             Pedina temp1 = caselle[pos[0]][pos[1]];
             Pedina temp2 = caselle[mossa[0]][mossa[1]];
@@ -335,7 +333,6 @@ public class Scacchiera {
         if (!p.getColore().equals(turno)) return null;
 
         this.mosseValide = filtraMosseScacco(pos, ottieniMosseFiltrate(pos, true));
-//        this.mosseValide = ottieniMosseFiltrate(pos, true);
         this.casella_selezionata = pos;
         return mosseValide;
     }
@@ -380,11 +377,6 @@ public class Scacchiera {
         return valido;
     }
 
-    public int[] getCasella_selezionata() {
-        if (casella_selezionata == null) return null;
-        return casella_selezionata.clone();
-    }
-
     public void promuoviPedone(int[] pos, int numeroPedina) {
         if (!((pos[0] == 0 || pos[0] == 7) && caselle[pos[0]][pos[1]] instanceof Pedone)) throw new IllegalArgumentException("La pedina che hai scelto non è un pedone in fondo alla scacchiera");
         Color c = caselle[pos[0]][pos[1]].getColore();
@@ -395,6 +387,26 @@ public class Scacchiera {
             case 4 -> caselle[pos[0]][pos[1]] = new Cavallo(c, pos);
             default -> caselle[pos[0]][pos[1]] = new Regina(c, pos);
         }
+    }
+
+    // -1 no vittoria; 0 vittoria bianco; 1 vittoria nero; 2 pareggio
+    public int getStatoPartita() {
+        for (Pedina[] riga : caselle) {
+            for (Pedina p : riga) {
+                if (p == null || !p.getColore().equals(turno)) continue;
+                if (!ottieniMosseFiltrate(p.getPosizione(), true).isEmpty()) return -1;
+            }
+        }
+        if (controllaScaccoRe(turno)) {
+            if (turno.equals(Color.white)) return 1;
+            return 0;
+        }
+        return 2;
+    }
+
+    public int[] getCasella_selezionata() {
+        if (casella_selezionata == null) return null;
+        return casella_selezionata.clone();
     }
 
     public Color getTurno() {

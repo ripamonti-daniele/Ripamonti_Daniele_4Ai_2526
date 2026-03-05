@@ -1,13 +1,12 @@
 //TODO
-// condizioni vittoria/pareggio
 // pareggi per ripetizione/mosse neutre
-// pulsante gioca ancora
 // scrittura su file della situazione della scacchiera a ogni mossa fatta
 // aggiornamento di scacchieraPanel con lettura file
 // nomi giocatori
 // timer
 // materiale
 // possibilità di spostarsi avanti e indietro nello stato della partita
+// l'enpassant mostra il cerchio vuoto
 // grafica migliore
 // controllo finale per ottimizzazione codice
 // debug generale
@@ -31,17 +30,17 @@ void main() {
 //    ScacchieraPanel scacchieraPanel = new ScacchieraPanel(scacchiera, 500);
 
     frame.setVisible(true);
-    JPanel board = new JPanel(null);
-    gestoreGrafico.mettiASchermo(board);
+    JPanel contenitore = new JPanel(null);
+    gestoreGrafico.mettiASchermo(contenitore);
 
 //    JButton giocaAncora = new JButton("Gioca ancora")
 
     Insets insets = frame.getInsets();
     int contentHeight = frame.getHeight() - insets.top - insets.bottom;
 
-    board.setBounds(width / 10, (contentHeight - gestoreGrafico.lunghezzaScacchiera) / 2, gestoreGrafico.lunghezzaScacchiera + gestoreGrafico.lunghezzaScacchiera / 8, gestoreGrafico.lunghezzaScacchiera);
-//    board.setBounds(width / 10, (contentHeight - scacchieraPanel.lunghezzaScacchiera) / 2, scacchieraPanel.lunghezzaScacchiera * 2, scacchieraPanel.lunghezzaScacchiera * 2);
-    frame.add(board);
+    contenitore.setBounds(gestoreGrafico.lunghezzaScacchiera / 8, (contentHeight - gestoreGrafico.lunghezzaScacchiera) / 2, 2 * gestoreGrafico.lunghezzaScacchiera, gestoreGrafico.lunghezzaScacchiera);
+//    contenitore.setBounds(width / 10, (contentHeight - scacchieraPanel.lunghezzaScacchiera) / 2, scacchieraPanel.lunghezzaScacchiera * 2, scacchieraPanel.lunghezzaScacchiera * 2);
+    frame.add(contenitore);
     frame.setLocationRelativeTo(null);
     frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
 }

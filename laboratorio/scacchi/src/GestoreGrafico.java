@@ -28,6 +28,9 @@ public class GestoreGrafico {
     private ImageIcon reginaB;
     private ImageIcon reB;
     private final Map<Integer, String> numeroToLettera = new HashMap<>();
+    private final JPanel panelInfo;
+    private final JButton btnGioca;
+    private final JLabel labelVittoria;
 
     public GestoreGrafico(Scacchiera scacchiera, int lunghezzaScacchiera, ImageIcon pedoneW, ImageIcon alfiereW, ImageIcon cavalloW, ImageIcon torreW, ImageIcon reginaW, ImageIcon reW, ImageIcon pedoneB, ImageIcon alfiereB, ImageIcon cavalloB, ImageIcon torreB, ImageIcon reginaB, ImageIcon reB) {
         numeroToLettera.put(1, "A");
@@ -60,6 +63,44 @@ public class GestoreGrafico {
         posPromozione = new int[2];
         inizializza();
         aggiornaScacchiera(scacchiera.getScacchiera());
+
+        panelInfo = new JPanel();
+        btnGioca = new JButton("Gioca ancora");
+        labelVittoria = new JLabel();
+
+        panelInfo.setBounds(lunghezzaScacchiera + lunghezzaScacchiera / 6, 0, lunghezzaScacchiera * 3 / 4, lunghezzaScacchiera);
+        panelInfo.setLayout(null);
+//        panelInfo.setBackground(Color.red);
+        panelInfo.setOpaque(true);
+
+        btnGioca.setFont(new Font("Segoe UI", Font.BOLD, 16));
+        btnGioca.setForeground(Color.white);
+        btnGioca.setBackground(new Color(60, 120, 200));
+        btnGioca.setFocusPainted(false);
+        btnGioca.setBorderPainted(false);
+        btnGioca.setContentAreaFilled(true);
+        btnGioca.setOpaque(true);
+        btnGioca.setBorder(BorderFactory.createEmptyBorder(10, 20, 10, 20));
+        btnGioca.setCursor(new Cursor(Cursor.HAND_CURSOR));
+        btnGioca.setBounds(0, lunghezzaScacchiera / 2 - lunghezzaScacchiera / 16, lunghezzaScacchiera / 4, lunghezzaScacchiera / 8);
+        btnGioca.setEnabled(false);
+        btnGioca.addActionListener(e -> {
+            scacchiera.reset();
+            ruotaScacchiera(scacchiera.getTurno());
+            aggiornaScacchiera(scacchiera.getScacchiera());
+            disegna();
+            btnGioca.setEnabled(false);
+            labelVittoria.setText(null);
+        });
+        panelInfo.add(btnGioca);
+
+        labelVittoria.setBounds(0, lunghezzaScacchiera / 2 + lunghezzaScacchiera / 16, lunghezzaScacchiera / 4, lunghezzaScacchiera / 8);
+        labelVittoria.setOpaque(true);
+//        labelVittoria.setBackground(Color.red);
+        labelVittoria.setHorizontalAlignment(SwingConstants.CENTER);
+        labelVittoria.setForeground(Color.black);
+        labelVittoria.setFont(new Font("Segoe UI", Font.BOLD, 16));
+        panelInfo.add(labelVittoria);
     }
 
     public GestoreGrafico(Scacchiera scacchiera, int lunghezzaScacchiera) {
@@ -156,7 +197,23 @@ public class GestoreGrafico {
                 }
                 else {
                     scacchiera.cambiaTurno();
-                    ruotaScacchiera(scacchiera.getTurno());
+                    switch (scacchiera.getStatoPartita()) {
+                        case 0 -> {
+                            labelVittoria.setText("Vince il bianco");
+                            btnGioca.setEnabled(true);
+                        }
+                        case 1 -> {
+                            labelVittoria.setText("Vince il nero");
+                            btnGioca.setEnabled(true);
+                        }
+                        case 2 -> {
+                            labelVittoria.setText("Pareggio");
+                            btnGioca.setEnabled(true);
+                        }
+                        default -> ruotaScacchiera(scacchiera.getTurno());
+                    }
+//                    if (scacchiera.getStatoPartita() != -1) btnGioca.setEnabled(true);
+//                    else ruotaScacchiera(scacchiera.getTurno());
                 }
 
                 aggiornaScacchiera(scacchiera.getScacchiera());
@@ -199,11 +256,13 @@ public class GestoreGrafico {
     public void mettiASchermo(JPanel panel) {
         for (int i = 0; i < 4; i++) panel.add(casellePromozione[i]);
         for (int i = 0; i < DIMENSIONE; i++) for (int j = 0; j < DIMENSIONE; j++) panel.add(casellePanel[i][j]);
+        panel.add(panelInfo);
     }
 
     public void mettiASchermo(JFrame frame) {
         for (int i = 0; i < 4; i++) frame.add(casellePromozione[i]);
         for (int i = 0; i < DIMENSIONE; i++) for (int j = 0; j < DIMENSIONE; j++) frame.add(casellePanel[i][j]);
+        frame.add(panelInfo);
     }
 
     private void resetMosseValide() {
@@ -229,7 +288,7 @@ public class GestoreGrafico {
                     Casella.scacchieraGirtata = false;
                 }
                 else {
-                    casellePanel[i][j].setBounds(lunghezzaScacchiera - lunghezzaCasella * (j + 1),  lunghezzaScacchiera - lunghezzaCasella * (i + 1), lunghezzaCasella, lunghezzaCasella);
+                    casellePanel[i][j].setBounds(lunghezzaCasella * (7 - j),  lunghezzaCasella * (7 - i), lunghezzaCasella, lunghezzaCasella);
                     Casella.scacchieraGirtata = true;
                 }
             }
@@ -560,11 +619,11 @@ public class GestoreGrafico {
             if (gestisciGrafica) super.remove(comp);
         }
 
-        @Override
-        public Component[] getComponents() {
-            if (gestisciGrafica) return super.getComponents();
-            return null;
-        }
+//        @Override
+//        public Component[] getComponents() {
+//            if (gestisciGrafica) return super.getComponents();
+//            return null;
+//        }
 
 //        @Override
 //        public Component getComponent(int n) {

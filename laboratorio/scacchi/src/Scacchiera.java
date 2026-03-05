@@ -2,8 +2,6 @@ import java.awt.*;
 import java.util.ArrayList;
 import java.util.List;
 
-//crea un metodo che per ogni posizione della scacchiera restituisce che pedina c'è e il suo colore (da usare in ScacchieraPanel)
-
 public class Scacchiera {
     public final int DIMENSIONE = 8;
     private final Pedina[][] caselle;
@@ -394,7 +392,7 @@ public class Scacchiera {
         for (Pedina[] riga : caselle) {
             for (Pedina p : riga) {
                 if (p == null || !p.getColore().equals(turno)) continue;
-                if (!ottieniMosseFiltrate(p.getPosizione(), true).isEmpty()) return -1;
+                if (!filtraMosseScacco(p.getPosizione(), ottieniMosseFiltrate(p.getPosizione(), true)).isEmpty()) return -1;
             }
         }
         if (controllaScaccoRe(turno)) {

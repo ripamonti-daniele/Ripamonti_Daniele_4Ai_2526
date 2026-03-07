@@ -33,8 +33,6 @@ void main() {
     JPanel contenitore = new JPanel(null);
     gestoreGrafico.mettiASchermo(contenitore);
 
-//    JButton giocaAncora = new JButton("Gioca ancora")
-
     Insets insets = frame.getInsets();
     int contentHeight = frame.getHeight() - insets.top - insets.bottom;
 

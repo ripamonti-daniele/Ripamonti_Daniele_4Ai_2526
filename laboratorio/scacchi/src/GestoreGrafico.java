@@ -6,6 +6,7 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.List;
+import java.util.function.LongUnaryOperator;
 
 public class GestoreGrafico {
     private final Casella[][] casellePanel;
@@ -32,15 +33,17 @@ public class GestoreGrafico {
     private final Map<Integer, String> numeroToLettera = new HashMap<>();
 
     private final JPanel panelInfo;
-    private final JButtonCustom btnGioca;
-    private final JButtonCustom btnRotazioneScacchiera;
+    private final JButton btnGioca;
+    private final JButton btnRotazioneScacchiera;
     private final JLabel labelVittoria;
-    private final JTextAreaCustom nomeBianco;
-    private final JTextAreaCustom nomeNero;
-    private final JButtonCustom btnBotBianco;
-    private final JButtonCustom btnBotNero;
+    private final JTextArea nomeBianco;
+    private final JTextArea nomeNero;
+    private final JButton btnBotBianco;
+    private final JButton btnBotNero;
+    private final TimerGrafico timerBianco;
+    private final TimerGrafico timerNero;
 
-    public GestoreGrafico(Scacchiera scacchiera, int lunghezzaScacchiera, ImageIcon pedoneW, ImageIcon alfiereW, ImageIcon cavalloW, ImageIcon torreW, ImageIcon reginaW, ImageIcon reW, ImageIcon pedoneB, ImageIcon alfiereB, ImageIcon cavalloB, ImageIcon torreB, ImageIcon reginaB, ImageIcon reB) {
+    public GestoreGrafico(Scacchiera scacchiera, int lunghezzaScacchiera, Color sfondo, ImageIcon pedoneW, ImageIcon alfiereW, ImageIcon cavalloW, ImageIcon torreW, ImageIcon reginaW, ImageIcon reW, ImageIcon pedoneB, ImageIcon alfiereB, ImageIcon cavalloB, ImageIcon torreB, ImageIcon reginaB, ImageIcon reB) {
         numeroToLettera.put(1, "A");
         numeroToLettera.put(2, "B");
         numeroToLettera.put(3, "C");
@@ -76,17 +79,20 @@ public class GestoreGrafico {
 
         panelInfo = new JPanel();
         btnGioca = new JButtonCustom("<html>Gioca</html>", 0, lunghezzaScacchiera / 2 - lunghezzaScacchiera / 16, lunghezzaScacchiera / 4, lunghezzaScacchiera / 8, new Color(66, 133, 244), new Color(52, 103, 206), new Color(90, 160, 255), new Color(66, 133, 244), new Color(30, 70, 180), Color.white);
-        btnRotazioneScacchiera = new JButtonCustom("<html><div style='text-align:center;'>Ruota<br>On</div><html>", lunghezzaScacchiera / 4 + lunghezzaScacchiera / 100, lunghezzaScacchiera / 2 - lunghezzaScacchiera / 16, lunghezzaScacchiera / 4, lunghezzaScacchiera / 8, new Color(66, 133, 244), new Color(52, 103, 206), new Color(90, 160, 255), new Color(66, 133, 244), new Color(30, 70, 180), Color.white);
+        btnRotazioneScacchiera = new JButtonCustom("<html><div style='text-align:center;'>Ruota<br>On</div><html>", lunghezzaScacchiera / 4 + lunghezzaScacchiera / 100, lunghezzaScacchiera / 2 - lunghezzaScacchiera / 16, lunghezzaScacchiera / 4, lunghezzaScacchiera / 8, new Color(250,250,250), new Color(190,190,190), new Color(255,255,255), new Color(200,200,200), new Color(170,170,170), Color.BLACK);
+//        btnRotazioneScacchiera = new JButtonCustom("<html><div style='text-align:center;'>Ruota<br>On</div><html>", lunghezzaScacchiera / 4 + lunghezzaScacchiera / 100, lunghezzaScacchiera / 2 - lunghezzaScacchiera / 16, lunghezzaScacchiera / 4, lunghezzaScacchiera / 8, new Color(66, 133, 244), new Color(52, 103, 206), new Color(90, 160, 255), new Color(66, 133, 244), new Color(30, 70, 180), Color.white);
         labelVittoria = new JLabel();
-        nomeBianco = new JTextAreaCustom("Giocatore 1", lunghezzaScacchiera / 16 + lunghezzaScacchiera / 100, lunghezzaScacchiera - lunghezzaScacchiera / 16,  lunghezzaScacchiera / 4, lunghezzaScacchiera / 16);
-        nomeNero = new JTextAreaCustom("Giocatore 2", lunghezzaScacchiera / 16 + lunghezzaScacchiera / 100, 0,  lunghezzaScacchiera / 4, lunghezzaScacchiera / 16);
-        btnBotBianco = new JButtonCustom("<html><div style='text-align:center;'>Bot<br>Off</div><html>", 0, lunghezzaScacchiera - lunghezzaScacchiera / 16,  lunghezzaScacchiera / 16, lunghezzaScacchiera / 16, new Color(51, 51, 51), new Color(0, 0, 0), new Color(85, 85, 85), new Color(0, 0, 0), new Color(0, 0, 0), Color.WHITE);
-        btnBotNero = new JButtonCustom("<html><div style='text-align:center;'>Bot<br>Off</div><html>", 0, 0,  lunghezzaScacchiera / 16, lunghezzaScacchiera / 16, new Color(51, 51, 51), new Color(0, 0, 0), new Color(85, 85, 85), new Color(0, 0, 0), new Color(0, 0, 0), Color.WHITE);
+        nomeBianco = new JTextAreaCustom("Giocatore 1", 0, lunghezzaScacchiera - lunghezzaScacchiera / 16,  lunghezzaScacchiera / 4, lunghezzaScacchiera / 16);
+        nomeNero = new JTextAreaCustom("Giocatore 2", 0, 0,  lunghezzaScacchiera / 4, lunghezzaScacchiera / 16);
+        btnBotBianco = new JButtonCustom("<html><div style='text-align:center;'>Bot<br>Off</div><html>", lunghezzaScacchiera / 4 + lunghezzaScacchiera / 100, lunghezzaScacchiera - lunghezzaScacchiera / 16,  lunghezzaScacchiera / 16, lunghezzaScacchiera / 16, new Color(51, 51, 51), new Color(0, 0, 0), new Color(85, 85, 85), new Color(0, 0, 0), new Color(0, 0, 0), Color.WHITE);
+        btnBotNero = new JButtonCustom("<html><div style='text-align:center;'>Bot<br>Off</div><html>", lunghezzaScacchiera / 4 + lunghezzaScacchiera / 100, 0,  lunghezzaScacchiera / 16, lunghezzaScacchiera / 16, new Color(51, 51, 51), new Color(0, 0, 0), new Color(85, 85, 85), new Color(0, 0, 0), new Color(0, 0, 0), Color.WHITE);
+        timerBianco = new TimerGrafico(0, 0, 10, 0, Color.white, Color.black);
+        timerNero = new TimerGrafico(0, 0, 10, 0, Color.black, Color.white);
 
         panelInfo.setBounds(lunghezzaScacchiera + lunghezzaScacchiera / 6, 0, lunghezzaScacchiera * 3 / 4, lunghezzaScacchiera);
         panelInfo.setLayout(null);
-//        panelInfo.setBackground(Color.red);
         panelInfo.setOpaque(true);
+        panelInfo.setBackground(sfondo);
 
         btnGioca.addActionListener(e -> {
             scacchiera.reset();
@@ -108,6 +114,7 @@ public class GestoreGrafico {
             btnBotBianco.setEnabled(false);
             btnBotNero.setEnabled(false);
             btnRotazioneScacchiera.setEnabled(false);
+            timerBianco.start();
         });
 
         btnRotazioneScacchiera.addActionListener(e -> {
@@ -116,36 +123,46 @@ public class GestoreGrafico {
             else btnRotazioneScacchiera.setText("<html><div style='text-align:center;'>Ruota<br>Off</div><html>");
         });
 
+        Font font = new Font("Segoe UI", Font.BOLD, Math.max(12, lunghezzaScacchiera / 32));
+        labelVittoria.setBounds(0, lunghezzaScacchiera / 3, lunghezzaScacchiera / 2 + lunghezzaScacchiera / 100, lunghezzaScacchiera / 10);
+        labelVittoria.setOpaque(false);
+        labelVittoria.setHorizontalAlignment(SwingConstants.CENTER);
+        labelVittoria.setForeground(Color.black);
+        labelVittoria.setFont(font);
+
+        timerBianco.setBounds(0, lunghezzaScacchiera - lunghezzaScacchiera / 8 - lunghezzaScacchiera / 100,  lunghezzaScacchiera / 6, lunghezzaScacchiera / 16);
+        timerNero.setBounds(0, lunghezzaScacchiera / 16 + lunghezzaScacchiera / 100,  lunghezzaScacchiera / 6, lunghezzaScacchiera / 16);
+        timerBianco.setFont(font);
+        timerNero.setFont(font);
+        timerBianco.setHorizontalAlignment(SwingConstants.CENTER);
+        timerNero.setHorizontalAlignment(SwingConstants.CENTER);
+
         panelInfo.add(btnGioca);
         panelInfo.add(btnRotazioneScacchiera);
         panelInfo.add(nomeBianco);
         panelInfo.add(nomeNero);
         panelInfo.add(btnBotBianco);
         panelInfo.add(btnBotNero);
-
-        labelVittoria.setBounds(0, lunghezzaScacchiera / 3, lunghezzaScacchiera / 2 + lunghezzaScacchiera / 100, lunghezzaScacchiera / 10);
-        labelVittoria.setOpaque(true);
-        labelVittoria.setHorizontalAlignment(SwingConstants.CENTER);
-        labelVittoria.setForeground(Color.black);
-        labelVittoria.setFont(new Font("Segoe UI", Font.BOLD, Math.max(12, lunghezzaScacchiera / 32)));
-
         panelInfo.add(labelVittoria);
+        panelInfo.add(timerBianco);
+        panelInfo.add(timerNero);
     }
 
-    public GestoreGrafico(Scacchiera scacchiera, int lunghezzaScacchiera) {
+    public GestoreGrafico(Scacchiera scacchiera, int lunghezzaScacchiera, Color sfondo) {
         int lunghezzaCasella = lunghezzaScacchiera / 8;
-        this(scacchiera, lunghezzaScacchiera,IconaPedina.PEDONE_WHITE.getImageIcon(lunghezzaCasella),
-                         IconaPedina.ALFIERE_WHITE.getImageIcon(lunghezzaCasella),
-                         IconaPedina.CAVALLO_WHITE.getImageIcon(lunghezzaCasella),
-                         IconaPedina.TORRE_WHITE.getImageIcon(lunghezzaCasella),
-                         IconaPedina.REGINA_WHITE.getImageIcon(lunghezzaCasella),
-                         IconaPedina.RE_WHITE.getImageIcon(lunghezzaCasella),
-                         IconaPedina.PEDONE_BLACK.getImageIcon(lunghezzaCasella),
-                         IconaPedina.ALFIERE_BLACK.getImageIcon(lunghezzaCasella),
-                         IconaPedina.CAVALLO_BLACK.getImageIcon(lunghezzaCasella),
-                         IconaPedina.TORRE_BLACK.getImageIcon(lunghezzaCasella),
-                         IconaPedina.REGINA_BLACK.getImageIcon(lunghezzaCasella),
-                         IconaPedina.RE_BLACK.getImageIcon(lunghezzaCasella));
+        this(scacchiera, lunghezzaScacchiera, sfondo,
+                IconaPedina.PEDONE_WHITE.getImageIcon(lunghezzaCasella),
+                IconaPedina.ALFIERE_WHITE.getImageIcon(lunghezzaCasella),
+                IconaPedina.CAVALLO_WHITE.getImageIcon(lunghezzaCasella),
+                IconaPedina.TORRE_WHITE.getImageIcon(lunghezzaCasella),
+                IconaPedina.REGINA_WHITE.getImageIcon(lunghezzaCasella),
+                IconaPedina.RE_WHITE.getImageIcon(lunghezzaCasella),
+                IconaPedina.PEDONE_BLACK.getImageIcon(lunghezzaCasella),
+                IconaPedina.ALFIERE_BLACK.getImageIcon(lunghezzaCasella),
+                IconaPedina.CAVALLO_BLACK.getImageIcon(lunghezzaCasella),
+                IconaPedina.TORRE_BLACK.getImageIcon(lunghezzaCasella),
+                IconaPedina.REGINA_BLACK.getImageIcon(lunghezzaCasella),
+                IconaPedina.RE_BLACK.getImageIcon(lunghezzaCasella));
     }
 
     private void inizializza() {
@@ -181,6 +198,7 @@ public class GestoreGrafico {
         gioca = false;
         ruotaScacchiera(Color.white);
         btnRotazioneScacchiera.setEnabled(true);
+        //reset del timer
     }
 
     private void setImgCasella(Color col, Casella c, ImageIcon imgW, ImageIcon imgB) {
@@ -257,8 +275,26 @@ public class GestoreGrafico {
                             if (rotazioneScacchiera) ruotaScacchiera(scacchiera.getTurno());
                         }
                     }
-//                    if (scacchiera.getStatoPartita() != -1) btnGioca.setEnabled(true);
-//                    else ruotaScacchiera(scacchiera.getTurno());
+                    if (timerBianco.isRunning()) {
+                        timerBianco.pause();
+                        timerBianco.sommaGuadagno();
+                        if (timerBianco.isTempoScaduto()) {
+                            labelVittoria.setText("<html><div style='text-align:center;'>Tempo scaduto:<br>Vince " + nomeNero.getText() + " (nero)</div><html>");
+                            reset();
+                        }
+                        else timerNero.resume();
+                    }
+                    else {
+                        timerNero.pause();
+                        timerNero.sommaGuadagno();
+                        if (timerNero.isTempoScaduto()) {
+                            labelVittoria.setText("<html><div style='text-align:center;'>Tempo scaduto:<br>Vince " + nomeBianco.getText() + " (bianco)</div><html>");
+                            reset();
+                        }
+                        else timerBianco.resume();
+                    }
+
+
                 }
 
                 aggiornaScacchiera(scacchiera.getScacchiera());

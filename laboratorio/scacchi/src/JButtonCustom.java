@@ -9,6 +9,7 @@ public class JButtonCustom extends JButton {
     private final Color hoverStart;
     private final Color hoverEnd;
     private final Color pressedColor;
+    private final Color textColor;
 
     private boolean hover;
     private boolean pressed;
@@ -31,6 +32,7 @@ public class JButtonCustom extends JButton {
         this.hoverStart = hoverStart;
         this.hoverEnd = hoverEnd;
         this.pressedColor = pressedColor;
+        this.textColor = textColor;
 
         hover = false;
         pressed = false;
@@ -74,7 +76,7 @@ public class JButtonCustom extends JButton {
         });
 
         // Ridisegna quando cambia lo stato enabled
-        addPropertyChangeListener("enabled", evt -> {
+        addPropertyChangeListener("enabled", e -> {
             hover = false;
             pressed = false;
             repaint();
@@ -89,27 +91,21 @@ public class JButtonCustom extends JButton {
     @Override
     protected void paintComponent(Graphics g) {
         Graphics2D g2d = (Graphics2D) g.create();
-        g2d.setRenderingHint(RenderingHints.KEY_ANTIALIASING,
-                RenderingHints.VALUE_ANTIALIAS_ON);
+        g2d.setRenderingHint(RenderingHints.KEY_ANTIALIASING, RenderingHints.VALUE_ANTIALIAS_ON);
 
         int w = getWidth();
         int h = getHeight();
 
         if (pressed) {
             g2d.setColor(pressedColor);
-            g2d.fillRoundRect(0, 0, w, h, arc, arc);
-            setForeground(Color.WHITE);
         } else if (hover) {
             GradientPaint gp = new GradientPaint(0, 0, hoverStart, 0, h, hoverEnd);
             g2d.setPaint(gp);
-            g2d.fillRoundRect(0, 0, w, h, arc, arc);
-            setForeground(Color.WHITE);
         } else {
             GradientPaint gp = new GradientPaint(0, 0, colorStart, 0, h, colorEnd);
             g2d.setPaint(gp);
-            g2d.fillRoundRect(0, 0, w, h, arc, arc);
-            setForeground(Color.WHITE);
         }
+        g2d.fillRoundRect(0, 0, w, h, arc, arc);
 
         g2d.dispose();
         super.paintComponent(g);

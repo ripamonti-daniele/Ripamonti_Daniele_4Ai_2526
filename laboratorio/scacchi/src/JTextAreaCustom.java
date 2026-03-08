@@ -1,4 +1,6 @@
 import javax.swing.*;
+import javax.swing.event.DocumentEvent;
+import javax.swing.event.DocumentListener;
 import java.awt.*;
 
 public class JTextAreaCustom extends JTextArea {
@@ -13,6 +15,24 @@ public class JTextAreaCustom extends JTextArea {
         setLineWrap(true);
         setWrapStyleWord(true);
         setOpaque(false);
+
+        getDocument().addDocumentListener(new DocumentListener() {
+            @Override
+            public void insertUpdate(DocumentEvent e) {
+                SwingUtilities.invokeLater(() -> {
+                    String testo = JTextAreaCustom.this.getText();
+                    if (testo.length() > 15) {
+                        JTextAreaCustom.this.setText(testo.substring(0, 15));
+                    }
+                });
+            }
+
+            @Override
+            public void removeUpdate(DocumentEvent e) {}
+
+            @Override
+            public void changedUpdate(DocumentEvent e) {}
+        });
     }
 
     public JTextAreaCustom(String text, int x, int y, int width, int height) {

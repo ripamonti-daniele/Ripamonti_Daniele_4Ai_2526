@@ -41,6 +41,13 @@ public class JTextAreaCustom extends JTextArea {
     }
 
     @Override
+    public void setEditable(boolean b) {
+        super.setEditable(b);
+        if (b) setCaretColor(Color.black);
+        else setCaretColor(new Color(0,0,0,0));
+    }
+
+    @Override
     protected void paintComponent(Graphics g) {
         Graphics2D g2d = (Graphics2D) g.create();
         g2d.setRenderingHint(RenderingHints.KEY_ANTIALIASING, RenderingHints.VALUE_ANTIALIAS_ON);
@@ -55,12 +62,5 @@ public class JTextAreaCustom extends JTextArea {
         setMargin(new Insets((getHeight() - altezzaCarattere) / 2, getWidth() / 20, (getHeight() + altezzaCarattere) / 2, getWidth() / 20));
 
         super.paintComponent(g);
-    }
-
-    @Override
-    public void setEditable(boolean b) {
-        super.setEditable(b);
-        if (b) setCaretColor(Color.black);
-        else setCaretColor(new Color(0,0,0,0));
     }
 }

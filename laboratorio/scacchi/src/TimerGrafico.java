@@ -4,17 +4,21 @@ import java.awt.event.ActionEvent;
 
 public class TimerGrafico extends JLabel {
     private final Timer timer;
+    private int millesimi;
     private int ore;
     private int minuti;
     private int secondi;
     private int guadagno;
+    private int oreDefault;
+    private int minutiDefault;
+    private int secondiDefault;
     private boolean tempoScaduto;
     private boolean off;
     private boolean modificaTesto;
     private final Color sfondo;
 
     public TimerGrafico(int ore, int minuti, int secondi, int guadagno, Color sfondo, Color textColor) {
-        setTimer(ore, minuti, secondi, guadagno);
+        inizializzaTimer(ore, minuti, secondi, guadagno);
         displayTimer();
         tempoScaduto = false;
         modificaTesto = false;
@@ -22,53 +26,46 @@ public class TimerGrafico extends JLabel {
         setOpaque(false);
         setForeground(textColor);
 
-        timer = new Timer(1000, (ActionEvent e) -> {
-            TimerGrafico.this.secondi--;
-            aggiorna();
-            displayTimer();
+        timer = new Timer(1, (ActionEvent e) -> {
+            millesimi++;
+            if (millesimi == 1000) {
+                aggiorna();
+                millesimi = 0;
+            }
         });
     }
 
-    public void start() {
-        if (!off && !timer.isRunning()) timer.start();
-    }
-
-    public void pause() {
-        if (timer.isRunning()) {
-            timer.stop();
-        }
-    }
-
-    public void resume() {
-        start();
-    }
-
-    public boolean isRunning() {
-        return timer.isRunning();
-    }
-
-    public void setTimer(int ore, int minuti, int secondi, int guadagno) {
-        this.ore = ore;
-        this.minuti = minuti;
-        this.secondi = secondi;
+    private void inizializzaTimer(int ore, int minuti, int secondi, int guadagno) {
+        oreDefault = ore;
+        minutiDefault = minuti;
+        secondiDefault = secondi;
         this.guadagno = guadagno;
 
-        if (ore > 23) this.ore = 23;
-        if (minuti > 59) this.minuti = 59;
-        if (secondi > 59) this.secondi = 59;
+        if (ore > 23) oreDefault = 23;
+        if (minuti > 59) minutiDefault = 59;
+        if (secondi > 59) secondiDefault = 59;
         if (guadagno > 60) this.guadagno = 60;
 
-        if (ore < 0) this.ore = 0;
-        if (minuti < 0) this.minuti = 0;
-        if (secondi < 0) this.secondi = 0;
+        if (ore < 0) oreDefault = 0;
+        if (minuti < 0) minutiDefault = 0;
+        if (secondi < 0) secondiDefault = 0;
         if (guadagno < 0) this.guadagno = 0;
 
-        off = (ore == 0 && minuti == 0 && secondi == 0);
+        this.ore = oreDefault;
+        this.minuti = minutiDefault;
+        this.secondi = secondiDefault;
+
+        off = (oreDefault == 0 && minutiDefault == 0 && secondiDefault == 0);
+    }
+
+    private void setTimer(int ore, int minuti, int secondi, int guadagno) {
+        reset();
+        inizializzaTimer(ore, minuti, secondi, guadagno);
     }
 
     private void aggiorna() {
-        if (ore == 0 && minuti == 0 && secondi == -1) {
-            secondi = 0;
+        secondi--;
+        if (ore == 0 && minuti == 0 && secondi == 0) {
             timer.stop();
             tempoScaduto = true;
         }
@@ -81,6 +78,44 @@ public class TimerGrafico extends JLabel {
             minuti = 59;
             ore--;
         }
+        displayTimer();
+    }
+
+    public void start() {
+        if (!off && !timer.isRunning()) timer.start();
+    }
+
+    public void pause() {
+        if (timer.isRunning()) {
+            timer.stop();
+            sommaGuadagno();
+        }
+    }
+
+    public void reset() {
+        pause();
+        millesimi = 0;
+        ore = oreDefault;
+        minuti = minutiDefault;
+        secondi = secondiDefault;
+        if (!off) {
+            tempoScaduto = false;
+            displayTimer();
+        }
+    }
+
+    public void invertiStato() {
+        if (!off) {
+            if (timer.isRunning()) {
+                timer.stop();
+                sommaGuadagno();
+            }
+            else timer.start();
+        }
+    }
+
+    public boolean isRunning() {
+        return timer.isRunning();
     }
 
     public boolean isTempoScaduto() {
@@ -110,6 +145,7 @@ public class TimerGrafico extends JLabel {
             minuti = 59;
             secondi = 59;
         }
+        displayTimer();
     }
 
     private void displayTimer() {

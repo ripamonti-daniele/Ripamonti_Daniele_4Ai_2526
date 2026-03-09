@@ -9,7 +9,6 @@ public class JButtonCustom extends JButton {
     private final Color hoverStart;
     private final Color hoverEnd;
     private final Color pressedColor;
-    private final Color textColor;
 
     private boolean hover;
     private boolean pressed;
@@ -26,20 +25,15 @@ public class JButtonCustom extends JButton {
         setCursor(new Cursor(Cursor.HAND_CURSOR));
         setFont(new Font("Segoe UI", Font.BOLD, Math.max(12, height / 4)));
 
-        // Colori
         this.colorStart = colorStart;
         this.colorEnd = colorEnd;
         this.hoverStart = hoverStart;
         this.hoverEnd = hoverEnd;
         this.pressedColor = pressedColor;
-        this.textColor = textColor;
-
         hover = false;
         pressed = false;
+        arc = Math.max(10, height / 4);
 
-        arc = Math.max(10, height / 4); // arc circa 1/4 altezza
-
-        // Mouse listener
         addMouseListener(new MouseAdapter() {
             @Override
             public void mouseEntered(MouseEvent e) {
@@ -98,10 +92,12 @@ public class JButtonCustom extends JButton {
 
         if (pressed) {
             g2d.setColor(pressedColor);
-        } else if (hover) {
+        }
+        else if (hover) {
             GradientPaint gp = new GradientPaint(0, 0, hoverStart, 0, h, hoverEnd);
             g2d.setPaint(gp);
-        } else {
+        }
+        else {
             GradientPaint gp = new GradientPaint(0, 0, colorStart, 0, h, colorEnd);
             g2d.setPaint(gp);
         }

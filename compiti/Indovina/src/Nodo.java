@@ -40,4 +40,8 @@ public class Nodo implements Serializable {
         return urlImmagine;
     }
 
+    public void setTesto(String testo) { this.testo = testo; }
+
+    public void setUrlImmagine(URL url) { this.urlImmagine = url; }
+
 }

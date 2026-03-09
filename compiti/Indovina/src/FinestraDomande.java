@@ -1,6 +1,7 @@
 import java.awt.*;
 import java.awt.event.*;
 import javax.imageio.ImageIO;
+import javax.swing.*;
 import java.io.IOException;
 
 public class FinestraDomande extends Frame implements ActionListener {
@@ -17,6 +18,7 @@ public class FinestraDomande extends Frame implements ActionListener {
     private ImagePanel immagineImp;
     private Panel panelCentro;
 
+    private Albero albero;
     private Nodo nodoCorrente;
 
     private void creaFinestraGrafica(){
@@ -63,10 +65,11 @@ public class FinestraDomande extends Frame implements ActionListener {
         setVisible(true);
     }
 
-    public FinestraDomande(Nodo radice) {
+    public FinestraDomande(Albero albero) {
 
         //TODO radice può essere null!
-        nodoCorrente = radice;      //il nodo corrente punta alla radice
+        this.albero = albero;
+        nodoCorrente = albero.getRadice();      //il nodo corrente punta alla radice
 
         //crea la finestra grafica
         creaFinestraGrafica();
@@ -97,28 +100,56 @@ public class FinestraDomande extends Frame implements ActionListener {
             }
 
             //disabilito i pulsanti Si / No (così non si può intraprendere alcuna ulteriore azione)
-            siButton.setEnabled(false);
-            noButton.setEnabled(false);
+//            siButton.setEnabled(false);
+//            noButton.setEnabled(false);
         }
     }
 
     @Override
     public void actionPerformed(ActionEvent e) {
 
-        //se l'utente preme si, mi sposto sul ramo dell'albero "si"
-        if (e.getSource() == siButton) {
-            nodoCorrente = nodoCorrente.si;
-            //aggiorno la finestra grafica
+        if (nodoCorrente == null) return;
+
+        if (nodoCorrente.isAnimale()) {  // nodo foglia
+            if (e.getSource() == siButton) {
+                JOptionPane.showMessageDialog(this, "Indovinato!");
+                siButton.setEnabled(false);
+                noButton.setEnabled(false);
+            } else if (e.getSource() == noButton) {
+                // apprendimento
+                String nuovoAnimale = JOptionPane.showInputDialog(this,
+                        "Quale animale stavi pensando?");
+                if (nuovoAnimale == null || nuovoAnimale.isEmpty()) return;
+
+                String nuovaDomanda = JOptionPane.showInputDialog(this,
+                        "Scrivi una domanda che distingue " + nuovoAnimale + " da " + nodoCorrente.getTesto());
+                if (nuovaDomanda == null || nuovaDomanda.isEmpty()) return;
+
+                int risposta = JOptionPane.showConfirmDialog(this,
+                        "La risposta alla domanda per " + nuovoAnimale + "?",
+                        "Risposta", JOptionPane.YES_NO_OPTION);
+
+                Nodo animaleNodo = new Nodo(nuovoAnimale, null);
+                Nodo vecchioAnimaleNodo = new Nodo(nodoCorrente.getTesto(), nodoCorrente.getUrlImmagine());
+
+                // nodo corrente diventa domanda
+                nodoCorrente.setTesto(nuovaDomanda);
+                nodoCorrente.setUrlImmagine(null);
+                if (risposta == JOptionPane.YES_OPTION) {
+                    nodoCorrente.si = animaleNodo;
+                    nodoCorrente.no = vecchioAnimaleNodo;
+                } else {
+                    nodoCorrente.si = vecchioAnimaleNodo;
+                    nodoCorrente.no = animaleNodo;
+                }
+                Serializzatore.serializza(albero);
+                aggiornaFinestra();
+            }
+        } else if (nodoCorrente.isDomanda()) {  // nodo domanda
+            if (e.getSource() == siButton) nodoCorrente = nodoCorrente.si;
+            else if (e.getSource() == noButton) nodoCorrente = nodoCorrente.no;
             aggiornaFinestra();
         }
-
-        //se l'utente preme no, mi sposto sul ramo dell'albero "no"
-        if (e.getSource() == noButton) {
-            nodoCorrente = nodoCorrente.no;
-            //aggiorno la finestra grafica
-            aggiornaFinestra();
-        }
-
     }
 
 }

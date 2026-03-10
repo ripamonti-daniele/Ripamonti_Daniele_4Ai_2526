@@ -1,5 +1,6 @@
 import javax.swing.*;
 import java.awt.*;
+import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
 import java.awt.event.MouseListener;
 import java.util.ArrayList;
@@ -16,6 +17,7 @@ public class GestoreGrafico {
     private boolean promozione;
     private int[] posPromozione;
     public final int lunghezzaScacchiera;
+    public final int lunghezzaCasella;
     public final int DIMENSIONE = 8;
     private ImageIcon pedoneW; //da mettere in un array e rivedere controlli
     private ImageIcon alfiereW;
@@ -41,8 +43,11 @@ public class GestoreGrafico {
     private final JButton btnBotNero;
     private final TimerGrafico timerBianco;
     private final TimerGrafico timerNero;
+    private final JLabel materialeBianco;
+    private final JLabel materialeNero;
 
     public GestoreGrafico(Scacchiera scacchiera, int lunghezzaScacchiera, Color sfondo, ImageIcon pedoneW, ImageIcon alfiereW, ImageIcon cavalloW, ImageIcon torreW, ImageIcon reginaW, ImageIcon reW, ImageIcon pedoneB, ImageIcon alfiereB, ImageIcon cavalloB, ImageIcon torreB, ImageIcon reginaB, ImageIcon reB) {
+        //inizializzazione attributi e scacchiera
         numeroToLettera.put(1, "A");
         numeroToLettera.put(2, "B");
         numeroToLettera.put(3, "C");
@@ -67,40 +72,80 @@ public class GestoreGrafico {
 
         this.scacchiera = scacchiera;
         this.lunghezzaScacchiera = lunghezzaScacchiera;
+        lunghezzaCasella = lunghezzaScacchiera / 8;
         casellePanel = new Casella[DIMENSIONE][DIMENSIONE];
         casellePromozione = new Casella[4];
-        promozione = false;
-        posPromozione = new int[2];
         gioca = false;
         rotazioneScacchiera = true;
+        promozione = false;
+        posPromozione = new int[2];
         inizializza();
         aggiornaScacchiera(scacchiera.getScacchiera());
 
+        //inizializzazione parte grafica gestione utente
         panelInfo = new JPanel();
-        btnGioca = new JButtonCustom("<html>Gioca</html>", 0, lunghezzaScacchiera / 2 - lunghezzaScacchiera / 16, lunghezzaScacchiera / 4, lunghezzaScacchiera / 8, new Color(66, 133, 244), new Color(52, 103, 206), new Color(90, 160, 255), new Color(66, 133, 244), new Color(30, 70, 180), Color.white);
-        btnRotazioneScacchiera = new JButtonCustom("<html><div style='text-align:center;'>Ruota<br>On</div></html>", lunghezzaScacchiera / 4 + lunghezzaScacchiera / 100, lunghezzaScacchiera / 2 - lunghezzaScacchiera / 16, lunghezzaScacchiera / 4, lunghezzaScacchiera / 8, new Color(250,250,250), new Color(190,190,190), new Color(255,255,255), new Color(200,200,200), new Color(170,170,170), Color.BLACK);
-//        btnRotazioneScacchiera = new JButtonCustom("<html><div style='text-align:center;'>Ruota<br>On</div><html>", lunghezzaScacchiera / 4 + lunghezzaScacchiera / 100, lunghezzaScacchiera / 2 - lunghezzaScacchiera / 16, lunghezzaScacchiera / 4, lunghezzaScacchiera / 8, new Color(66, 133, 244), new Color(52, 103, 206), new Color(90, 160, 255), new Color(66, 133, 244), new Color(30, 70, 180), Color.white);
-        labelVittoria = new JLabel();
-        nomeBianco = new JTextAreaCustom("Giocatore 1", 0, lunghezzaScacchiera - lunghezzaScacchiera / 16,  lunghezzaScacchiera / 4, lunghezzaScacchiera / 16);
+        labelVittoria = new JLabelCustom(null, Color.red);
         nomeNero = new JTextAreaCustom("Giocatore 2", 0, 0,  lunghezzaScacchiera / 4, lunghezzaScacchiera / 16);
-        btnBotBianco = new JButtonCustom("<html><div style='text-align:center;'>Bot<br>Off</div></html>", lunghezzaScacchiera / 4 + lunghezzaScacchiera / 100, lunghezzaScacchiera - lunghezzaScacchiera / 16,  lunghezzaScacchiera / 16, lunghezzaScacchiera / 16, new Color(51, 51, 51), new Color(0, 0, 0), new Color(85, 85, 85), new Color(0, 0, 0), new Color(0, 0, 0), Color.WHITE);
-        btnBotNero = new JButtonCustom("<html><div style='text-align:center;'>Bot<br>Off</div></html>", lunghezzaScacchiera / 4 + lunghezzaScacchiera / 100, 0,  lunghezzaScacchiera / 16, lunghezzaScacchiera / 16, new Color(51, 51, 51), new Color(0, 0, 0), new Color(85, 85, 85), new Color(0, 0, 0), new Color(0, 0, 0), Color.WHITE);
-        timerBianco = new TimerGrafico(0, 0, 10, 3, Color.white, Color.black);
-        timerNero = new TimerGrafico(0, 0, 10, 3, Color.black, Color.white);
+        timerBianco = new TimerGrafico(0, 10, 0, 0, Color.white, Color.black);
+        timerNero = new TimerGrafico(0, 10, 0, 0, Color.black, Color.white);
+        materialeBianco = new JLabelCustom(null, Color.white);
+        materialeNero = new JLabelCustom(null, Color.black);
+        btnGioca = new JButtonCustom("<html>Gioca</html>", 0, lunghezzaCasella * 4 - lunghezzaCasella / 2, lunghezzaCasella * 2, lunghezzaCasella, new Color(66, 133, 244), new Color(52, 103, 206), new Color(90, 160, 255), new Color(66, 133, 244), new Color(30, 70, 180), Color.white);
+        btnRotazioneScacchiera = new JButtonCustom("<html><div style='text-align:center;'>Ruota<br>On</div></html>", lunghezzaCasella * 2 + lunghezzaCasella / 15, lunghezzaCasella * 4 - lunghezzaCasella / 2, lunghezzaCasella * 2, lunghezzaCasella, new Color(250,250,250), new Color(190,190,190), new Color(255,255,255), new Color(200,200,200), new Color(170,170,170), Color.BLACK);
+        nomeBianco = new JTextAreaCustom("Giocatore 1", 0, lunghezzaScacchiera - lunghezzaCasella / 2,  lunghezzaCasella * 2, lunghezzaCasella / 2);
+        btnBotBianco = new JButtonCustom("<html><div style='text-align:center;'>Bot<br>Off</div></html>", lunghezzaCasella * 2 + lunghezzaCasella / 15, lunghezzaScacchiera - lunghezzaCasella / 2,  lunghezzaCasella / 2, lunghezzaCasella / 2, new Color(51, 51, 51), new Color(0, 0, 0), new Color(85, 85, 85), new Color(0, 0, 0), new Color(0, 0, 0), Color.WHITE);
+        btnBotNero = new JButtonCustom("<html><div style='text-align:center;'>Bot<br>Off</div></html>", lunghezzaCasella * 2 + lunghezzaCasella / 15, 0,  lunghezzaCasella / 2, lunghezzaCasella / 2, new Color(51, 51, 51), new Color(0, 0, 0), new Color(85, 85, 85), new Color(0, 0, 0), new Color(0, 0, 0), Color.WHITE);
 
-        panelInfo.setBounds(lunghezzaScacchiera + lunghezzaScacchiera / 6, 0, lunghezzaScacchiera * 3 / 4, lunghezzaScacchiera);
+        //setBounds
+        panelInfo.setBounds(lunghezzaScacchiera + lunghezzaCasella * 4 / 3, 0, lunghezzaCasella * 6, lunghezzaScacchiera);
+        labelVittoria.setBounds(0, lunghezzaScacchiera / 3, lunghezzaCasella * 4 + lunghezzaCasella / 15, lunghezzaCasella * 4 / 5);
+        timerBianco.setBounds(0, lunghezzaScacchiera - lunghezzaCasella - lunghezzaCasella / 15,  lunghezzaCasella * 4 / 3, lunghezzaCasella / 2);
+        timerNero.setBounds(0, lunghezzaCasella / 2 + lunghezzaCasella / 15,  lunghezzaCasella * 4 / 3, lunghezzaCasella / 2);
+        materialeBianco.setBounds(lunghezzaCasella * 4 / 3 + lunghezzaCasella / 15, lunghezzaScacchiera - lunghezzaCasella - lunghezzaCasella / 15,  lunghezzaScacchiera / 7, lunghezzaCasella / 2);
+        materialeNero.setBounds(lunghezzaCasella * 4 / 3 + lunghezzaCasella / 15, lunghezzaCasella / 2 + lunghezzaCasella / 15,  lunghezzaScacchiera / 7, lunghezzaCasella / 2);
+
+        //modifiche grafiche
         panelInfo.setLayout(null);
         panelInfo.setOpaque(true);
         panelInfo.setBackground(sfondo);
 
+        Font font = new Font("Segoe UI", Font.BOLD, Math.max(12, lunghezzaCasella / 4));
+        labelVittoria.setOpaque(false);
+        labelVittoria.setForeground(Color.white);
+        labelVittoria.setFont(font);
+
+        timerBianco.setFont(font);
+        timerNero.setFont(font);
+        setListenerTimer(timerBianco);
+        setListenerTimer(timerNero);
+
+        Font fontPiccolo = new Font("Segoe UI", Font.BOLD, Math.max(12, lunghezzaScacchiera / 60));
+        materialeBianco.setForeground(Color.black);
+        materialeBianco.setFont(fontPiccolo);
+        materialeNero.setForeground(Color.white);
+        materialeNero.setFont(fontPiccolo);
+
+        panelInfo.add(btnGioca);
+        panelInfo.add(btnRotazioneScacchiera);
+        panelInfo.add(nomeBianco);
+        panelInfo.add(nomeNero);
+        panelInfo.add(btnBotBianco);
+        panelInfo.add(btnBotNero);
+        panelInfo.add(labelVittoria);
+        panelInfo.add(timerBianco);
+        panelInfo.add(timerNero);
+        panelInfo.add(materialeBianco);
+        panelInfo.add(materialeNero);
+
+        //listener gestione utente
         btnGioca.addActionListener(e -> {
             scacchiera.reset();
             aggiornaScacchiera(scacchiera.getScacchiera());
             ruotaScacchiera(scacchiera.getTurno());
             disegna();
+            labelVittoria.setText(null);
             btnGioca.setEnabled(false);
             btnGioca.setText("<html>Gioca ancora</html>");
-            labelVittoria.setText(null);
             gioca = true;
             nomeBianco.setText(nomeBianco.getText().trim());
             nomeNero.setText(nomeNero.getText().trim());
@@ -112,6 +157,7 @@ public class GestoreGrafico {
             btnBotBianco.setEnabled(false);
             btnBotNero.setEnabled(false);
             btnRotazioneScacchiera.setEnabled(false);
+            aggiornaLabelMateriale();
             timerBianco.reset();
             timerNero.reset();
             timerBianco.start();
@@ -122,32 +168,6 @@ public class GestoreGrafico {
             if (rotazioneScacchiera) btnRotazioneScacchiera.setText("<html><div style='text-align:center;'>Ruota<br>On</div></html>");
             else btnRotazioneScacchiera.setText("<html><div style='text-align:center;'>Ruota<br>Off</div></html>");
         });
-
-        Font font = new Font("Segoe UI", Font.BOLD, Math.max(12, lunghezzaScacchiera / 32));
-        labelVittoria.setBounds(0, lunghezzaScacchiera / 3, lunghezzaScacchiera / 2 + lunghezzaScacchiera / 100, lunghezzaScacchiera / 10);
-        labelVittoria.setOpaque(false);
-        labelVittoria.setHorizontalAlignment(SwingConstants.CENTER);
-        labelVittoria.setForeground(Color.black);
-        labelVittoria.setFont(font);
-
-        timerBianco.setBounds(0, lunghezzaScacchiera - lunghezzaScacchiera / 8 - lunghezzaScacchiera / 100,  lunghezzaScacchiera / 6, lunghezzaScacchiera / 16);
-        timerBianco.setFont(font);
-        timerBianco.setHorizontalAlignment(SwingConstants.CENTER);
-        setListenerTimer(timerBianco);
-        timerNero.setBounds(0, lunghezzaScacchiera / 16 + lunghezzaScacchiera / 100,  lunghezzaScacchiera / 6, lunghezzaScacchiera / 16);
-        timerNero.setFont(font);
-        timerNero.setHorizontalAlignment(SwingConstants.CENTER);
-        setListenerTimer(timerNero);
-
-        panelInfo.add(btnGioca);
-        panelInfo.add(btnRotazioneScacchiera);
-        panelInfo.add(nomeBianco);
-        panelInfo.add(nomeNero);
-        panelInfo.add(btnBotBianco);
-        panelInfo.add(btnBotNero);
-        panelInfo.add(labelVittoria);
-        panelInfo.add(timerBianco);
-        panelInfo.add(timerNero);
     }
 
     public GestoreGrafico(Scacchiera scacchiera, int lunghezzaScacchiera, Color sfondo) {
@@ -169,7 +189,6 @@ public class GestoreGrafico {
 
     private void inizializza() {
         Casella.gestisciGrafica = true;
-        int lunghezzaCasella = lunghezzaScacchiera / 8;
         for (int i = 0; i < DIMENSIONE; i++) {
             for (int j = 0; j < DIMENSIONE; j++) {
                 Color c;
@@ -206,11 +225,6 @@ public class GestoreGrafico {
         timerNero.pause();
     }
 
-    private void setImgCasella(Color col, Casella c, ImageIcon imgW, ImageIcon imgB) {
-        if (col.equals(Color.white)) c.setImg(imgW);
-        else c.setImg(imgB);
-    }
-
     private void aggiornaScacchiera(Pedina[][] scacchiera) {
         for (int i = 0; i < DIMENSIONE; i++) {
             for (int j = 0; j < DIMENSIONE; j++) {
@@ -233,6 +247,11 @@ public class GestoreGrafico {
         }
     }
 
+    private void setImgCasella(Color col, Casella c, ImageIcon imgW, ImageIcon imgB) {
+        if (col.equals(Color.white)) c.setImg(imgW);
+        else c.setImg(imgB);
+    }
+
     public JPanel[][] getCasellePanel() {
         Casella[][] copia = new Casella[DIMENSIONE][DIMENSIONE];
         for (int i = 0; i < DIMENSIONE; i++) {
@@ -248,6 +267,7 @@ public class GestoreGrafico {
             if (!promozione && gioca) {
                 Pedina p = scacchiera.getPedina(new int[]{y, x});
                 if (p != null && p.getColore().equals(scacchiera.getTurno())) Casella.casellaSelezionata = casellePanel[y][x].id;
+                else Casella.casellaSelezionata = null;
                 resetMosseValide();
 
                 if (scacchiera.getCasella_selezionata() == null || !scacchiera.muoviPedina(new int[]{y, x})) { //se la casella selezionata non è null allora seleziona la pedina; se è null prova a spostarla e se non riesce seleziona la pedina dove si intendeva spostare quella selezionata precedentemente
@@ -255,6 +275,7 @@ public class GestoreGrafico {
                     if (mosseValide != null) mostraMosseValide(mosseValide);
                 }
                 else if ((y == 0 || y == 7) && scacchiera.getPedina(new int[]{y, x}) instanceof Pedone) {
+                    Casella.casellaSelezionata = casellePanel[y][x].id;
                     promozione = true;
                     Casella.sceltaPromozione = true;
                     posPromozione = new int[]{y, x};
@@ -283,9 +304,36 @@ public class GestoreGrafico {
                         }
                     }
                 }
-
+                aggiornaLabelMateriale();
                 aggiornaScacchiera(scacchiera.getScacchiera());
                 disegna();
+            }
+        });
+    }
+
+    private void setListenerPromozione(int i) {
+        casellePromozione[i].setListener(() -> {
+            if (promozione) {
+                scacchiera.promuoviPedone(posPromozione, i + 1);
+                promozione = false;
+                Casella.sceltaPromozione = false;
+                for (Casella c : casellePromozione) c.rimuoviImg();
+                scacchiera.cambiaTurno();
+                if (rotazioneScacchiera) ruotaScacchiera(scacchiera.getTurno());
+                aggiornaLabelMateriale();
+                aggiornaScacchiera(scacchiera.getScacchiera());
+                disegna();
+            }
+        });
+    }
+
+    private void setListenerTimer(TimerGrafico t) {
+        t.addPropertyChangeListener("text", e -> {
+            if (t.isTempoScaduto()) {
+                String testo = nomeBianco.getText() + " (bianco)";
+                if (t == timerBianco) testo = nomeNero.getText() + " (nero)";
+                labelVittoria.setText("<html><div style='text-align:center;'>Tempo scaduto:<br>Vince " + testo + "</div></html>");
+                reset();
             }
         });
     }
@@ -306,30 +354,35 @@ public class GestoreGrafico {
         }
     }
 
-    private void setListenerPromozione(int i) {
-        casellePromozione[i].setListener(() -> {
-            if (promozione) {
-                scacchiera.promuoviPedone(posPromozione, i + 1);
-                promozione = false;
-                Casella.sceltaPromozione = false;
-                for (Casella c : casellePromozione) c.rimuoviImg();
-                scacchiera.cambiaTurno();
-                if (rotazioneScacchiera) ruotaScacchiera(scacchiera.getTurno());
-                aggiornaScacchiera(scacchiera.getScacchiera());
-                disegna();
+    private void ruotaScacchiera(Color c) {
+        Casella.gestisciGrafica = true;
+        int lunghezzaCasella = lunghezzaScacchiera / 8;
+        for (int i = 0; i < DIMENSIONE; i++) {
+            for (int j = 0; j < DIMENSIONE; j++) {
+                if (c.equals(Color.white)) {
+                    casellePanel[i][j].setBounds(lunghezzaCasella * j, lunghezzaCasella * i, lunghezzaCasella, lunghezzaCasella);
+                    Casella.scacchieraGirata = false;
+                }
+                else {
+                    casellePanel[i][j].setBounds(lunghezzaCasella * (7 - j),  lunghezzaCasella * (7 - i), lunghezzaCasella, lunghezzaCasella);
+                    Casella.scacchieraGirata = true;
+                }
             }
-        });
+        }
+        Casella.gestisciGrafica = false;
     }
 
-    private void setListenerTimer(TimerGrafico t) {
-        t.addPropertyChangeListener("text", e -> {
-            if (t.isTempoScaduto()) {
-                String testo = nomeBianco.getText() + " (bianco)";
-                if (t == timerBianco) testo = nomeNero.getText() + " (nero)";
-                labelVittoria.setText("<html><div style='text-align:center;'>Tempo scaduto:<br>Vince " + testo + "</div></html>");
-                reset();
-            }
-        });
+    private void aggiornaLabelMateriale() {
+        int matBianco = scacchiera.getMateriale(Color.white);
+        int matNero = scacchiera.getMateriale(Color.black);
+        String diffBianco = "";
+        String diffNero = "";
+        if (matBianco > matNero) diffBianco = "+";
+        else if (matBianco < matNero) diffNero = "+";
+        diffBianco += String.valueOf(matBianco - matNero);
+        diffNero += String.valueOf(matNero - matBianco);
+        materialeBianco.setText("<html>Materiale: " + matBianco + "<br>Differenza: " + diffBianco + "</html>");
+        materialeNero.setText("<html>Materiale: " + matNero + "<br>Differenza: " + diffNero + "</html>");
     }
 
     public void mettiASchermo(JPanel panel) {
@@ -355,24 +408,6 @@ public class GestoreGrafico {
         for (int[] m : mosseValide) {
             casellePanel[m[0]][m[1]].mossaValida = true;
         }
-    }
-
-    private void ruotaScacchiera(Color c) {
-        Casella.gestisciGrafica = true;
-        int lunghezzaCasella = lunghezzaScacchiera / 8;
-        for (int i = 0; i < DIMENSIONE; i++) {
-            for (int j = 0; j < DIMENSIONE; j++) {
-                if (c.equals(Color.white)) {
-                    casellePanel[i][j].setBounds(lunghezzaCasella * j, lunghezzaCasella * i, lunghezzaCasella, lunghezzaCasella);
-                    Casella.scacchieraGirata = false;
-                }
-                else {
-                    casellePanel[i][j].setBounds(lunghezzaCasella * (7 - j),  lunghezzaCasella * (7 - i), lunghezzaCasella, lunghezzaCasella);
-                    Casella.scacchieraGirata = true;
-                }
-            }
-        }
-        Casella.gestisciGrafica = false;
     }
 
     private void disegna() {
@@ -495,7 +530,7 @@ public class GestoreGrafico {
         this.reB = reB;
     }
 
-    private static class Casella extends JPanel implements MouseListener {
+    private static class Casella extends JPanel {
         private Color colore;
         private final JLabel label;
         private int lunghezzaLato;
@@ -515,8 +550,14 @@ public class GestoreGrafico {
             setId(id);
             this.setSize(new Dimension(lunghezzaLato, lunghezzaLato));
             this.add(label);
-            this.addMouseListener(this);
             mossaValida = false;
+
+            addMouseListener(new MouseAdapter() {
+                @Override
+                public void mousePressed(MouseEvent e) {
+                    if (listener != null) listener.casellaCliccata();
+                }
+            });
         }
 
         public Casella(Color colore, int lunghezzaLato, String id, ImageIcon img) {
@@ -592,27 +633,6 @@ public class GestoreGrafico {
         }
 
         @Override
-        public void mouseClicked(MouseEvent e) {
-        }
-
-        @Override
-        public void mousePressed(MouseEvent e) {
-            if (listener != null) listener.casellaCliccata();
-        }
-
-        @Override
-        public void mouseReleased(MouseEvent e) {
-        }
-
-        @Override
-        public void mouseEntered(MouseEvent e) {
-        }
-
-        @Override
-        public void mouseExited(MouseEvent e) {
-        }
-
-        @Override
         protected void paintComponent(Graphics g) {
             super.paintComponent(g);
             Graphics2D g2d = (Graphics2D) g;
@@ -622,7 +642,7 @@ public class GestoreGrafico {
             g2d.setRenderingHint(RenderingHints.KEY_ANTIALIASING, RenderingHints.VALUE_ANTIALIAS_ON);
 
             if (sceltaPromozione && this.id.equals("PROMOZIONE")) {
-                g2d.setColor(new Color(0, 128, 200, 100));
+                g2d.setColor(new Color(0, 128, 200));
                 g2d.fillRect(0, 0, getWidth() - 1, getHeight() - 1);
                 g2d.setColor(Color.black);
                 g2d.drawRect(0, 0, getWidth() - 1, getHeight() - 1);
@@ -666,6 +686,8 @@ public class GestoreGrafico {
                 }
             }
         }
+
+        //da rivedere
 
         @Override
         public void setBounds(Rectangle r) {

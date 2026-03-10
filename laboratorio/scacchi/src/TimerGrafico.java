@@ -25,6 +25,8 @@ public class TimerGrafico extends JLabel {
         this.sfondo = sfondo;
         setOpaque(false);
         setForeground(textColor);
+        setVerticalAlignment(SwingConstants.CENTER);
+        setHorizontalAlignment(SwingConstants.CENTER);
 
         timer = new Timer(1, (ActionEvent e) -> {
             millesimi++;
@@ -171,9 +173,8 @@ public class TimerGrafico extends JLabel {
         Graphics2D g2d = (Graphics2D) g.create();
         g2d.setRenderingHint(RenderingHints.KEY_ANTIALIASING, RenderingHints.VALUE_ANTIALIAS_ON);
 
-        int arc = 20;
         g2d.setColor(sfondo);
-        g2d.fillRoundRect(0, 0, getWidth(), getHeight(), arc, arc);
+        g2d.fillRoundRect(0, 0, getWidth(), getHeight(), 20, 20);
 
         g2d.dispose();
         super.paintComponent(g);

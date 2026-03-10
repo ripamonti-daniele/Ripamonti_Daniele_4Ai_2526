@@ -416,6 +416,14 @@ public class Scacchiera {
         else turno = Color.white;
     }
 
+    public int getMateriale(Color c) {
+        int materiale = 0;
+        for (Pedina[] riga : caselle) {
+            for (Pedina p : riga) if (p != null && p.getColore().equals(c)) materiale += p.getMateriale();
+        }
+        return materiale;
+    }
+
     @Override
     public String toString() {
         StringBuilder sb = new StringBuilder();

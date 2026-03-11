@@ -34,6 +34,7 @@ public enum IconaPedina {
 
     public ImageIcon getImageIcon(int dimensione) {
         ImageIcon icon = new ImageIcon(iconPath);
+        if (dimensione <= 0) return icon;
         if (icon.getIconWidth() == dimensione && icon.getIconHeight() == dimensione) return icon;
         Image image = icon.getImage().getScaledInstance(dimensione, dimensione, Image.SCALE_SMOOTH);
         return new ImageIcon(image);

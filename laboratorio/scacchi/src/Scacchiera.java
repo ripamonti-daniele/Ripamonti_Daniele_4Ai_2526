@@ -1,4 +1,7 @@
 import java.awt.*;
+import java.io.BufferedWriter;
+import java.io.FileWriter;
+import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -8,15 +11,21 @@ public class Scacchiera {
     private int mosseNeutre;
     private Color turno;
     private int[] casella_selezionata;
+    private int mosse;
     private List<int[]> mosseValide;
+    private BufferedWriter writer;
+    private final String SEP;
 
     public Scacchiera() {
         caselle = new Pedina[DIMENSIONE][DIMENSIONE];
         mosseNeutre = 0;
+        mosse = 0;
         turno = Color.white;
         casella_selezionata = null;
         mosseValide = new ArrayList<>();
         inizializza();
+        SEP = ";";
+        scriviScacchiera();
     }
 
     private void inizializza() {
@@ -45,6 +54,7 @@ public class Scacchiera {
 
     public void reset() {
         mosseNeutre = 0;
+        mosse = 0;
         turno = Color.white;
         casella_selezionata = null;
         mosseValide.clear();
@@ -89,6 +99,14 @@ public class Scacchiera {
             }
         }
         return tipoPedine;
+    }
+
+    public int getMosseNeutre() {
+        return mosseNeutre;
+    }
+
+    public int getMosse() {
+        return mosse;
     }
 
     private List<int[]> filtraMossePedone(int[] pos, List<int[]> mosseValide) {
@@ -370,6 +388,8 @@ public class Scacchiera {
             caselle[casella_selezionata[0]][casella_selezionata[1]] = null;
 
             mosseValide.clear();
+            mosse++;
+            scriviScacchiera();
         }
         casella_selezionata = null;
         return valido;
@@ -422,6 +442,45 @@ public class Scacchiera {
             for (Pedina p : riga) if (p != null && p.getColore().equals(c)) materiale += p.getMateriale();
         }
         return materiale;
+    }
+
+    private void scriviScacchiera() {
+        if (mosse == 0) {
+            try {
+                writer = new BufferedWriter(new FileWriter("partita.txt"));
+                writer.write("");
+                writer.close();
+            }
+            catch (IOException e) {
+                return;
+            }
+        }
+
+        try {
+            writer = new BufferedWriter(new FileWriter("partita.txt", true));
+            writer.write(mosse + "\n" + getStringaScacchiera());
+            writer.close();
+        }
+        catch (IOException _) {}
+    }
+
+    public String getStringaScacchiera() {
+        StringBuilder scacchiera;
+        scacchiera = new StringBuilder();
+        for (Pedina[] riga : caselle) {
+            for (Pedina p : riga) {
+                if (p == null) scacchiera.append("--");
+                else {
+                    if (p instanceof Regina) scacchiera.append("Q");
+                    else scacchiera.append(p.getClass().getSimpleName().charAt(0));
+                    if (p.getColore().equals(Color.white)) scacchiera.append("B");
+                    else scacchiera.append("N");
+                }
+                scacchiera.append(SEP);
+            }
+            scacchiera.append("\n");
+        }
+        return scacchiera.toString();
     }
 
     @Override

@@ -1,8 +1,7 @@
 //TODO
 // pareggi per ripetizione/mosse neutre
-// scrittura su file della situazione della scacchiera a ogni mossa fatta
-// aggiornamento di scacchieraPanel con lettura file
 // impostazione timer da parte dell'utente
+// velocità timer corretta
 // possibilità di spostarsi avanti e indietro nello stato della partita
 // l'enpassant mostra il cerchio vuoto
 // grafica migliore

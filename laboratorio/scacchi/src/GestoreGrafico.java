@@ -3,7 +3,6 @@ import java.awt.*;
 import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
 import java.util.ArrayList;
-import java.util.HashMap;
 import java.util.Map;
 import java.util.List;
 
@@ -18,19 +17,9 @@ public class GestoreGrafico {
     public final int lunghezzaScacchiera;
     public final int lunghezzaCasella;
     public final int DIMENSIONE = 8;
-    private ImageIcon pedoneW; //da mettere in un array e rivedere controlli
-    private ImageIcon alfiereW;
-    private ImageIcon cavalloW;
-    private ImageIcon torreW;
-    private ImageIcon reginaW;
-    private ImageIcon reW;
-    private ImageIcon pedoneB;
-    private ImageIcon alfiereB;
-    private ImageIcon cavalloB;
-    private ImageIcon torreB;
-    private ImageIcon reginaB;
-    private ImageIcon reB;
-    private final Map<Integer, String> numeroToLettera = new HashMap<>();
+    private ImageIcon[] immagini;
+    private final String SEP;
+    private final Map<Integer, String> numeroToLettera;
 
     private final JPanel panelInfo;
     private final JButton btnGioca;
@@ -45,30 +34,7 @@ public class GestoreGrafico {
     private final JLabel materialeBianco;
     private final JLabel materialeNero;
 
-    public GestoreGrafico(Scacchiera scacchiera, int lunghezzaScacchiera, Color sfondo, ImageIcon pedoneW, ImageIcon alfiereW, ImageIcon cavalloW, ImageIcon torreW, ImageIcon reginaW, ImageIcon reW, ImageIcon pedoneB, ImageIcon alfiereB, ImageIcon cavalloB, ImageIcon torreB, ImageIcon reginaB, ImageIcon reB) {
-        //inizializzazione attributi e scacchiera
-        numeroToLettera.put(1, "A");
-        numeroToLettera.put(2, "B");
-        numeroToLettera.put(3, "C");
-        numeroToLettera.put(4, "D");
-        numeroToLettera.put(5, "E");
-        numeroToLettera.put(6, "F");
-        numeroToLettera.put(7, "G");
-        numeroToLettera.put(8, "H");
-
-        setPedoneW(pedoneW);
-        setAlfiereW(alfiereW);
-        setCavalloW(cavalloW);
-        setTorreW(torreW);
-        setReginaW(reginaW);
-        setReW(reW);
-        setPedoneB(pedoneB);
-        setAlfiereB(alfiereB);
-        setCavalloB(cavalloB);
-        setTorreB(torreB);
-        setReginaB(reginaB);
-        setReB(reB);
-
+    public GestoreGrafico(Scacchiera scacchiera, int lunghezzaScacchiera, Color sfondo, ImageIcon[] immagini) {
         this.scacchiera = scacchiera;
         this.lunghezzaScacchiera = lunghezzaScacchiera;
         lunghezzaCasella = lunghezzaScacchiera / 8;
@@ -78,8 +44,11 @@ public class GestoreGrafico {
         rotazioneScacchiera = true;
         promozione = false;
         posPromozione = new int[2];
+        SEP = ";";
+        numeroToLettera = Map.of(1, "A", 2, "B", 3, "C", 4, "D", 5, "E", 6, "F", 7, "G", 8, "H");
+        setImmagini(immagini);
         inizializza();
-        aggiornaScacchiera(scacchiera.getScacchiera());
+        aggiornaScacchiera(scacchiera.getStringaScacchiera());
 
         //inizializzazione parte grafica gestione utente
         panelInfo = new JPanel();
@@ -123,6 +92,7 @@ public class GestoreGrafico {
         materialeBianco.setFont(fontPiccolo);
         materialeNero.setForeground(Color.white);
         materialeNero.setFont(fontPiccolo);
+        aggiornaLabelMateriale();
 
         panelInfo.add(btnGioca);
         panelInfo.add(btnRotazioneScacchiera);
@@ -139,7 +109,7 @@ public class GestoreGrafico {
         //listener gestione utente
         btnGioca.addActionListener(e -> {
             scacchiera.reset();
-            aggiornaScacchiera(scacchiera.getScacchiera());
+            aggiornaScacchiera(scacchiera.getStringaScacchiera());
             ruotaScacchiera(scacchiera.getTurno());
             disegna();
             labelVittoria.setText(null);
@@ -156,10 +126,10 @@ public class GestoreGrafico {
             btnBotBianco.setEnabled(false);
             btnBotNero.setEnabled(false);
             btnRotazioneScacchiera.setEnabled(false);
-            aggiornaLabelMateriale();
             timerBianco.reset();
             timerNero.reset();
             timerBianco.start();
+            aggiornaLabelMateriale();
         });
 
         btnRotazioneScacchiera.addActionListener(e -> {
@@ -171,7 +141,7 @@ public class GestoreGrafico {
 
     public GestoreGrafico(Scacchiera scacchiera, int lunghezzaScacchiera, Color sfondo) {
         int lunghezzaCasella = lunghezzaScacchiera / 8;
-        this(scacchiera, lunghezzaScacchiera, sfondo,
+        this(scacchiera, lunghezzaScacchiera, sfondo, new ImageIcon[]{
                 IconaPedina.PEDONE_WHITE.getImageIcon(lunghezzaCasella),
                 IconaPedina.ALFIERE_WHITE.getImageIcon(lunghezzaCasella),
                 IconaPedina.CAVALLO_WHITE.getImageIcon(lunghezzaCasella),
@@ -183,7 +153,8 @@ public class GestoreGrafico {
                 IconaPedina.CAVALLO_BLACK.getImageIcon(lunghezzaCasella),
                 IconaPedina.TORRE_BLACK.getImageIcon(lunghezzaCasella),
                 IconaPedina.REGINA_BLACK.getImageIcon(lunghezzaCasella),
-                IconaPedina.RE_BLACK.getImageIcon(lunghezzaCasella));
+                IconaPedina.RE_BLACK.getImageIcon(lunghezzaCasella)
+        });
     }
 
     private void inizializza() {
@@ -209,7 +180,18 @@ public class GestoreGrafico {
         Casella.gestisciGrafica = false;
     }
 
-    private void reset() {
+    private void setImmagini(ImageIcon[] immagini) {
+        if (immagini.length != 12) throw new IllegalArgumentException("Le immagini devono essere obbligatoriamente 12");
+        if (immagini[11] == null) throw new IllegalArgumentException("Le immagini non possono essere null");
+        for (int i = 0; i < immagini.length - 1; i++) {
+            if (immagini[i] == null) throw new IllegalArgumentException("Le immagini non possono essere null");
+            for (int j = i + 1; j < immagini.length; j++) if (immagini[i].equals(immagini[j])) throw new IllegalArgumentException("Due tipi di pedina diversi non possono avere la stessa immagine");
+        }
+        for (int i = 0; i < immagini.length; i++) if (immagini[i].getIconWidth() != lunghezzaCasella || immagini[i].getIconHeight() != lunghezzaCasella) immagini[i] = new ImageIcon(immagini[i].getImage().getScaledInstance(lunghezzaCasella, lunghezzaCasella, Image.SCALE_SMOOTH));
+        this.immagini = immagini;
+    }
+
+    private void finePartita() {
         Casella.casellaSelezionata = null;
         resetMosseValide();
         disegna();
@@ -224,42 +206,40 @@ public class GestoreGrafico {
         timerNero.pause();
     }
 
-    private void aggiornaScacchiera(Pedina[][] scacchiera) {
-        for (int i = 0; i < DIMENSIONE; i++) {
-            for (int j = 0; j < DIMENSIONE; j++) {
-                Pedina p = scacchiera[i][j];
+    private void aggiornaScacchiera(String s) {
+        String[] righe = s.split("\n");
+        for (int i = 0; i < righe.length; i++) {
+            String[] pedine = righe[i].split(SEP);
+            for (int j = 0; j < pedine.length; j++) {
                 Casella c = casellePanel[i][j];
-                if (p == null) c.rimuoviImg();
-                else {
-                    Color col = p.getColore();
-                    switch (p) {
-                        case Pedone _ -> setImgCasella(col, c, pedoneW, pedoneB);
-                        case Alfiere _ -> setImgCasella(col, c, alfiereW, alfiereB);
-                        case Torre _ -> setImgCasella(col, c, torreW, torreB);
-                        case Regina _ -> setImgCasella(col, c, reginaW, reginaB);
-                        case Re _ -> setImgCasella(col, c, reW, reB);
-                        case Cavallo _ -> setImgCasella(col, c, cavalloW, cavalloB);
-                        default -> throw new IllegalStateException("Tipo pedina non valido: " + p.getClass().getSimpleName());
-                    }
+                switch (pedine[j]) {
+                    case "PB" -> c.setImg(immagini[0]);
+                    case "AB" -> c.setImg(immagini[1]);
+                    case "CB" -> c.setImg(immagini[2]);
+                    case "TB" -> c.setImg(immagini[3]);
+                    case "QB" -> c.setImg(immagini[4]);
+                    case "RB" -> c.setImg(immagini[5]);
+                    case "PN" -> c.setImg(immagini[6]);
+                    case "AN" -> c.setImg(immagini[7]);
+                    case "CN" -> c.setImg(immagini[8]);
+                    case "TN" -> c.setImg(immagini[9]);
+                    case "QN" -> c.setImg(immagini[10]);
+                    case "RN" -> c.setImg(immagini[11]);
+                    default -> casellePanel[i][j].rimuoviImg();
                 }
             }
         }
     }
 
-    private void setImgCasella(Color col, Casella c, ImageIcon imgW, ImageIcon imgB) {
-        if (col.equals(Color.white)) c.setImg(imgW);
-        else c.setImg(imgB);
-    }
-
-    public JPanel[][] getCasellePanel() {
-        Casella[][] copia = new Casella[DIMENSIONE][DIMENSIONE];
-        for (int i = 0; i < DIMENSIONE; i++) {
-            for (int j = 0; j < DIMENSIONE; j++) {
-                copia[i][j] = new Casella(casellePanel[i][j]);
-            }
-        }
-        return copia;
-    }
+//    public JPanel[][] getCasellePanel() {
+//        Casella[][] copia = new Casella[DIMENSIONE][DIMENSIONE];
+//        for (int i = 0; i < DIMENSIONE; i++) {
+//            for (int j = 0; j < DIMENSIONE; j++) {
+//                copia[i][j] = new Casella(casellePanel[i][j]);
+//            }
+//        }
+//        return copia;
+//    }
 
     private void setListener(int y, int x) {
         casellePanel[y][x].setListener(() -> {
@@ -288,15 +268,15 @@ public class GestoreGrafico {
                     switch (scacchiera.getStatoPartita()) {
                         case 0 -> {
                             labelVittoria.setText("<html><div style='text-align:center;'>Scacco matto:<br>Vince " + nomeBianco.getText() + " (bianco)</div></html>");
-                            reset();
+                            finePartita();
                         }
                         case 1 -> {
                             labelVittoria.setText("<html><div style='text-align:center;'>Scacco matto:<br>Vince " + nomeNero.getText() + " (nero)</div></html>");
-                            reset();
+                            finePartita();
                         }
                         case 2 -> {
                             labelVittoria.setText("<html><div style='text-align:center;'>Stallo:<br>Pareggio</div></html>");
-                            reset();
+                            finePartita();
                         }
                         default -> {
                             if (rotazioneScacchiera) ruotaScacchiera(scacchiera.getTurno());
@@ -304,7 +284,7 @@ public class GestoreGrafico {
                     }
                 }
                 aggiornaLabelMateriale();
-                aggiornaScacchiera(scacchiera.getScacchiera());
+                aggiornaScacchiera(scacchiera.getStringaScacchiera());
                 disegna();
             }
         });
@@ -320,7 +300,7 @@ public class GestoreGrafico {
                 scacchiera.cambiaTurno();
                 if (rotazioneScacchiera) ruotaScacchiera(scacchiera.getTurno());
                 aggiornaLabelMateriale();
-                aggiornaScacchiera(scacchiera.getScacchiera());
+                aggiornaScacchiera(scacchiera.getStringaScacchiera());
                 disegna();
             }
         });
@@ -332,7 +312,7 @@ public class GestoreGrafico {
                 String testo = nomeBianco.getText() + " (bianco)";
                 if (t == timerBianco) testo = nomeNero.getText() + " (nero)";
                 labelVittoria.setText("<html><div style='text-align:center;'>Tempo scaduto:<br>Vince " + testo + "</div></html>");
-                reset();
+                finePartita();
             }
         });
     }
@@ -416,119 +396,6 @@ public class GestoreGrafico {
         for (Casella c : casellePromozione) c.repaint();
     }
 
-    private void controllaImmagini(ImageIcon daControllare, ImageIcon img1, ImageIcon img2, ImageIcon img3, ImageIcon img4, ImageIcon img5, ImageIcon img6, ImageIcon img7, ImageIcon img8, ImageIcon img9, ImageIcon img10, ImageIcon img11) {
-        if (daControllare == null) throw new IllegalArgumentException("Le immagini delle pedine non possono essere null");
-        if (daControllare == img1 || daControllare == img2 || daControllare == img3 || daControllare == img4 || daControllare == img5 || daControllare == img6 || daControllare == img7 || daControllare == img8 || daControllare == img9 || daControllare == img10 || daControllare == img11) throw new IllegalArgumentException("Le immagini delle pedine devono essere diverse fra loro");
-    }
-
-    public ImageIcon getPedoneW() {
-        return new ImageIcon(pedoneW.getImage());
-    }
-
-    private void setPedoneW(ImageIcon pedoneW) {
-        controllaImmagini(pedoneW, alfiereW, cavalloW, torreW, reginaW, reW, pedoneB, alfiereB, cavalloB, torreB, reginaB, reB);
-        this.pedoneW = pedoneW;
-    }
-
-    public ImageIcon getAlfiereW() {
-        return new ImageIcon(alfiereW.getImage());
-    }
-
-    private void setAlfiereW(ImageIcon alfiereW) {
-        controllaImmagini(alfiereW, pedoneW, cavalloW, torreW, reginaW, reW, pedoneB, alfiereB, cavalloB, torreB, reginaB, reB);
-        this.alfiereW = alfiereW;
-    }
-
-    public ImageIcon getCavalloW() {
-        return new ImageIcon(cavalloW.getImage());
-    }
-
-    private void setCavalloW(ImageIcon cavalloW) {
-        controllaImmagini(cavalloW, alfiereW, pedoneW, torreW, reginaW, reW, pedoneB, alfiereB, cavalloB, torreB, reginaB, reB);
-        this.cavalloW = cavalloW;
-    }
-
-    public ImageIcon getTorreW() {
-        return new ImageIcon(torreW.getImage());
-    }
-
-    private void setTorreW(ImageIcon torreW) {
-        controllaImmagini(torreW, alfiereW, cavalloW, pedoneW, reginaW, reW, pedoneB, alfiereB, cavalloB, torreB, reginaB, reB);
-        this.torreW = torreW;
-    }
-
-    public ImageIcon getReginaW() {
-        return new ImageIcon(reginaW.getImage());
-    }
-
-    private void setReginaW(ImageIcon reginaW) {
-        controllaImmagini(reginaW, alfiereW, cavalloW, torreW, pedoneW, reW, pedoneB, alfiereB, cavalloB, torreB, reginaB, reB);
-        this.reginaW = reginaW;
-    }
-
-    public ImageIcon getReW() {
-        return new ImageIcon(reW.getImage());
-    }
-
-    private void setReW(ImageIcon reW) {
-        controllaImmagini(reW, alfiereW, cavalloW, torreW, reginaW, pedoneW, pedoneB, alfiereB, cavalloB, torreB, reginaB, reB);
-        this.reW = reW;
-    }
-
-    public ImageIcon getPedoneB() {
-        return new ImageIcon(pedoneB.getImage());
-    }
-
-    private void setPedoneB(ImageIcon pedoneB) {
-        controllaImmagini(pedoneB, alfiereW, cavalloW, torreW, reginaW, reW, pedoneW, alfiereB, cavalloB, torreB, reginaB, reB);
-        this.pedoneB = pedoneB;
-    }
-
-    public ImageIcon getAlfiereB() {
-        return new ImageIcon(alfiereB.getImage());
-    }
-
-    private void setAlfiereB(ImageIcon alfiereB) {
-        controllaImmagini(alfiereB, pedoneW, cavalloW, torreW, reginaW, reW, pedoneB, alfiereW, cavalloB, torreB, reginaB, reB);
-        this.alfiereB = alfiereB;
-    }
-
-    public ImageIcon getCavalloB() {
-        return new ImageIcon(cavalloB.getImage());
-    }
-
-    private void setCavalloB(ImageIcon cavalloB) {
-        controllaImmagini(cavalloB, alfiereW, pedoneW, torreW, reginaW, reW, pedoneB, alfiereB, cavalloW, torreB, reginaB, reB);
-        this.cavalloB = cavalloB;
-    }
-
-    public ImageIcon getTorreB() {
-        return new ImageIcon(torreB.getImage());
-    }
-
-    private void setTorreB(ImageIcon torreB) {
-        controllaImmagini(torreB, alfiereW, cavalloW, pedoneW, reginaW, reW, pedoneB, alfiereB, cavalloB, torreW, reginaB, reB);
-        this.torreB = torreB;
-    }
-
-    public ImageIcon getReginaB() {
-        return new ImageIcon(reginaB.getImage());
-    }
-
-    private void setReginaB(ImageIcon reginaB) {
-        controllaImmagini(reginaB, alfiereW, cavalloW, torreW, pedoneW, reW, pedoneB, alfiereB, cavalloB, torreB, reginaW, reB);
-        this.reginaB = reginaB;
-    }
-
-    public ImageIcon getReB() {
-        return new ImageIcon(reB.getImage());
-    }
-
-    private void setReB(ImageIcon reB) {
-        controllaImmagini(reB, alfiereW, cavalloW, torreW, reginaW, pedoneW, pedoneB, alfiereB, cavalloB, torreB, reginaB, reW);
-        this.reB = reB;
-    }
-
     private static class Casella extends JPanel {
         private Color colore;
         private final JLabel label;
@@ -565,14 +432,14 @@ public class GestoreGrafico {
             setImg(img);
         }
 
-        public Casella(Casella originale) {
-            this.colore = originale.colore;
-            this.lunghezzaLato = originale.lunghezzaLato;
-            this.label = originale.label;
-            this.id = originale.id;
-            this.listener = originale.listener;
-            this.mossaValida = originale.mossaValida;
-        }
+//        public Casella(Casella originale) {
+//            this.colore = originale.colore;
+//            this.lunghezzaLato = originale.lunghezzaLato;
+//            this.label = originale.label;
+//            this.id = originale.id;
+//            this.listener = originale.listener;
+//            this.mossaValida = originale.mossaValida;
+//        }
 
         public int getLunghezzaLato() {
             return lunghezzaLato;
@@ -646,7 +513,7 @@ public class GestoreGrafico {
                 g2d.setColor(Color.black);
                 g2d.drawRect(0, 0, getWidth() - 1, getHeight() - 1);
             }
-            else if (this.id.equals(casellaSelezionata)) g2d.drawRect(0, 0, getWidth(), getHeight());
+            else if (this.id.equals(casellaSelezionata)) g2d.drawRect(0, 0, getWidth() - 1, getHeight() - 1);
             else if (mossaValida) {
                 Composite old = g2d.getComposite();
                 g2d.setComposite(AlphaComposite.getInstance(AlphaComposite.SRC_OVER, 0.5f));

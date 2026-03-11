@@ -33,10 +33,10 @@ public enum IconaPedina {
     }
 
     public ImageIcon getImageIcon(int dimensione) {
-        Image image = new ImageIcon(iconPath).getImage().getScaledInstance(dimensione, dimensione, Image.SCALE_SMOOTH);
-        ImageIcon img = new ImageIcon(image);
-        img.setDescription(iconPath);
-        return img;
+        ImageIcon icon = new ImageIcon(iconPath);
+        if (icon.getIconWidth() == dimensione && icon.getIconHeight() == dimensione) return icon;
+        Image image = icon.getImage().getScaledInstance(dimensione, dimensione, Image.SCALE_SMOOTH);
+        return new ImageIcon(image);
     }
 
     public ImageIcon getImageIcon() {

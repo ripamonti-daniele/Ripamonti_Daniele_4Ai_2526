@@ -2,7 +2,6 @@ import javax.swing.*;
 import java.awt.*;
 import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
-import java.awt.event.MouseListener;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Map;
@@ -544,8 +543,9 @@ public class GestoreGrafico {
         private static boolean gestisciGrafica = false;
 
         public Casella(Color colore, int lunghezzaLato, String id) {
-            label = new JLabel();
             setLunghezzaLato(lunghezzaLato);
+            label = new JLabel();
+            label.setPreferredSize(new Dimension(lunghezzaLato,lunghezzaLato));
             setColore(colore);
             setId(id);
             this.setSize(new Dimension(lunghezzaLato, lunghezzaLato));
@@ -579,8 +579,7 @@ public class GestoreGrafico {
         }
 
         private void setLunghezzaLato(int lunghezzaLato) {
-            if (lunghezzaLato <= 0)
-                throw new IllegalArgumentException("La lunghezza del lato deve essere maggiore di 0");
+            if (lunghezzaLato <= 0) throw new IllegalArgumentException("La lunghezza del lato deve essere maggiore di 0");
             this.lunghezzaLato = lunghezzaLato;
         }
 
@@ -647,7 +646,7 @@ public class GestoreGrafico {
                 g2d.setColor(Color.black);
                 g2d.drawRect(0, 0, getWidth() - 1, getHeight() - 1);
             }
-            else if (this.id.equals(casellaSelezionata)) g2d.drawRect(0, 0, getWidth() - 1, getHeight() - 1);
+            else if (this.id.equals(casellaSelezionata)) g2d.drawRect(0, 0, getWidth(), getHeight());
             else if (mossaValida) {
                 Composite old = g2d.getComposite();
                 g2d.setComposite(AlphaComposite.getInstance(AlphaComposite.SRC_OVER, 0.5f));

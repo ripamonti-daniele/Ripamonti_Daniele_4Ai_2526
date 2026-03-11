@@ -478,6 +478,7 @@ public class Scacchiera {
                 }
                 scacchiera.append(SEP);
             }
+            scacchiera.deleteCharAt(scacchiera.length() - 1);
             scacchiera.append("\n");
         }
         return scacchiera.toString();

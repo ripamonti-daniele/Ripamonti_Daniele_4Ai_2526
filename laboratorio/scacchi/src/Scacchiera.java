@@ -360,18 +360,23 @@ public class Scacchiera {
         boolean valido = false;
         for (int[] mossa : mosseValide) {
             if (mossa[0] == pos[0] && mossa[1] == pos[1]) {
-                if (caselle[casella_selezionata[0]][casella_selezionata[1]] != null && caselle[casella_selezionata[0]][casella_selezionata[1]] instanceof Pedone && mossa[1] != casella_selezionata[1] && caselle[mossa[0]][mossa[1]] == null) {
-                    if (caselle[casella_selezionata[0]][casella_selezionata[1]].colore == Color.white) caselle[mossa[0] + 1][mossa[1]] = null;
-                    if (caselle[casella_selezionata[0]][casella_selezionata[1]].colore == Color.black) caselle[mossa[0] - 1][mossa[1]] = null;
-                }
                 valido = true;
                 break;
             }
         }
 
         if (valido) {
+            if (!(mosseNeutre == 0 && turno == Color.black)) mosseNeutre++;
+            if (caselle[pos[0]][pos[1]] != null || caselle[casella_selezionata[0]][casella_selezionata[1]] instanceof Pedone) mosseNeutre = 0;
+
+            if (caselle[casella_selezionata[0]][casella_selezionata[1]] != null && caselle[casella_selezionata[0]][casella_selezionata[1]] instanceof Pedone && pos[1] != casella_selezionata[1] && caselle[pos[0]][pos[1]] == null) {
+                if (caselle[casella_selezionata[0]][casella_selezionata[1]].colore == Color.white) caselle[pos[0] + 1][pos[1]] = null;
+                if (caselle[casella_selezionata[0]][casella_selezionata[1]].colore == Color.black) caselle[pos[0] - 1][pos[1]] = null;
+            }
+
             for (Pedina[] riga : caselle) for (Pedina p : riga) if (p instanceof Pedone && p.colore != caselle[casella_selezionata[0]][casella_selezionata[1]].colore) ((Pedone) p).rimuoviEnpassant();
 
+            //arrocco
             if (caselle[casella_selezionata[0]][casella_selezionata[1]] instanceof Re && casella_selezionata[1] - pos[1] == 2) {
                 caselle[pos[0]][0].muovi(new int[]{pos[0], pos[1] + 1});
                 caselle[pos[0]][pos[1] + 1] = caselle[pos[0]][0];
@@ -407,8 +412,10 @@ public class Scacchiera {
         }
     }
 
-    // -1 no vittoria; 0 vittoria bianco; 1 vittoria nero; 2 pareggio
+    // -1 no vittoria; 0 vittoria bianco; 1 vittoria nero; 2 stallo; 3 pareggio mosse neutre;
     public int getStatoPartita() {
+        if (mosseNeutre >= 150) return 3;
+
         for (Pedina[] riga : caselle) {
             for (Pedina p : riga) {
                 if (p == null || !p.getColore().equals(turno)) continue;
@@ -437,11 +444,24 @@ public class Scacchiera {
     }
 
     public int getMateriale(Color c) {
+        if (!c.equals(Color.black) && !c.equals(Color.white)) throw new IllegalArgumentException("Il colore del giocatore scelto può essere solo bianco o nero");
         int materiale = 0;
         for (Pedina[] riga : caselle) {
             for (Pedina p : riga) if (p != null && p.getColore().equals(c)) materiale += p.getMateriale();
         }
         return materiale;
+    }
+
+    public boolean materialeInsufficiente(Color c) {
+        if (!c.equals(Color.black) && !c.equals(Color.white)) throw new IllegalArgumentException("Il colore del giocatore scelto può essere solo bianco o nero");
+        int materiale = getMateriale(c);
+        if (materiale == 0) return true;
+        if (materiale == 3) {
+            for (Pedina[] riga : caselle) {
+                for (Pedina p : riga) if (p != null && p.getColore().equals(c) && p instanceof Cavallo || p instanceof Alfiere) return true;
+            }
+        }
+        return false;
     }
 
     private void scriviScacchiera() {
@@ -482,6 +502,12 @@ public class Scacchiera {
             scacchiera.append("\n");
         }
         return scacchiera.toString();
+    }
+
+    public String getStringaScacchieraMossa(int mossa) {
+        if (mossa < 0 || mossa >= mosse) return getStringaScacchiera();
+        //trova la stringa col bufferedReader
+        return "";
     }
 
     @Override

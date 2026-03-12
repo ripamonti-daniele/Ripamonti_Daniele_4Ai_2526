@@ -1,5 +1,5 @@
 //TODO
-// pareggi per ripetizione/mosse neutre
+// pareggi per ripetizione
 // impostazione timer da parte dell'utente
 // velocità timer corretta
 // possibilità di spostarsi avanti e indietro nello stato della partita

@@ -278,6 +278,10 @@ public class GestoreGrafico {
                             labelVittoria.setText("<html><div style='text-align:center;'>Stallo:<br>Pareggio</div></html>");
                             finePartita();
                         }
+                        case 3 -> {
+                            labelVittoria.setText("<html><div style='text-align:center;'>75 mosse neutre:<br>Pareggio</div></html>");
+                            finePartita();
+                        }
                         default -> {
                             if (rotazioneScacchiera) ruotaScacchiera(scacchiera.getTurno());
                         }
@@ -309,9 +313,13 @@ public class GestoreGrafico {
     private void setListenerTimer(TimerGrafico t) {
         t.addPropertyChangeListener("text", e -> {
             if (t.isTempoScaduto()) {
-                String testo = nomeBianco.getText() + " (bianco)";
-                if (t == timerBianco) testo = nomeNero.getText() + " (nero)";
-                labelVittoria.setText("<html><div style='text-align:center;'>Tempo scaduto:<br>Vince " + testo + "</div></html>");
+                if (t == timerBianco && scacchiera.materialeInsufficiente(Color.black)) labelVittoria.setText("<html><div style='text-align:center;'>Tempo bianco scaduto, pareggio:<br>Materiale nero insufficiente</div></html>");
+                else if (t == timerNero && scacchiera.materialeInsufficiente(Color.white)) labelVittoria.setText("<html><div style='text-align:center;'>Tempo nero scaduto, pareggio:<br>Materiale bianco insufficiente</div></html>");
+                else {
+                    String testo = nomeBianco.getText() + " (bianco)";
+                    if (t == timerBianco) testo = nomeNero.getText() + " (nero)";
+                    labelVittoria.setText("<html><div style='text-align:center;'>Tempo scaduto:<br>Vince " + testo + "</div></html>");
+                }
                 finePartita();
             }
         });

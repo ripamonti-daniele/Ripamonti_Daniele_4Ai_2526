@@ -3,9 +3,9 @@ import java.util.ArrayList;
 import java.util.List;
 
 public abstract class Pedina {
-    protected Color colore;
+    private Color colore;
     protected int[] posizione;
-    protected int materiale;
+    private int materiale;
     protected List<int[]> mosseValide;
     public final int DIMENSIONE_SCACCHIERA = 8;
 

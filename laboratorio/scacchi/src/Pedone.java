@@ -32,7 +32,7 @@ public class Pedone extends Pedina {
     public void trovaMosseValide() {
         mosseValide.clear();
 
-        if (colore == Color.white) {
+        if (getColore() == Color.white) {
             if (posizione[0] > 0) {
                 mosseValide.add(new int[]{posizione[0] - 1, posizione[1]});
                 if (posizione[1] > 0) mosseValide.add(new int[]{posizione[0] - 1, posizione[1] - 1});
@@ -53,7 +53,7 @@ public class Pedone extends Pedina {
 
     @Override
     public void muovi(int[] posizione) {
-        boolean temporaneo = colore == Color.white && posizione[0] == this.posizione[0] - 2 || colore == Color.black && posizione[0] == this.posizione[0] + 2;
+        boolean temporaneo = getColore() == Color.white && posizione[0] == this.posizione[0] - 2 || getColore() == Color.black && posizione[0] == this.posizione[0] + 2;
         super.muovi(posizione);
         enpassant = temporaneo;
         muoviDiDueCaselle = false;

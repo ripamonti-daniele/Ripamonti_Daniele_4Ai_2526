@@ -282,6 +282,10 @@ public class GestoreGrafico {
                             labelVittoria.setText("<html><div style='text-align:center;'>75 mosse neutre:<br>Pareggio</div></html>");
                             finePartita();
                         }
+                        case 4 -> {
+                            labelVittoria.setText("<html><div style='text-align:center;'>5 posizioni ripetute:<br>Pareggio</div></html>");
+                            finePartita();
+                        }
                         default -> {
                             if (rotazioneScacchiera) ruotaScacchiera(scacchiera.getTurno());
                         }

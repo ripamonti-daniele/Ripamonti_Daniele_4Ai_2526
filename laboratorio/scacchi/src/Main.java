@@ -43,13 +43,3 @@ void main() {
     frame.setLocationRelativeTo(null);
     frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
 }
-
-//    Path path = Path.of("partita.txt");
-//    try {
-//        Files.writeString(path, scacchiera.toString() + "\n", StandardOpenOption.CREATE, StandardOpenOption.APPEND);
-//    }
-//    catch (IOException e) {
-//        System.out.println(e.getMessage());
-//    }
-
-//    System.out.println(scacchiera);

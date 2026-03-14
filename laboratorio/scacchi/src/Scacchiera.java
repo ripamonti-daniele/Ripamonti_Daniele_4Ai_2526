@@ -13,8 +13,9 @@ public class Scacchiera {
     private int mosse;
     private List<int[]> mosseValide;
     private final String SEP;
-    private String pedinaEnPassant;
-    private final Map<Color, String> colorStringMap;
+    private boolean adx;
+    private boolean asx;
+//    private final Map<Color, String> colorStringMap;
 
     public Scacchiera() {
         caselle = new Pedina[DIMENSIONE][DIMENSIONE];
@@ -25,8 +26,9 @@ public class Scacchiera {
         mosseValide = new ArrayList<>();
         inizializza();
         SEP = ";";
-        pedinaEnPassant = "";
-        colorStringMap = Map.of(Color.white, "B", Color.black, "N");
+        adx = false;
+        asx = false;
+//        colorStringMap = Map.of(Color.white, "B", Color.black, "N");
         scriviScacchiera();
     }
 
@@ -60,7 +62,8 @@ public class Scacchiera {
         turno = Color.white;
         casella_selezionata = null;
         mosseValide.clear();
-        pedinaEnPassant = "";
+        adx = false;
+        asx = false;
         inizializza();
     }
 
@@ -118,16 +121,10 @@ public class Scacchiera {
         for (int[] mossa : mosseValide) {
             if (mossa[1] != pos[1] && caselle[mossa[0]][mossa[1]] != null) mosseFiltrate.add(mossa);
             else if (mossa[1] != pos[1] && caselle[pos[0]][pos[1]].getColore() == Color.black && pos[0] == DIMENSIONE - 4) {
-                if (caselle[mossa[0] - 1][mossa[1]] != null && caselle[mossa[0] - 1][mossa[1]] instanceof Pedone && ((Pedone) caselle[mossa[0] - 1][mossa[1]]).getEnpassant()) {
-                    mosseFiltrate.add(mossa);
-                    pedinaEnPassant = "ep" + colorStringMap.get(caselle[pos[0]][pos[1]].getColore()) + pos[1];
-                }
+                if (caselle[mossa[0] - 1][mossa[1]] != null && caselle[mossa[0] - 1][mossa[1]] instanceof Pedone && ((Pedone) caselle[mossa[0] - 1][mossa[1]]).getEnpassant()) mosseFiltrate.add(mossa);
             }
             else if (mossa[1] != pos[1] && caselle[pos[0]][pos[1]].getColore() == Color.white && pos[0] == 3) {
-                if (caselle[mossa[0] + 1][mossa[1]] != null && caselle[mossa[0] + 1][mossa[1]] instanceof Pedone && ((Pedone) caselle[mossa[0] + 1][mossa[1]]).getEnpassant()) {
-                    mosseFiltrate.add(mossa);
-                    pedinaEnPassant = "ep" + colorStringMap.get(caselle[pos[0]][pos[1]].getColore()) + (pos[1] + 8);
-                }
+                if (caselle[mossa[0] + 1][mossa[1]] != null && caselle[mossa[0] + 1][mossa[1]] instanceof Pedone && ((Pedone) caselle[mossa[0] + 1][mossa[1]]).getEnpassant()) mosseFiltrate.add(mossa);
             }
             else if (mossa[1] == pos[1] && caselle[mossa[0]][mossa[1]] == null) {
                 if (Math.abs(mossa[0] - pos[0]) == 1) mosseFiltrate.add(mossa);
@@ -247,11 +244,20 @@ public class Scacchiera {
             }
 
             if (Math.abs(pos[1] - mossa[1]) == 2 && ((Re) caselle[pos[0]][pos[1]]).getArrocco()) {
-                if (pos[1] - mossa[1] == 2 && caselle[pos[0]][pos[1] - 1] == null && caselle[pos[0]][pos[1] - 2] == null && caselle[pos[0]][pos[1] - 3] == null && (caselle[pos[0]][0] instanceof Torre) && ((Torre) caselle[pos[0]][0]).getArrocco()) mosseFiltrate.add(mossa);
-                if (pos[1] - mossa[1] == - 2 && caselle[pos[0]][pos[1] + 1] == null && caselle[pos[0]][pos[1] + 2] == null && (caselle[pos[0]][DIMENSIONE - 1] instanceof Torre) && ((Torre) caselle[pos[0]][DIMENSIONE - 1]).getArrocco()) mosseFiltrate.add(mossa);
+                if (pos[1] - mossa[1] == 2 && caselle[pos[0]][pos[1] - 1] == null && caselle[pos[0]][pos[1] - 2] == null && caselle[pos[0]][pos[1] - 3] == null && (caselle[pos[0]][0] instanceof Torre) && ((Torre) caselle[pos[0]][0]).getArrocco()) {
+                    mosseFiltrate.add(mossa);
+                    asx = true;
+                }
+                if (pos[1] - mossa[1] == - 2 && caselle[pos[0]][pos[1] + 1] == null && caselle[pos[0]][pos[1] + 2] == null && (caselle[pos[0]][DIMENSIONE - 1] instanceof Torre) && ((Torre) caselle[pos[0]][DIMENSIONE - 1]).getArrocco()) {
+                    mosseFiltrate.add(mossa);
+                    adx = true;
+                }
             }
             else mosseFiltrate.add(mossa);
         }
+
+        asx = asx && !annullaArroccoSx;
+        adx = adx && !annullaArroccoDx;
 
         if (annullaArroccoDx || annullaArroccoSx) {
             int[][] eliminaArrocco = new int[][]{null, null};
@@ -386,7 +392,6 @@ public class Scacchiera {
             }
 
             for (Pedina[] riga : caselle) for (Pedina p : riga) if (p instanceof Pedone && p.getColore() != turno) ((Pedone) p).rimuoviEnpassant();
-            if (!pedinaEnPassant.isEmpty() && String.valueOf(pedinaEnPassant.charAt(2)).equals(colorStringMap.get(turno))) pedinaEnPassant = "";
 
             //arrocco
             if (caselle[casella_selezionata[0]][casella_selezionata[1]] instanceof Re && casella_selezionata[1] - pos[1] == 2) {
@@ -407,7 +412,8 @@ public class Scacchiera {
             mosseValide.clear();
             mosse++;
             scriviScacchiera();
-            pedinaEnPassant = "";
+            asx = false;
+            adx = false;
         }
         casella_selezionata = null;
         return valido;
@@ -484,17 +490,25 @@ public class Scacchiera {
     }
 
     public boolean pareggioRipetizioni() {
-        if (mosse < 10) return false;
-        String mossaCorrente = getStringaScacchiera();
+        if (mosse < 17) return false;
+        System.out.println("\n==========================================\n");
+        String mossaCorrente = getStringaScacchiera(true);
         String mossaAvversario = getStringaScacchieraMossa(mosse - 1, true);
         int mosseRipetute = 0;
 
-        for (int i = mosse - 2; i > 0; i--) {
+        for (int i = mosse - 4; i > 0; i -= 2) {
             if (getStringaScacchieraMossa(i, true).equals(mossaCorrente) && getStringaScacchieraMossa(i - 1, true).equals(mossaAvversario)) mosseRipetute++;
+//            System.out.println(mossaCorrente);
+//            System.out.println(getStringaScacchieraMossa(i, true));
+//            System.out.println("---------------------------------------");
+//            System.out.println(mossaAvversario);
+//            System.out.println(getStringaScacchieraMossa(i - 1, true));
+//            System.out.println("&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&  " + mosseRipetute);
         }
+        System.out.println(mossaCorrente);
 
-        System.out.println(mosseRipetute);
-        return mosseRipetute >= 5;
+//        System.out.println(mosseRipetute);
+        return mosseRipetute >= 4;
     }
 
     private void scriviScacchiera() {
@@ -512,29 +526,13 @@ public class Scacchiera {
 
         try {
             writer = new BufferedWriter(new FileWriter("partita.txt", true));
-            writer.write(mosse + "\n" + getStringaScacchiera());
-            StringBuilder info;
-            info = new StringBuilder();
-            List<int[]> arrocchi = new ArrayList<>();
-            int[] posRe = trovaPosRe(turno);
-            assert posRe != null;
-            if (posRe[1] + 2 < DIMENSIONE) arrocchi.add(new int[]{posRe[0], posRe[1] + 2});
-            if (posRe[1] - 2 >= 0) arrocchi.add(new int[]{posRe[0], posRe[1] - 2});
-            arrocchi = filtraMosseRe(posRe, arrocchi, true);
-            if (arrocchi.size() == 2) info.append("asxadx");
-            else if (arrocchi.size() == 1) {
-                if (arrocchi.getFirst()[1] - posRe[1] == 2) info.append("adx");
-                else info.append("asx");
-            }
-            info.append(pedinaEnPassant);
-            info.append("\n");
-            writer.write(info.toString());
+            writer.write(mosse + "\n" + getStringaScacchiera(true) + "\n");
             writer.close();
         }
         catch (IOException _) {}
     }
 
-    public String getStringaScacchiera() {
+    public String getStringaScacchiera(boolean info) {
         StringBuilder scacchiera;
         scacchiera = new StringBuilder();
         for (Pedina[] riga : caselle) {
@@ -551,19 +549,38 @@ public class Scacchiera {
             scacchiera.deleteCharAt(scacchiera.length() - 1);
             scacchiera.append("\n");
         }
+        if (info) {
+//            List<int[]> arrocchi = new ArrayList<>();
+//            int[] posRe = trovaPosRe(turno);
+//            assert posRe != null;
+//            if (posRe[1] + 2 < DIMENSIONE) arrocchi.add(new int[]{posRe[0], posRe[1] + 2});
+//            if (posRe[1] - 2 >= 0) arrocchi.add(new int[]{posRe[0], posRe[1] - 2});
+//            arrocchi = filtraMosseRe(posRe, arrocchi, true);
+//            if (arrocchi.size() == 2) scacchiera.append("asxadx");
+//            else if (arrocchi.size() == 1) {
+//                if (arrocchi.getFirst()[1] - posRe[1] == 2) scacchiera.append("adx");
+//                else scacchiera.append("asx");
+//            }
+//            if (asx) scacchiera.append("asx");
+//            if (adx) scacchiera.append("adx");
+        }
         return scacchiera.toString();
     }
 
-    public String getStringaScacchieraMossa(int mossa, boolean ottieniInfo) {
+    public String getStringaScacchiera() {
+        return getStringaScacchiera(false);
+    }
+
+    public String getStringaScacchieraMossa(int mossa, boolean info) {
         if (mossa < 0 || mossa > mosse) return null;
-        if (mossa == mosse) return getStringaScacchiera();
+        if (mossa == mosse) return getStringaScacchiera(info);
 
         StringBuilder scacchiera = new StringBuilder();
         try {
             BufferedReader reader = new BufferedReader(new FileReader("partita.txt"));
             for (int i = 0; i < mossa * 10 + 1; i++) reader.readLine();
             int iterazioni = 8;
-            if (ottieniInfo) iterazioni++;
+            if (info) iterazioni++;
             for (int i = 0; i < iterazioni; i++) {
                 scacchiera.append(reader.readLine());
                 if (i < iterazioni - 1) scacchiera.append("\n");

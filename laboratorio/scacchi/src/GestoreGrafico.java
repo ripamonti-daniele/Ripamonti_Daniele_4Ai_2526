@@ -33,6 +33,7 @@ public class GestoreGrafico {
     private final TimerGrafico timerNero;
     private final JLabel materialeBianco;
     private final JLabel materialeNero;
+    private final BottoneSpostamento[] btnSpostamenti;
 
     public GestoreGrafico(Scacchiera scacchiera, int lunghezzaScacchiera, Color sfondo, ImageIcon[] immagini) {
         this.scacchiera = scacchiera;
@@ -63,6 +64,8 @@ public class GestoreGrafico {
         nomeBianco = new JTextAreaCustom("Giocatore 1", 0, lunghezzaScacchiera - lunghezzaCasella / 2,  lunghezzaCasella * 2, lunghezzaCasella / 2);
         btnBotBianco = new JButtonCustom("<html><div style='text-align:center;'>Bot<br>Off</div></html>", lunghezzaCasella * 2 + lunghezzaCasella / 15, lunghezzaScacchiera - lunghezzaCasella / 2,  lunghezzaCasella / 2, lunghezzaCasella / 2, new Color(51, 51, 51), new Color(0, 0, 0), new Color(85, 85, 85), new Color(0, 0, 0), new Color(0, 0, 0), Color.WHITE);
         btnBotNero = new JButtonCustom("<html><div style='text-align:center;'>Bot<br>Off</div></html>", lunghezzaCasella * 2 + lunghezzaCasella / 15, 0,  lunghezzaCasella / 2, lunghezzaCasella / 2, new Color(51, 51, 51), new Color(0, 0, 0), new Color(85, 85, 85), new Color(0, 0, 0), new Color(0, 0, 0), Color.WHITE);
+        btnSpostamenti = new BottoneSpostamento[4];
+        for (int i = 0; i < 4; i++) btnSpostamenti[i] = new BottoneSpostamento(i + 1, lunghezzaScacchiera - lunghezzaCasella / 2 * (4 - i), lunghezzaScacchiera + lunghezzaCasella / 8, lunghezzaCasella / 2, new Color(50, 205, 150), new Color(50, 205, 150, 40), new Color(50, 205, 150, 80), new Color(200, 245, 225));
 
         //setBounds
         panelInfo.setBounds(lunghezzaScacchiera + lunghezzaCasella * 4 / 3, 0, lunghezzaCasella * 6, lunghezzaScacchiera);
@@ -105,6 +108,7 @@ public class GestoreGrafico {
         panelInfo.add(timerNero);
         panelInfo.add(materialeBianco);
         panelInfo.add(materialeNero);
+//        for (BottoneSpostamento b : btnSpostamenti) panelInfo.add(b);
 
         //listener gestione utente
         btnGioca.addActionListener(e -> {
@@ -380,12 +384,14 @@ public class GestoreGrafico {
         for (int i = 0; i < 4; i++) panel.add(casellePromozione[i]);
         for (int i = 0; i < DIMENSIONE; i++) for (int j = 0; j < DIMENSIONE; j++) panel.add(casellePanel[i][j]);
         panel.add(panelInfo);
+        for (BottoneSpostamento b : btnSpostamenti) panel.add(b);
     }
 
     public void mettiASchermo(JFrame frame) {
         for (int i = 0; i < 4; i++) frame.add(casellePromozione[i]);
         for (int i = 0; i < DIMENSIONE; i++) for (int j = 0; j < DIMENSIONE; j++) frame.add(casellePanel[i][j]);
         frame.add(panelInfo);
+        for (BottoneSpostamento b : btnSpostamenti) frame.add(b);
     }
 
     private void resetMosseValide() {

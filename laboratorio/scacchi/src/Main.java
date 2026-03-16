@@ -35,7 +35,7 @@ void main() {
     Insets insets = frame.getInsets();
     int contentHeight = frame.getHeight() - insets.top - insets.bottom;
 
-    contenitore.setBounds(gestoreGrafico.lunghezzaScacchiera / 8, (contentHeight - gestoreGrafico.lunghezzaScacchiera) / 2, 2 * gestoreGrafico.lunghezzaScacchiera, gestoreGrafico.lunghezzaScacchiera);
+    contenitore.setBounds(gestoreGrafico.lunghezzaCasella, (contentHeight - gestoreGrafico.lunghezzaScacchiera) / 2, 2 * gestoreGrafico.lunghezzaScacchiera, gestoreGrafico.lunghezzaScacchiera + gestoreGrafico.lunghezzaCasella);
     contenitore.setBackground(sfondo);
     //    contenitore.setBounds(width / 10, (contentHeight - scacchieraPanel.lunghezzaScacchiera) / 2, scacchieraPanel.lunghezzaScacchiera * 2, scacchieraPanel.lunghezzaScacchiera * 2);
     frame.add(contenitore);

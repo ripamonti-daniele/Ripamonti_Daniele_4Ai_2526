@@ -11,6 +11,8 @@ public class GestoreGrafico {
     private final Casella[] casellePromozione;
     private final Scacchiera scacchiera;
     private boolean gioca;
+    private int mossaMostrata;
+    private boolean mossaNonCorrente;
     private boolean rotazioneScacchiera;
     private boolean promozione;
     private int[] posPromozione;
@@ -42,6 +44,8 @@ public class GestoreGrafico {
         casellePanel = new Casella[DIMENSIONE][DIMENSIONE];
         casellePromozione = new Casella[4];
         gioca = false;
+        mossaMostrata = 0;
+        mossaNonCorrente = false;
         rotazioneScacchiera = true;
         promozione = false;
         posPromozione = new int[2];
@@ -65,7 +69,7 @@ public class GestoreGrafico {
         btnBotBianco = new JButtonCustom("<html><div style='text-align:center;'>Bot<br>Off</div></html>", lunghezzaCasella * 2 + lunghezzaCasella / 15, lunghezzaScacchiera - lunghezzaCasella / 2,  lunghezzaCasella / 2, lunghezzaCasella / 2, new Color(51, 51, 51), new Color(0, 0, 0), new Color(85, 85, 85), new Color(0, 0, 0), new Color(0, 0, 0), Color.WHITE);
         btnBotNero = new JButtonCustom("<html><div style='text-align:center;'>Bot<br>Off</div></html>", lunghezzaCasella * 2 + lunghezzaCasella / 15, 0,  lunghezzaCasella / 2, lunghezzaCasella / 2, new Color(51, 51, 51), new Color(0, 0, 0), new Color(85, 85, 85), new Color(0, 0, 0), new Color(0, 0, 0), Color.WHITE);
         btnSpostamenti = new BottoneSpostamento[4];
-        for (int i = 0; i < 4; i++) btnSpostamenti[i] = new BottoneSpostamento(i + 1, lunghezzaScacchiera - lunghezzaCasella / 2 * (4 - i), lunghezzaScacchiera + lunghezzaCasella / 8, lunghezzaCasella / 2, new Color(50, 205, 150), new Color(50, 205, 150, 40), new Color(50, 205, 150, 80), new Color(200, 245, 225));
+        for (int i = 0; i < 4; i++) btnSpostamenti[i] = new BottoneSpostamento(i + 1, lunghezzaScacchiera - lunghezzaCasella / 2 * (4 - i), lunghezzaScacchiera + lunghezzaCasella / 8, lunghezzaCasella / 2);
 
         //setBounds
         panelInfo.setBounds(lunghezzaScacchiera + lunghezzaCasella * 4 / 3, 0, lunghezzaCasella * 6, lunghezzaScacchiera);
@@ -97,6 +101,8 @@ public class GestoreGrafico {
         materialeNero.setFont(fontPiccolo);
         aggiornaLabelMateriale();
 
+        setListenerSpostamenti(btnSpostamenti);
+
         panelInfo.add(btnGioca);
         panelInfo.add(btnRotazioneScacchiera);
         panelInfo.add(nomeBianco);
@@ -120,6 +126,8 @@ public class GestoreGrafico {
             btnGioca.setEnabled(false);
             btnGioca.setText("<html>Gioca ancora</html>");
             gioca = true;
+            mossaMostrata = 0;
+            mossaNonCorrente = false;
             nomeBianco.setText(nomeBianco.getText().trim());
             nomeNero.setText(nomeNero.getText().trim());
             if (nomeBianco.getText().isEmpty()) nomeBianco.setText("Giocatore 1");
@@ -235,20 +243,11 @@ public class GestoreGrafico {
         }
     }
 
-//    public JPanel[][] getCasellePanel() {
-//        Casella[][] copia = new Casella[DIMENSIONE][DIMENSIONE];
-//        for (int i = 0; i < DIMENSIONE; i++) {
-//            for (int j = 0; j < DIMENSIONE; j++) {
-//                copia[i][j] = new Casella(casellePanel[i][j]);
-//            }
-//        }
-//        return copia;
-//    }
-
     private void setListener(int y, int x) {
         casellePanel[y][x].setListener(() -> {
-            if (!promozione && gioca) {
+            if (!promozione && gioca && !mossaNonCorrente) {
                 Pedina p = scacchiera.getPedina(new int[]{y, x});
+                String idCasellaSelOld = Casella.casellaSelezionata;
                 if (p != null && p.getColore().equals(scacchiera.getTurno())) Casella.casellaSelezionata = casellePanel[y][x].id;
                 else Casella.casellaSelezionata = null;
                 resetMosseValide();
@@ -258,14 +257,17 @@ public class GestoreGrafico {
                     if (mosseValide != null) mostraMosseValide(mosseValide);
                 }
                 else if ((y == 0 || y == 7) && scacchiera.getPedina(new int[]{y, x}) instanceof Pedone) {
-                    Casella.casellaSelezionata = casellePanel[y][x].id;
+                    Casella.casellaPosFinale = casellePanel[y][x].id;
+                    Casella.casellaPosIniziale = idCasellaSelOld;
                     promozione = true;
                     Casella.sceltaPromozione = true;
                     posPromozione = new int[]{y, x};
                     setImgCasellePromozione(scacchiera.getPedina(posPromozione).getColore());
                 }
                 else {
-                    Casella.casellaSelezionata = casellePanel[y][x].id;
+                    Casella.casellaPosFinale = casellePanel[y][x].id;
+                    Casella.casellaPosIniziale = idCasellaSelOld;
+                    mossaMostrata = scacchiera.getMosse();
                     scacchiera.cambiaTurno();
                     timerBianco.invertiStato();
                     timerNero.invertiStato();
@@ -304,7 +306,7 @@ public class GestoreGrafico {
 
     private void setListenerPromozione(int i) {
         casellePromozione[i].setListener(() -> {
-            if (promozione) {
+            if (promozione && !mossaNonCorrente) {
                 scacchiera.promuoviPedone(posPromozione, i + 1);
                 promozione = false;
                 Casella.sceltaPromozione = false;
@@ -313,6 +315,7 @@ public class GestoreGrafico {
                 if (rotazioneScacchiera) ruotaScacchiera(scacchiera.getTurno());
                 aggiornaLabelMateriale();
                 aggiornaScacchiera(scacchiera.getStringaScacchiera());
+                mossaMostrata = scacchiera.getMosse();
                 disegna();
             }
         });
@@ -331,6 +334,43 @@ public class GestoreGrafico {
                 finePartita();
             }
         });
+    }
+
+    private void setListenerSpostamenti(BottoneSpostamento[] btn) {
+        for (int i = 0; i < btn.length; i++) {
+            int ind = i;
+            btn[i].addActionListener(e -> {
+                if (! btn[ind].isAbilitato()) return;
+                switch (ind) {
+                    case 0 -> mossaMostrata = 0;
+                    case 1 -> {
+                        if (mossaMostrata > 0) mossaMostrata--;
+                    }
+                    case 2 -> {
+                        if (mossaMostrata < scacchiera.getMosse()) mossaMostrata++;
+                    }
+                    case 3 -> mossaMostrata = scacchiera.getMosse();
+                    default -> {}
+                }
+                aggiornaScacchiera(scacchiera.getStringaScacchieraMossa(mossaMostrata));
+                for (int n = 0; n < 4; n++) btn[n].abilita();
+                if (mossaMostrata != scacchiera.getMosse()) {
+                    Casella.infoMossa = false;
+                    mossaNonCorrente = true;
+                }
+                else {
+                    btn[2].disabilita();
+                    btn[3].disabilita();
+                    Casella.infoMossa = true;
+                    mossaNonCorrente = false;
+                }
+                if (mossaMostrata == 0) {
+                    btn[0].disabilita();
+                    btn[1].disabilita();
+                }
+                disegna();
+            });
+        }
     }
 
     private void setImgCasellePromozione(Color c) {
@@ -420,12 +460,15 @@ public class GestoreGrafico {
         private int lunghezzaLato;
         private String id;
         private static String casellaSelezionata = null;
+        private static String casellaPosIniziale = null;
+        private static String casellaPosFinale = null;
         private static final List<String> idUtilizzati = new ArrayList<>();
         private casellaClickListener listener;
         public boolean mossaValida;
         private static boolean sceltaPromozione = false;
         private static boolean scacchieraGirata = false;
         private static boolean gestisciGrafica = false;
+        private static boolean infoMossa = true;
 
         public Casella(Color colore, int lunghezzaLato, String id) {
             setLunghezzaLato(lunghezzaLato);
@@ -444,20 +487,6 @@ public class GestoreGrafico {
                 }
             });
         }
-
-        public Casella(Color colore, int lunghezzaLato, String id, ImageIcon img) {
-            this(colore, lunghezzaLato, id);
-            setImg(img);
-        }
-
-//        public Casella(Casella originale) {
-//            this.colore = originale.colore;
-//            this.lunghezzaLato = originale.lunghezzaLato;
-//            this.label = originale.label;
-//            this.id = originale.id;
-//            this.listener = originale.listener;
-//            this.mossaValida = originale.mossaValida;
-//        }
 
         public int getLunghezzaLato() {
             return lunghezzaLato;
@@ -492,10 +521,6 @@ public class GestoreGrafico {
             }
         }
 
-        public static String getIdCasellaSelezionata() {
-            return casellaSelezionata;
-        }
-
         public Icon getImg() {
             return label.getIcon();
         }
@@ -519,11 +544,22 @@ public class GestoreGrafico {
         @Override
         protected void paintComponent(Graphics g) {
             super.paintComponent(g);
-            Graphics2D g2d = (Graphics2D) g;
-            g2d.setStroke(new BasicStroke(5));
+            Graphics2D g2d = (Graphics2D) g.create();
             disegnaCoordinata(g2d);
-            g2d.setColor(Color.black);
+
             g2d.setRenderingHint(RenderingHints.KEY_ANTIALIASING, RenderingHints.VALUE_ANTIALIAS_ON);
+            if (!infoMossa) {
+                g2d.dispose();
+                return;
+            }
+
+            if (this.id.equals(casellaPosIniziale) || this.id.equals(casellaPosFinale)) {
+                g2d.setColor(new Color(50, 150, 50, 150));
+                g2d.fillRect(0, 0, getWidth(), getHeight());
+            }
+
+            g2d.setStroke(new BasicStroke(5));
+            g2d.setColor(Color.black);
 
             if (sceltaPromozione && this.id.equals("PROMOZIONE")) {
                 g2d.setColor(new Color(0, 128, 200));
@@ -546,6 +582,7 @@ public class GestoreGrafico {
                 }
                 g2d.setComposite(old);
             }
+            g2d.dispose();
         }
 
         private void disegnaCoordinata(Graphics2D g2d) {

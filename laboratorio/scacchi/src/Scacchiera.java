@@ -572,6 +572,10 @@ public class Scacchiera {
         return scacchiera.toString();
     }
 
+    public String getStringaScacchieraMossa(int mossa) {
+        return getStringaScacchieraMossa(mossa, false);
+    }
+
     @Override
     public String toString() {
         return getStringaScacchiera();

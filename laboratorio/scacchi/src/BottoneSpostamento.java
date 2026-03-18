@@ -1,92 +1,66 @@
 import javax.swing.*;
 import java.awt.*;
-import java.awt.event.MouseAdapter;
-import java.awt.event.MouseEvent;
 
 public class BottoneSpostamento extends JButton {
-    private final Color borderColor;
-    private final Color hoverColor;
-    private final Color pressedColor;
+    private final int tipo;
+    private Timer timer;
+    private int step = 0;
+    private boolean abilitato;
 
-    private boolean hover   = false;
-    private boolean pressed = false;
-
-    private final int arc;
-
-    public BottoneSpostamento(int tipo, int x, int y, int dimensione, Color borderColor, Color hoverColor, Color pressedColor, Color textColor) {
+    public BottoneSpostamento(int tipo, int x, int y, int dimensione) {
         super();
-        switch (tipo) {
-            case 1 -> setText("⏮");
-            case 2 -> setText("◀");
-            case 3 -> setText("▶");
-            case 4 -> setText("⏭");
-            default -> {}
-        }
+        this.tipo = tipo;
+        abilitato = true;
         setBounds(x, y, dimensione, dimensione);
-
-        this.borderColor = borderColor;
-        this.hoverColor = hoverColor;
-        this.pressedColor = pressedColor;
-        this.arc = dimensione / 3;
-
-        setForeground(textColor);
+        impostaImmagine(dimensione);
         setContentAreaFilled(false);
-        setFocusPainted(false);
         setBorderPainted(false);
+        setFocusPainted(false);
         setOpaque(false);
-        setCursor(new Cursor(Cursor.HAND_CURSOR));
-        setFont(new Font("Segoe UI Emoji", Font.PLAIN, dimensione / 4));
-
         setVerticalAlignment(SwingConstants.CENTER);
         setHorizontalAlignment(SwingConstants.CENTER);
+        setCursor(new Cursor(Cursor.HAND_CURSOR));
 
-        addMouseListener(new MouseAdapter() {
-            @Override
-            public void mouseEntered(MouseEvent e) {
-                if (isEnabled()) { hover = true;  repaint(); }
-            }
-            @Override
-            public void mouseExited(MouseEvent e) {
-                if (isEnabled()) { hover = false; pressed = false; repaint(); }
-            }
-            @Override
-            public void mousePressed(MouseEvent e) {
-                if (isEnabled()) { pressed = true;  repaint(); }
-            }
-            @Override
-            public void mouseReleased(MouseEvent e) {
-                if (isEnabled()) { pressed = false; repaint(); }
+        timer = new Timer(60, e -> {
+            step++;
+            if (step == 1) impostaImmagine(dimensione - dimensione / 10);
+            else if (step == 2) {
+                impostaImmagine(dimensione);
+                timer.stop();
+                step = 0;
             }
         });
 
-//        addPropertyChangeListener("enabled", e -> { hover = false; pressed = false; repaint(); });
+        addActionListener(e -> {
+            if (abilitato) timer.start();
+        });
     }
 
-    @Override
-    protected void paintComponent(Graphics g) {
-        Graphics2D g2 = (Graphics2D) g.create();
-        g2.setRenderingHint(RenderingHints.KEY_ANTIALIASING, RenderingHints.VALUE_ANTIALIAS_ON);
-
-        int w = getWidth();
-        int h = getHeight();
-
-        if (pressed) {
-            g2.setColor(pressedColor);
-            g2.fillRoundRect(0, 0, w, h, arc, arc);
+    private void impostaImmagine(int dimensione) {
+        switch (tipo) {
+            case 1 -> setIcon(creaIconaScalata("frecce/frecciaStart.png", dimensione));
+            case 2 -> setIcon(creaIconaScalata("frecce/frecciaSx.png", dimensione));
+            case 3 -> setIcon(creaIconaScalata("frecce/frecciaDx.png", dimensione));
+            case 4 -> setIcon(creaIconaScalata("frecce/frecciaEnd.png", dimensione));
+            default -> {}
         }
-        else if (hover) {
-            g2.setColor(hoverColor);
-            g2.fillRoundRect(0, 0, w, h, arc, arc);
-        }
+    }
 
-        int spessore = 2;
-        g2.setStroke(new BasicStroke(spessore));
-        Color bc = borderColor;
-        if (!isEnabled()) bc = new Color(borderColor.getRed(), borderColor.getGreen(), borderColor.getBlue(), 80);
-        g2.setColor(bc);
-        g2.drawRoundRect(spessore / 2, spessore / 2, w - spessore, h - spessore, arc, arc);
+    private ImageIcon creaIconaScalata(String percorso, int dimensione) {
+        ImageIcon icon = new ImageIcon(percorso);
+        Image img = icon.getImage().getScaledInstance(dimensione, dimensione, Image.SCALE_SMOOTH);
+        return new ImageIcon(img);
+    }
 
-        g2.dispose();
-        super.paintComponent(g);
+    public void abilita() {
+        abilitato = true;
+    }
+
+    public void disabilita() {
+        abilitato = false;
+    }
+
+    public boolean isAbilitato() {
+        return abilitato;
     }
 }

@@ -1,7 +1,6 @@
 //TODO
 // impostazione timer da parte dell'utente
 // velocità timer corretta
-// possibilità di spostarsi avanti e indietro nello stato della partita
 // l'enpassant mostra il cerchio vuoto
 // grafica migliore
 // controllo finale per ottimizzazione codice

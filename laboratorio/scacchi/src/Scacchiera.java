@@ -534,10 +534,12 @@ public class Scacchiera {
                             if (mossa[1] == pos[1] + 1 && caselle[mossa[0]][mossa[1]] == null) infoRipetizioni.append("ep").append(pos[1] + 1).append("dx");
                         }
                     }
-                    else if (p instanceof Re && p.getColore() == turno) {
+                    else if (p instanceof Re) {
+                        String col = "B";
+                        if (!p.getColore().equals(Color.white)) col = "N";
                         for (int[] mossa : filtraMosseScacco(pos, ottieniMosseFiltrate(pos))) {
-                            if (mossa[1] == pos[1] - 2) infoRipetizioni.append("asx");
-                            if (mossa[1] == pos[1] + 2) infoRipetizioni.append("adx");
+                            if (mossa[1] == pos[1] - 2) infoRipetizioni.append("asx").append(col);
+                            if (mossa[1] == pos[1] + 2) infoRipetizioni.append("adx").append(col);
                         }
                     }
                 }

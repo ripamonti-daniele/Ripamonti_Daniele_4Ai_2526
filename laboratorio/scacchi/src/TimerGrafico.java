@@ -4,7 +4,8 @@ import java.awt.event.ActionEvent;
 
 public class TimerGrafico extends JLabel {
     private final Timer timer;
-    private int millesimi;
+    private long millesimi;
+    private long ultimoTick;
     private int ore;
     private int minuti;
     private int secondi;
@@ -29,11 +30,12 @@ public class TimerGrafico extends JLabel {
         setHorizontalAlignment(SwingConstants.CENTER);
 
         timer = new Timer(1, (ActionEvent e) -> {
-            millesimi++;
-            if (millesimi == 1000) {
+            millesimi += System.currentTimeMillis() - ultimoTick;
+            if (millesimi >= 1000) {
                 aggiorna();
-                millesimi = 0;
+                millesimi -= 1000;
             }
+            ultimoTick = System.currentTimeMillis();
         });
     }
 
@@ -84,7 +86,10 @@ public class TimerGrafico extends JLabel {
     }
 
     public void start() {
-        if (!off && !timer.isRunning()) timer.start();
+        if (!off && !timer.isRunning()) {
+            ultimoTick = System.currentTimeMillis();
+            timer.start();
+        }
     }
 
     public void pause() {
@@ -112,7 +117,10 @@ public class TimerGrafico extends JLabel {
                 timer.stop();
                 sommaGuadagno();
             }
-            else timer.start();
+            else {
+                ultimoTick = System.currentTimeMillis();
+                timer.start();
+            }
         }
     }
 

@@ -1,6 +1,5 @@
 //TODO
 // impostazione timer da parte dell'utente
-// velocità timer corretta
 // l'enpassant mostra il cerchio vuoto
 // grafica migliore
 // controllo finale per ottimizzazione codice
@@ -25,7 +24,7 @@ void main() {
 
     Scacchiera scacchiera = new Scacchiera();
     GestoreGrafico gestoreGrafico = new GestoreGrafico(scacchiera, (int) Math.round(height * 0.8), sfondo);
-//    ScacchieraPanel scacchieraPanel = new ScacchieraPanel(scacchiera, 500);
+//    GestoreGrafico gestoreGrafico = new GestoreGrafico(scacchiera, 500, sfondo);
 
     frame.setVisible(true);
     JPanel contenitore = new JPanel(null);

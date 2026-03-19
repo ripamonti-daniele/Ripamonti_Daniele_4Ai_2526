@@ -23,7 +23,7 @@ public class JButtonCustom extends JButton {
         setBorderPainted(false);
         setOpaque(false);
         setCursor(new Cursor(Cursor.HAND_CURSOR));
-        setFont(new Font("Segoe UI", Font.BOLD, Math.max(12, height / 4)));
+        setFont(new Font("Segoe UI", Font.BOLD, height / 4));
         setVerticalAlignment(SwingConstants.CENTER);
         setHorizontalAlignment(SwingConstants.CENTER);
 

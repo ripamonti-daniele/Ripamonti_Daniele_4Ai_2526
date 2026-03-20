@@ -62,9 +62,10 @@ public class TimerGrafico extends JLabel {
         off = (oreDefault == 0 && minutiDefault == 0 && secondiDefault == 0);
     }
 
-    private void setTimer(int ore, int minuti, int secondi, int guadagno) {
+    public void setTimer(int ore, int minuti, int secondi, int guadagno) {
         reset();
         inizializzaTimer(ore, minuti, secondi, guadagno);
+        displayTimer();
     }
 
     private void aggiorna() {
@@ -124,18 +125,6 @@ public class TimerGrafico extends JLabel {
         }
     }
 
-    public boolean isRunning() {
-        return timer.isRunning();
-    }
-
-    public boolean isTempoScaduto() {
-        return tempoScaduto;
-    }
-
-    public boolean isOff() {
-        return off;
-    }
-
     public void sommaGuadagno() {
         if (tempoScaduto || guadagno == 0) return;
         if (guadagno == 60) minuti++;
@@ -160,8 +149,7 @@ public class TimerGrafico extends JLabel {
 
     private void displayTimer() {
         String s = "";
-        if (ore >= 10) s = ore + ":";
-        else if (ore > 0) s = "0" + ore + ":";
+        if (ore > 0) s = ore + ":";
         if (minuti < 10) s += "0";
         s += minuti + ":";
         if (secondi < 10) s += "0";
@@ -169,6 +157,46 @@ public class TimerGrafico extends JLabel {
         modificaTesto = true;
         setText(s);
         modificaTesto = false;
+    }
+
+    public boolean isRunning() {
+        return timer.isRunning();
+    }
+
+    public boolean isTempoScaduto() {
+        return tempoScaduto;
+    }
+
+    public boolean isOff() {
+        return off;
+    }
+
+    public int getOreDefault() {
+        return oreDefault;
+    }
+
+    public int getMinutiDefault() {
+        return minutiDefault;
+    }
+
+    public int getSecondiDefault() {
+        return secondiDefault;
+    }
+
+    public int getGuadagno() {
+        return guadagno;
+    }
+
+    public int getSecondi() {
+        return secondi;
+    }
+
+    public int getMinuti() {
+        return minuti;
+    }
+
+    public int getOre() {
+        return ore;
     }
 
     @Override

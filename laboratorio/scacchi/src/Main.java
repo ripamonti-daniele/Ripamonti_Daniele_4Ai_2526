@@ -1,5 +1,6 @@
 //TODO
-// impostazione timer da parte dell'utente
+// rimuovere / cambiare l'immagine del dialog
+// tasto disattiva timer nel dialog
 // l'enpassant mostra il cerchio vuoto
 // grafica migliore
 // controllo finale per ottimizzazione codice

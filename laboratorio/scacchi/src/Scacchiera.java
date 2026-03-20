@@ -414,7 +414,7 @@ public class Scacchiera {
         }
     }
 
-    // -1 no vittoria; 0 vittoria bianco; 1 vittoria nero; 2 stallo; 3 pareggio mosse neutre; 4 pareggio ripetizioni
+    // -1 partita non finita; 0 vittoria bianco; 1 vittoria nero; 2 stallo; 3 materiale insufficiente; 4 pareggio ripetizioni; 5 pareggio mosse neutre
     public int getStatoPartita() {
         boolean noMosse = false;
         for (Pedina[] riga : caselle) {
@@ -432,8 +432,9 @@ public class Scacchiera {
             return 0;
         }
         else if (!noMosse) return 2;
-        if (mosseNeutre >= 150) return 3;
-        if (pareggioRipetizioni()) return 4;
+        if (materialeInsufficiente(Color.black) && materialeInsufficiente(Color.white)) return 3;
+        if (mosseNeutre >= 150) return 4;
+        if (pareggioRipetizioni()) return 5;
         return -1;
     }
 

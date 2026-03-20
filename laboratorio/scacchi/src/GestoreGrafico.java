@@ -31,6 +31,7 @@ public class GestoreGrafico {
     private final JTextArea nomeNero;
     private final JButton btnBotBianco;
     private final JButton btnBotNero;
+    private final JButton btnTimer;
     private final TimerGrafico timerBianco;
     private final TimerGrafico timerNero;
     private final JLabel materialeBianco;
@@ -58,6 +59,7 @@ public class GestoreGrafico {
         //inizializzazione parte grafica gestione utente
         panelInfo = new JPanel();
         labelVittoria = new JLabelCustom(null, Color.red);
+        nomeBianco = new JTextAreaCustom("Giocatore 1", 0, lunghezzaScacchiera - lunghezzaCasella / 2,  lunghezzaCasella * 2, lunghezzaCasella / 2);
         nomeNero = new JTextAreaCustom("Giocatore 2", 0, 0,  lunghezzaScacchiera / 4, lunghezzaScacchiera / 16);
         timerBianco = new TimerGrafico(0, 10, 0, 0, Color.white, Color.black);
         timerNero = new TimerGrafico(0, 10, 0, 0, Color.black, Color.white);
@@ -65,7 +67,7 @@ public class GestoreGrafico {
         materialeNero = new JLabelCustom(null, Color.black);
         btnGioca = new JButtonCustom("<html>Gioca</html>", 0, lunghezzaCasella * 4 - lunghezzaCasella / 2, lunghezzaCasella * 2, lunghezzaCasella, new Color(66, 133, 244), new Color(52, 103, 206), new Color(90, 160, 255), new Color(66, 133, 244), new Color(30, 70, 180), Color.white);
         btnRotazioneScacchiera = new JButtonCustom("<html><div style='text-align:center;'>Ruota<br>On</div></html>", lunghezzaCasella * 2 + lunghezzaCasella / 15, lunghezzaCasella * 4 - lunghezzaCasella / 2, lunghezzaCasella * 2, lunghezzaCasella, new Color(250,250,250), new Color(190,190,190), new Color(255,255,255), new Color(200,200,200), new Color(170,170,170), Color.BLACK);
-        nomeBianco = new JTextAreaCustom("Giocatore 1", 0, lunghezzaScacchiera - lunghezzaCasella / 2,  lunghezzaCasella * 2, lunghezzaCasella / 2);
+        btnTimer = new JButtonCustom("<html><div style='text-align:center;'>Imposta timer</div></html>", 0, lunghezzaCasella * 4 + lunghezzaCasella / 2 + lunghezzaCasella / 15, lunghezzaCasella * 2, lunghezzaCasella, new Color(250,250,250), new Color(190,190,190), new Color(255,255,255), new Color(200,200,200), new Color(170,170,170), Color.BLACK);
         btnBotBianco = new JButtonCustom("<html><div style='text-align:center;'>Bot<br>Off</div></html>", lunghezzaCasella * 2 + lunghezzaCasella / 15, lunghezzaScacchiera - lunghezzaCasella / 2,  lunghezzaCasella / 2, lunghezzaCasella / 2, new Color(51, 51, 51), new Color(0, 0, 0), new Color(85, 85, 85), new Color(0, 0, 0), new Color(0, 0, 0), Color.WHITE);
         btnBotNero = new JButtonCustom("<html><div style='text-align:center;'>Bot<br>Off</div></html>", lunghezzaCasella * 2 + lunghezzaCasella / 15, 0,  lunghezzaCasella / 2, lunghezzaCasella / 2, new Color(51, 51, 51), new Color(0, 0, 0), new Color(85, 85, 85), new Color(0, 0, 0), new Color(0, 0, 0), Color.WHITE);
         btnSpostamenti = new BottoneSpostamento[4];
@@ -115,7 +117,7 @@ public class GestoreGrafico {
         panelInfo.add(timerNero);
         panelInfo.add(materialeBianco);
         panelInfo.add(materialeNero);
-//        for (BottoneSpostamento b : btnSpostamenti) panelInfo.add(b);
+        panelInfo.add(btnTimer);
 
         //listener gestione utente
         btnGioca.addActionListener(e -> {
@@ -142,6 +144,7 @@ public class GestoreGrafico {
             btnBotBianco.setEnabled(false);
             btnBotNero.setEnabled(false);
             btnRotazioneScacchiera.setEnabled(false);
+            btnTimer.setEnabled(false);
             timerBianco.reset();
             timerNero.reset();
             timerBianco.start();
@@ -153,6 +156,8 @@ public class GestoreGrafico {
             if (rotazioneScacchiera) btnRotazioneScacchiera.setText("<html><div style='text-align:center;'>Ruota<br>On</div></html>");
             else btnRotazioneScacchiera.setText("<html><div style='text-align:center;'>Ruota<br>Off</div></html>");
         });
+
+        btnTimer.addActionListener(e -> creaDialogTimer());
     }
 
     public GestoreGrafico(Scacchiera scacchiera, int lunghezzaScacchiera, Color sfondo) {
@@ -220,6 +225,7 @@ public class GestoreGrafico {
         btnRotazioneScacchiera.setEnabled(true);
         timerBianco.pause();
         timerNero.pause();
+        btnTimer.setEnabled(true);
     }
 
     private void aggiornaScacchiera(String s) {
@@ -290,10 +296,14 @@ public class GestoreGrafico {
                             finePartita();
                         }
                         case 3 -> {
-                            labelVittoria.setText("<html><div style='text-align:center;'>75 mosse neutre:<br>Pareggio</div></html>");
+                            labelVittoria.setText("<html><div style='text-align:center;'>Materiale insufficiente:<br>Pareggio</div></html>");
                             finePartita();
                         }
                         case 4 -> {
+                            labelVittoria.setText("<html><div style='text-align:center;'>75 mosse neutre:<br>Pareggio</div></html>");
+                            finePartita();
+                        }
+                        case 5 -> {
                             labelVittoria.setText("<html><div style='text-align:center;'>5 posizioni ripetute:<br>Pareggio</div></html>");
                             finePartita();
                         }
@@ -430,6 +440,75 @@ public class GestoreGrafico {
         diffNero += String.valueOf(matNero - matBianco);
         materialeBianco.setText("<html>Materiale: " + matBianco + "<br>Differenza: " + diffBianco + "</html>");
         materialeNero.setText("<html>Materiale: " + matNero + "<br>Differenza: " + diffNero + "</html>");
+    }
+
+    private void creaDialogTimer() {
+        JSpinner s1 = new JSpinner(new SpinnerNumberModel(timerBianco.getOreDefault(), 0, 23, 1));
+        JSpinner s2 = new JSpinner(new SpinnerNumberModel(timerBianco.getMinutiDefault(), 0, 59, 1));
+        JSpinner s3 = new JSpinner(new SpinnerNumberModel(timerBianco.getSecondiDefault(), 0, 59, 10));
+        JSpinner s4 = new JSpinner(new SpinnerNumberModel(timerBianco.getGuadagno(), 0, 60, 5));
+
+        JDialog dialog = new JDialog();
+        dialog.setTitle("Imposta il timer");
+        dialog.setModal(true);
+        dialog.setResizable(true);
+        dialog.setLayout(new BorderLayout());
+
+        Font f = UIManager.getFont("Label.font").deriveFont(14f);
+        JPanel panel = new JPanel(new GridLayout(4, 2, 10, 10));
+        panel.setBorder(BorderFactory.createEmptyBorder(15, 15, 15, 15));
+        JLabel l1 = new JLabel("Ore:"); l1.setFont(f); panel.add(l1);
+        s1.setFont(f); panel.add(s1);
+        JLabel l2 = new JLabel("Minuti:"); l2.setFont(f); panel.add(l2);
+        s2.setFont(f); panel.add(s2);
+        JLabel l3 = new JLabel("Secondi:"); l3.setFont(f); panel.add(l3);
+        s3.setFont(f); panel.add(s3);
+        JLabel l4 = new JLabel("Guadagno (sec):"); l4.setFont(f); panel.add(l4);
+        s4.setFont(f); panel.add(s4);
+
+        f = new Font("Segoe UI", Font.BOLD, 15);
+        JButton btnConferma = new JButton("Conferma");
+        btnConferma.setFont(f);
+        btnConferma.setBackground(new Color(66, 133, 244));
+        btnConferma.setForeground(Color.white);
+        btnConferma.setFocusPainted(false);
+        btnConferma.setOpaque(true);
+        btnConferma.setBorderPainted(false);
+        btnConferma.setCursor(Cursor.getPredefinedCursor(Cursor.HAND_CURSOR));
+        btnConferma.addMouseListener(new MouseAdapter() {
+            public void mouseEntered(MouseEvent e) { btnConferma.setBackground(new Color(90, 160, 255)); }
+            public void mouseExited(MouseEvent e)  { btnConferma.setBackground(new Color(66, 133, 244)); }
+        });
+        btnConferma.addActionListener(_ -> {
+            timerBianco.setTimer((int) s1.getValue(), (int) s2.getValue(), (int) s3.getValue(), (int) s4.getValue());
+            timerNero.setTimer((int) s1.getValue(), (int) s2.getValue(), (int) s3.getValue(), (int) s4.getValue());
+            dialog.dispose();
+        });
+
+        JButton btnAnnulla = new JButton("Annulla");
+        btnAnnulla.setFont(f);
+        btnAnnulla.setBackground(new Color(60, 60, 60));
+        btnAnnulla.setForeground(new Color(200, 200, 200));
+        btnAnnulla.setFocusPainted(false);
+        btnAnnulla.setOpaque(true);
+        btnAnnulla.setBorderPainted(false);
+        btnAnnulla.setCursor(Cursor.getPredefinedCursor(Cursor.HAND_CURSOR));
+        btnAnnulla.addMouseListener(new MouseAdapter() {
+            public void mouseEntered(MouseEvent e) { btnAnnulla.setBackground(new Color(80, 80, 80)); }
+            public void mouseExited(MouseEvent e)  { btnAnnulla.setBackground(new Color(60, 60, 60)); }
+        });
+        btnAnnulla.addActionListener(_ -> dialog.dispose());
+
+        JPanel panelBottoni = new JPanel(new FlowLayout(FlowLayout.RIGHT, 10, 10));
+        panelBottoni.add(btnAnnulla);
+        panelBottoni.add(btnConferma);
+
+        dialog.add(panel, BorderLayout.CENTER);
+        dialog.add(panelBottoni, BorderLayout.SOUTH);
+        dialog.setSize(lunghezzaCasella * 4, lunghezzaCasella * 3);
+        dialog.setMinimumSize(new Dimension(290, 250));
+        dialog.setLocationRelativeTo(null);
+        dialog.setVisible(true);
     }
 
     public void mettiASchermo(JPanel panel) {

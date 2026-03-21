@@ -1,5 +1,4 @@
 import javax.swing.*;
-import javax.swing.border.AbstractBorder;
 import java.awt.*;
 import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
@@ -7,7 +6,6 @@ import java.awt.event.MouseEvent;
 public class BottoneSpostamento extends JButton {
     private final int tipo;
     private boolean abilitato;
-    private final Cursor[] cursori;
     private boolean hover;
 
     public BottoneSpostamento(int tipo, int x, int y, int dimensione) {
@@ -22,16 +20,13 @@ public class BottoneSpostamento extends JButton {
         setOpaque(false);
         setVerticalAlignment(SwingConstants.CENTER);
         setHorizontalAlignment(SwingConstants.CENTER);
-        cursori = new Cursor[2];
-        cursori[0] = new Cursor(Cursor.DEFAULT_CURSOR);
-        cursori[1] = new Cursor(Cursor.HAND_CURSOR);
 
         addMouseListener(new MouseAdapter() {
             @Override
             public void mouseEntered(MouseEvent e) {
                 hover = true;
                 if (abilitato) {
-                    setCursor(cursori[1]);
+                    setCursor(new Cursor(Cursor.HAND_CURSOR));
                     impostaImmagine(dimensione);
                 }
             }
@@ -39,7 +34,7 @@ public class BottoneSpostamento extends JButton {
             @Override
             public void mouseExited(MouseEvent e) {
                 hover = false;
-                setCursor(cursori[0]);
+                setCursor(new Cursor(Cursor.DEFAULT_CURSOR));
                 impostaImmagine(dimensione - dimensione / 10);
             }
 
@@ -53,7 +48,7 @@ public class BottoneSpostamento extends JButton {
                 if (hover && abilitato) impostaImmagine(dimensione);
                 else {
                     impostaImmagine(dimensione - dimensione / 10);
-                    setCursor(cursori[0]);
+                    setCursor(new Cursor(Cursor.DEFAULT_CURSOR));
                 }
             }
         });

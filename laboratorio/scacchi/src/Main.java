@@ -1,6 +1,4 @@
 //TODO
-// rimuovere / cambiare l'immagine del dialog
-// tasto disattiva timer nel dialog
 // l'enpassant mostra il cerchio vuoto
 // grafica migliore
 // controllo finale per ottimizzazione codice
@@ -22,6 +20,7 @@ void main() {
     frame.setSize(width, height);
     frame.setExtendedState(JFrame.MAXIMIZED_BOTH);
     frame.getContentPane().setBackground(sfondo);
+    frame.setIconImage(new ImageIcon(new ImageIcon("img/chess.png").getImage().getScaledInstance(30, 30, Image.SCALE_SMOOTH)).getImage());
 
     Scacchiera scacchiera = new Scacchiera();
     GestoreGrafico gestoreGrafico = new GestoreGrafico(scacchiera, (int) Math.round(height * 0.8), sfondo);
@@ -34,10 +33,9 @@ void main() {
     Insets insets = frame.getInsets();
     int contentHeight = frame.getHeight() - insets.top - insets.bottom;
 
-    contenitore.setBounds(gestoreGrafico.lunghezzaCasella, (contentHeight - gestoreGrafico.lunghezzaScacchiera) / 2, 2 * gestoreGrafico.lunghezzaScacchiera, gestoreGrafico.lunghezzaScacchiera + gestoreGrafico.lunghezzaCasella);
+    contenitore.setBounds(gestoreGrafico.lunghezzaCasella, (contentHeight - gestoreGrafico.lunghezzaScacchiera) / 2, 2 * gestoreGrafico.lunghezzaScacchiera, gestoreGrafico.lunghezzaScacchiera + gestoreGrafico.lunghezzaCasella / 4 * 3);
     contenitore.setBackground(sfondo);
     //    contenitore.setBounds(width / 10, (contentHeight - scacchieraPanel.lunghezzaScacchiera) / 2, scacchieraPanel.lunghezzaScacchiera * 2, scacchieraPanel.lunghezzaScacchiera * 2);
     frame.add(contenitore);
-    frame.setLocationRelativeTo(null);
     frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
 }

@@ -29,7 +29,7 @@ public class TimerGrafico extends JLabel {
         setVerticalAlignment(SwingConstants.CENTER);
         setHorizontalAlignment(SwingConstants.CENTER);
 
-        timer = new Timer(1, (ActionEvent e) -> {
+        timer = new Timer(100, (ActionEvent _) -> {
             millesimi += System.currentTimeMillis() - ultimoTick;
             if (millesimi >= 1000) {
                 aggiorna();
@@ -66,6 +66,11 @@ public class TimerGrafico extends JLabel {
         reset();
         inizializzaTimer(ore, minuti, secondi, guadagno);
         displayTimer();
+    }
+
+    public void disattiva() {
+        setTimer(0, 0, 0, 0);
+        off = true;
     }
 
     private void aggiorna() {
@@ -126,7 +131,7 @@ public class TimerGrafico extends JLabel {
     }
 
     public void sommaGuadagno() {
-        if (tempoScaduto || guadagno == 0) return;
+        if (tempoScaduto || guadagno == 0 || off) return;
         if (guadagno == 60) minuti++;
         else {
             secondi += guadagno;
@@ -149,11 +154,14 @@ public class TimerGrafico extends JLabel {
 
     private void displayTimer() {
         String s = "";
-        if (ore > 0) s = ore + ":";
-        if (minuti < 10) s += "0";
-        s += minuti + ":";
-        if (secondi < 10) s += "0";
-        s += String.valueOf(secondi);
+        if (off) s = "Off";
+        else {
+            if (ore > 0) s = ore + ":";
+            if (minuti < 10) s += "0";
+            s += minuti + ":";
+            if (secondi < 10) s += "0";
+            s += String.valueOf(secondi);
+        }
         modificaTesto = true;
         setText(s);
         modificaTesto = false;

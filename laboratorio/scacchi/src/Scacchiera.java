@@ -348,6 +348,9 @@ public class Scacchiera {
         Pedina p = caselle[pos[0]][pos[1]];
         if (!p.getColore().equals(turno)) return null;
 
+        for (Pedina ped : caselle[0]) if (ped instanceof Pedone) promuoviPedone(ped.getPosizione(), 1);
+        for (Pedina ped : caselle[DIMENSIONE - 1]) if (ped instanceof Pedone) promuoviPedone(ped.getPosizione(), 1);
+
         this.mosseValide = filtraMosseScacco(pos, ottieniMosseFiltrate(pos));
         this.casella_selezionata = pos;
         return mosseValide;
@@ -395,8 +398,10 @@ public class Scacchiera {
             caselle[casella_selezionata[0]][casella_selezionata[1]] = null;
 
             mosseValide.clear();
-            mosse++;
-            scriviScacchiera();
+            if (!(p instanceof Pedone && (pos[0] == DIMENSIONE -1 || pos[0] == 0))) {
+                mosse++;
+                scriviScacchiera();
+            }
         }
         casella_selezionata = null;
         return valido;
@@ -412,6 +417,8 @@ public class Scacchiera {
             case 4 -> caselle[pos[0]][pos[1]] = new Cavallo(c, pos);
             default -> caselle[pos[0]][pos[1]] = new Regina(c, pos);
         }
+        mosse++;
+        scriviScacchiera();
     }
 
     // -1 partita non finita; 0 vittoria bianco; 1 vittoria nero; 2 stallo; 3 materiale insufficiente; 4 pareggio ripetizioni; 5 pareggio mosse neutre

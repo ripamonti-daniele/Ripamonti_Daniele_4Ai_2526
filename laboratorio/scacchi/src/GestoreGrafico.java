@@ -273,6 +273,7 @@ public class GestoreGrafico {
                     Casella.sceltaPromozione = true;
                     posPromozione = new int[]{y, x};
                     setImgCasellePromozione(scacchiera.getPedina(posPromozione).getColore());
+                    aggiornaBtnSpostamento();
                 }
                 else {
                     Casella.casellaPosFinale = casellePanel[y][x].id;
@@ -377,6 +378,10 @@ public class GestoreGrafico {
     }
 
     private void aggiornaBtnSpostamento() {
+        if (promozione) {
+            for (int n = 0; n < 4; n++) btnSpostamenti[n].disabilita();
+            return;
+        }
         for (int n = 0; n < 4; n++) btnSpostamenti[n].abilita();
         if (mossaMostrata != scacchiera.getMosse()) {
             Casella.infoMossa = false;

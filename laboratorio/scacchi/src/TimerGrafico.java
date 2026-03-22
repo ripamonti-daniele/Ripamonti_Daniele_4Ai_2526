@@ -99,7 +99,7 @@ public class TimerGrafico extends JLabel {
     }
 
     public void pause() {
-        if (timer.isRunning()) {
+        if (timer.isRunning() && !off) {
             timer.stop();
             sommaGuadagno();
         }
@@ -167,8 +167,8 @@ public class TimerGrafico extends JLabel {
         modificaTesto = false;
     }
 
-    public boolean isRunning() {
-        return timer.isRunning();
+    public boolean isPaused() {
+        return !timer.isRunning();
     }
 
     public boolean isTempoScaduto() {

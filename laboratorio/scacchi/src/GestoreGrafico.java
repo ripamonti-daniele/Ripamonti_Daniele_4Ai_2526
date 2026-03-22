@@ -138,7 +138,10 @@ public class GestoreGrafico {
             nomeNero.setText(nomeNero.getText().trim());
             if (nomeBianco.getText().isEmpty()) nomeBianco.setText("Giocatore 1");
             if (nomeNero.getText().isEmpty()) nomeNero.setText("Giocatore 2");
-            if (nomeBianco.getText().equals(nomeNero.getText())) nomeNero.setText(nomeNero.getText() + " 1");
+            if (nomeBianco.getText().equals(nomeNero.getText())) {
+                if (nomeNero.getText().length() == 15) nomeNero.setText(nomeNero.getText().substring(0, 14) + "N");
+                else nomeNero.setText(nomeNero.getText() + "N");
+            }
             nomeBianco.setEditable(false);
             nomeNero.setEditable(false);
             btnBotBianco.setEnabled(false);
@@ -328,6 +331,8 @@ public class GestoreGrafico {
                 Casella.sceltaPromozione = false;
                 for (Casella c : casellePromozione) c.rimuoviImg();
                 scacchiera.cambiaTurno();
+                timerBianco.invertiStato();
+                timerNero.invertiStato();
                 if (rotazioneScacchiera) ruotaScacchiera(scacchiera.getTurno());
                 aggiornaLabelMateriale();
                 aggiornaScacchiera(scacchiera.getStringaScacchiera());
@@ -356,7 +361,7 @@ public class GestoreGrafico {
     private void setListenerSpostamenti() {
         for (int i = 0; i < btnSpostamenti.length; i++) {
             int ind = i;
-            btnSpostamenti[i].addActionListener(e -> {
+            btnSpostamenti[i].addActionListener(_ -> {
                 if (btnSpostamenti[ind].isAbilitato()) {
                     switch (ind) {
                         case 0 -> mossaMostrata = 0;
@@ -371,6 +376,12 @@ public class GestoreGrafico {
                         }
                     }
                     aggiornaScacchiera(scacchiera.getStringaScacchieraMossa(mossaMostrata));
+                    if (mossaMostrata != scacchiera.getMosse()) {
+                        timerBianco.pause();
+                        timerNero.pause();
+                    }
+                    else if (scacchiera.getTurno().equals(Color.white) && timerBianco.isPaused()) timerBianco.start();
+                    else if (scacchiera.getTurno().equals(Color.black) && timerNero.isPaused()) timerNero.start();
                 }
                 aggiornaBtnSpostamento();
             });
@@ -484,7 +495,7 @@ public class GestoreGrafico {
         btnConferma.setCursor(Cursor.getPredefinedCursor(Cursor.HAND_CURSOR));
         btnConferma.addMouseListener(new MouseAdapter() {
             public void mouseEntered(MouseEvent e) { btnConferma.setBackground(new Color(90, 160, 255)); }
-            public void mouseExited(MouseEvent e)  { btnConferma.setBackground(new Color(66, 133, 244)); }
+            public void mouseExited(MouseEvent e) { btnConferma.setBackground(new Color(66, 133, 244)); }
         });
         btnConferma.addActionListener(_ -> {
             timerBianco.setTimer((int) s1.getValue(), (int) s2.getValue(), (int) s3.getValue(), (int) s4.getValue());
@@ -503,7 +514,7 @@ public class GestoreGrafico {
         btnAnnulla.setCursor(Cursor.getPredefinedCursor(Cursor.HAND_CURSOR));
         btnAnnulla.addMouseListener(new MouseAdapter() {
             public void mouseEntered(MouseEvent e) { btnAnnulla.setBackground(new Color(80, 80, 80)); }
-            public void mouseExited(MouseEvent e)  { btnAnnulla.setBackground(new Color(60, 60, 60)); }
+            public void mouseExited(MouseEvent e) { btnAnnulla.setBackground(new Color(60, 60, 60)); }
         });
         btnAnnulla.addActionListener(_ -> dialog.dispose());
 
@@ -518,7 +529,7 @@ public class GestoreGrafico {
         btnDisattiva.setCursor(Cursor.getPredefinedCursor(Cursor.HAND_CURSOR));
         btnDisattiva.addMouseListener(new MouseAdapter() {
             public void mouseEntered(MouseEvent e) { btnDisattiva.setBackground(new Color(210, 55, 55)); }
-            public void mouseExited(MouseEvent e)  { btnDisattiva.setBackground(new Color(180, 40, 40)); }
+            public void mouseExited(MouseEvent e) { btnDisattiva.setBackground(new Color(180, 40, 40)); }
         });
         btnDisattiva.addActionListener(_ -> {
             timerBianco.disattiva();

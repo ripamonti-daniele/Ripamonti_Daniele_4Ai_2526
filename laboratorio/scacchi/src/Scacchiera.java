@@ -423,22 +423,24 @@ public class Scacchiera {
 
     // -1 partita non finita; 0 vittoria bianco; 1 vittoria nero; 2 stallo; 3 materiale insufficiente; 4 pareggio ripetizioni; 5 pareggio mosse neutre
     public int getStatoPartita() {
-        boolean noMosse = false;
+        boolean noMosse = true;
         for (Pedina[] riga : caselle) {
             for (Pedina p : riga) {
                 if (p == null || !p.getColore().equals(turno)) continue;
                 if (!filtraMosseScacco(p.getPosizione(), ottieniMosseFiltrate(p.getPosizione())).isEmpty()) {
-                    noMosse = true;
+                    noMosse = false;
                     break;
                 }
             }
-            if (noMosse) break;
+            if (!noMosse) break;
         }
-        if (!noMosse && controllaScaccoRe(turno)) {
-            if (turno.equals(Color.white)) return 1;
-            return 0;
+        if (noMosse) {
+            if (controllaScaccoRe(turno)) {
+                if (turno.equals(Color.white)) return 1;
+                else return 0;
+            }
+            return 2;
         }
-        else if (!noMosse) return 2;
         if (materialeInsufficiente(Color.black) && materialeInsufficiente(Color.white)) return 3;
         if (mosseNeutre >= 150) return 4;
         if (pareggioRipetizioni()) return 5;

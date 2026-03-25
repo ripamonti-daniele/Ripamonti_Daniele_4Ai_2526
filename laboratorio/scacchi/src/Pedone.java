@@ -38,7 +38,7 @@ public class Pedone extends Pedina {
                 if (posizione[1] > 0) mosseValide.add(new int[]{posizione[0] - 1, posizione[1] - 1});
                 if (posizione[1] < DIMENSIONE_SCACCHIERA - 1) mosseValide.add(new int[]{posizione[0] - 1, posizione[1] + 1});
             }
-            if (muoviDiDueCaselle) mosseValide.add(new int[]{posizione[0] - 2, posizione[1]});
+            if (muoviDiDueCaselle && posizione[0] - 2 >= 0) mosseValide.add(new int[]{posizione[0] - 2, posizione[1]});
         }
 
         else {
@@ -47,15 +47,14 @@ public class Pedone extends Pedina {
                 if (posizione[1] > 0) mosseValide.add(new int[]{posizione[0] + 1, posizione[1] - 1});
                 if (posizione[1] < DIMENSIONE_SCACCHIERA - 1) mosseValide.add(new int[]{posizione[0] + 1, posizione[1] + 1});
             }
-            if (muoviDiDueCaselle) mosseValide.add(new int[]{posizione[0] + 2, posizione[1]});
+            if (muoviDiDueCaselle && posizione[0] + 2 < DIMENSIONE_SCACCHIERA) mosseValide.add(new int[]{posizione[0] + 2, posizione[1]});
         }
     }
 
     @Override
     public void muovi(int[] posizione) {
-        boolean temporaneo = getColore() == Color.white && posizione[0] == this.posizione[0] - 2 || getColore() == Color.black && posizione[0] == this.posizione[0] + 2;
+        enpassant = Math.abs(posizione[0] - this.posizione[0]) == 2;
         super.muovi(posizione);
-        enpassant = temporaneo;
         muoviDiDueCaselle = false;
     }
 

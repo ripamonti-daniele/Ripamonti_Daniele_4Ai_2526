@@ -281,46 +281,50 @@ public class GestoreGrafico {
                 else {
                     Casella.casellaPosFinale = casellePanel[y][x].id;
                     Casella.casellaPosIniziale = idCasellaSelOld;
-                    mossaMostrata = scacchiera.getMosse();
-                    aggiornaBtnSpostamento();
-                    scacchiera.cambiaTurno();
-                    timerBianco.invertiStato();
-                    timerNero.invertiStato();
-                    switch (scacchiera.getStatoPartita()) {
-                        case 0 -> {
-                            labelVittoria.setText("<html><div style='text-align:center;'>Scacco matto:<br>Vince " + nomeBianco.getText() + " (bianco)</div></html>");
-                            finePartita();
-                        }
-                        case 1 -> {
-                            labelVittoria.setText("<html><div style='text-align:center;'>Scacco matto:<br>Vince " + nomeNero.getText() + " (nero)</div></html>");
-                            finePartita();
-                        }
-                        case 2 -> {
-                            labelVittoria.setText("<html><div style='text-align:center;'>Stallo:<br>Pareggio</div></html>");
-                            finePartita();
-                        }
-                        case 3 -> {
-                            labelVittoria.setText("<html><div style='text-align:center;'>Materiale insufficiente:<br>Pareggio</div></html>");
-                            finePartita();
-                        }
-                        case 4 -> {
-                            labelVittoria.setText("<html><div style='text-align:center;'>75 mosse neutre:<br>Pareggio</div></html>");
-                            finePartita();
-                        }
-                        case 5 -> {
-                            labelVittoria.setText("<html><div style='text-align:center;'>5 posizioni ripetute:<br>Pareggio</div></html>");
-                            finePartita();
-                        }
-                        default -> {
-                            if (rotazioneScacchiera) ruotaScacchiera(scacchiera.getTurno());
-                        }
-                    }
+                    aggiornaInfoScacchiera();
                 }
-                aggiornaLabelMateriale();
-                aggiornaScacchiera(scacchiera.getStringaScacchiera());
                 disegna();
             }
         });
+    }
+
+    private void aggiornaInfoScacchiera() {
+        scacchiera.cambiaTurno();
+        timerBianco.invertiStato();
+        timerNero.invertiStato();
+        mossaMostrata = scacchiera.getMosse();
+        aggiornaBtnSpostamento();
+        aggiornaLabelMateriale();
+        aggiornaScacchiera(scacchiera.getStringaScacchiera());
+        switch (scacchiera.getStatoPartita()) {
+            case 0 -> {
+                labelVittoria.setText("<html><div style='text-align:center;'>Scacco matto:<br>Vince " + nomeBianco.getText() + " (bianco)</div></html>");
+                finePartita();
+            }
+            case 1 -> {
+                labelVittoria.setText("<html><div style='text-align:center;'>Scacco matto:<br>Vince " + nomeNero.getText() + " (nero)</div></html>");
+                finePartita();
+            }
+            case 2 -> {
+                labelVittoria.setText("<html><div style='text-align:center;'>Stallo:<br>Pareggio</div></html>");
+                finePartita();
+            }
+            case 3 -> {
+                labelVittoria.setText("<html><div style='text-align:center;'>Materiale insufficiente:<br>Pareggio</div></html>");
+                finePartita();
+            }
+            case 4 -> {
+                labelVittoria.setText("<html><div style='text-align:center;'>75 mosse neutre:<br>Pareggio</div></html>");
+                finePartita();
+            }
+            case 5 -> {
+                labelVittoria.setText("<html><div style='text-align:center;'>5 posizioni ripetute:<br>Pareggio</div></html>");
+                finePartita();
+            }
+            default -> {
+                if (rotazioneScacchiera) ruotaScacchiera(scacchiera.getTurno());
+            }
+        }
     }
 
     private void setListenerPromozione(int i) {
@@ -330,11 +334,7 @@ public class GestoreGrafico {
                 promozione = false;
                 Casella.sceltaPromozione = false;
                 for (Casella c : casellePromozione) c.rimuoviImg();
-                scacchiera.cambiaTurno();
-                timerBianco.invertiStato();
-                timerNero.invertiStato();
-                if (rotazioneScacchiera) ruotaScacchiera(scacchiera.getTurno());
-                aggiornaLabelMateriale();
+                aggiornaInfoScacchiera();
                 aggiornaScacchiera(scacchiera.getStringaScacchiera());
                 mossaMostrata = scacchiera.getMosse();
                 aggiornaBtnSpostamento();
@@ -346,8 +346,8 @@ public class GestoreGrafico {
     private void setListenerTimer(TimerGrafico t) {
         t.addPropertyChangeListener("text", e -> {
             if (t.isTempoScaduto()) {
-                if (t == timerBianco && scacchiera.materialeInsufficiente(Color.black)) labelVittoria.setText("<html><div style='text-align:center;'>Tempo bianco scaduto, pareggio:<br>Materiale nero insufficiente</div></html>");
-                else if (t == timerNero && scacchiera.materialeInsufficiente(Color.white)) labelVittoria.setText("<html><div style='text-align:center;'>Tempo nero scaduto, pareggio:<br>Materiale bianco insufficiente</div></html>");
+                if (t == timerBianco && scacchiera.materialeInsufficiente(Color.black)) labelVittoria.setText("<html><div style='text-align:center;'>Tempo scaduto, pareggio:<br>Materiale nero insufficiente</div></html>");
+                else if (t == timerNero && scacchiera.materialeInsufficiente(Color.white)) labelVittoria.setText("<html><div style='text-align:center;'>Tempo scaduto, pareggio:<br>Materiale bianco insufficiente</div></html>");
                 else {
                     String testo = nomeBianco.getText() + " (bianco)";
                     if (t == timerBianco) testo = nomeNero.getText() + " (nero)";
@@ -620,6 +620,10 @@ public class GestoreGrafico {
                 @Override
                 public void mousePressed(MouseEvent e) {
                     if (listener != null) listener.casellaCliccata();
+                }
+                @Override
+                public void mouseEntered(MouseEvent e) {
+                    if (id.equals("PROMOZIONE")) setCursor(new Cursor(Cursor.HAND_CURSOR));
                 }
             });
         }

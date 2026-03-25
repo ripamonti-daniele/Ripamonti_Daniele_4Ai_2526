@@ -1,5 +1,6 @@
 //TODO
 // l'enpassant mostra il cerchio vuoto
+// quando guardo le mosse vecchie il materiale viene aggiornato
 // grafica migliore
 // controllo finale per ottimizzazione codice
 // debug generale

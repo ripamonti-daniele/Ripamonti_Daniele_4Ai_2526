@@ -22,8 +22,8 @@ public class Re extends Pedina {
         mosseValide.clear();
 
         if (arrocco) {
-            mosseValide.add(new int[] {posizione[0], posizione[1] + 2});
-            mosseValide.add(new int[] {posizione[0], posizione[1] - 2});
+            if (posizione[1] + 2 < DIMENSIONE_SCACCHIERA) mosseValide.add(new int[] {posizione[0], posizione[1] + 2});
+            if (posizione[1] - 2 >= 0) mosseValide.add(new int[] {posizione[0], posizione[1] - 2});
         }
 
         for (int i = -1; i <= 1; i++) {

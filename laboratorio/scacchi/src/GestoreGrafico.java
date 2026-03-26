@@ -261,26 +261,26 @@ public class GestoreGrafico {
             if (!promozione && gioca && !mossaNonCorrente) {
                 Pedina p = scacchiera.getPedina(new int[]{y, x});
                 String idCasellaSelOld = Casella.casellaSelezionata;
-                if (p != null && p.getColore().equals(scacchiera.getTurno())) Casella.casellaSelezionata = casellePanel[y][x].id;
+                if (p != null && p.getColore().equals(scacchiera.getTurno()) && !casellePanel[y][x].getId().equals(Casella.casellaSelezionata)) Casella.casellaSelezionata = casellePanel[y][x].getId();
                 else Casella.casellaSelezionata = null;
                 resetMosseValide();
 
                 if (scacchiera.getCasellaSelezionata() == null || !scacchiera.muoviPedina(new int[]{y, x})) { //se la casella selezionata non è null allora seleziona la pedina; se è null prova a spostarla e se non riesce seleziona la pedina dove si intendeva spostare quella selezionata precedentemente
                     List<int[]> mosseValide = scacchiera.selezionaPedina(new int[]{y, x}, scacchiera.getTurno());
-                    Casella.idEnPassant[0] = null;
-                    Casella.idEnPassant[1] = null;
+                    Casella.idEnPassant = null;
                     if (scacchiera.getPedinaSelezionata() instanceof Pedone) {
                         for (int[] mossa : mosseValide) {
                             if (mossa[1] != scacchiera.getCasellaSelezionata()[1] && scacchiera.getPedina(mossa) == null) {
-                                if (Casella.idEnPassant[0] == null) Casella.idEnPassant[0] = casellePanel[mossa[0]][mossa[1]].getId();
-                                else Casella.idEnPassant[1] = casellePanel[mossa[0]][mossa[1]].getId();
+                                Casella.idEnPassant = casellePanel[mossa[0]][mossa[1]].getId();
+                                break;
                             }
                         }
                     }
                     if (mosseValide != null) mostraMosseValide(mosseValide);
                 }
-                else if ((y == 0 || y == 7) && scacchiera.getPedina(new int[]{y, x}) instanceof Pedone) {
-                    Casella.casellaPosFinale = casellePanel[y][x].id;
+
+                else if ((y == 0 || y == DIMENSIONE - 1) && scacchiera.getPedina(new int[]{y, x}) instanceof Pedone) {
+                    Casella.casellaPosFinale = casellePanel[y][x].getId();
                     Casella.casellaPosIniziale = idCasellaSelOld;
                     promozione = true;
                     Casella.sceltaPromozione = true;
@@ -288,11 +288,13 @@ public class GestoreGrafico {
                     setImgCasellePromozione(scacchiera.getPedina(posPromozione).getColore());
                     aggiornaBtnSpostamento();
                 }
+
                 else {
-                    Casella.casellaPosFinale = casellePanel[y][x].id;
+                    Casella.casellaPosFinale = casellePanel[y][x].getId();
                     Casella.casellaPosIniziale = idCasellaSelOld;
                     aggiornaInfoScacchiera();
                 }
+
                 disegna();
             }
         });
@@ -614,7 +616,7 @@ public class GestoreGrafico {
         private static boolean scacchieraGirata = false;
         private static boolean gestisciGrafica = false;
         private static boolean infoMossa = true;
-        private final static String[] idEnPassant = new String[]{null, null};
+        private static String idEnPassant = null;
 
         public Casella(Boolean pari, int lunghezzaLato, String id) {
             setLunghezzaLato(lunghezzaLato);
@@ -729,7 +731,7 @@ public class GestoreGrafico {
                 Composite old = g2d.getComposite();
                 g2d.setComposite(AlphaComposite.getInstance(AlphaComposite.SRC_OVER, 0.5f));
                 int offset;
-                if (this.label.getIcon() != null || this.id.equals(idEnPassant[0]) || this.id.equals(idEnPassant[1])) {
+                if (this.label.getIcon() != null || this.id.equals(idEnPassant)) {
                     offset = lunghezzaLato / 25;
                     g2d.drawOval(offset, offset, lunghezzaLato - 2 * offset - 1, lunghezzaLato - 2 * offset - 1);
                 }

@@ -8,7 +8,7 @@ public class Scacchiera {
     private final Pedina[][] caselle;
     private Color turno;
     private int mosseNeutre;
-    private int[] casella_selezionata;
+    private int[] casellaSelezionata;
     private int mosse;
     private List<int[]> mosseValide;
     private final String SEP;
@@ -18,7 +18,7 @@ public class Scacchiera {
         mosseNeutre = 0;
         mosse = 0;
         turno = Color.white;
-        casella_selezionata = null;
+        casellaSelezionata = null;
         mosseValide = new ArrayList<>();
         inizializza();
         SEP = ";";
@@ -53,7 +53,7 @@ public class Scacchiera {
         mosseNeutre = 0;
         mosse = 0;
         turno = Color.white;
-        casella_selezionata = null;
+        casellaSelezionata = null;
         mosseValide.clear();
         inizializza();
         scriviScacchiera();
@@ -84,8 +84,13 @@ public class Scacchiera {
     }
 
     public Pedina getPedina(int[] pos) {
-        if (caselle[pos[0]][pos[1]] == null) return null;
+        if (pos == null || caselle[pos[0]][pos[1]] == null) return null;
         return caselle[pos[0]][pos[1]].copy();
+    }
+
+    public Pedina getPedinaSelezionata() {
+        if (casellaSelezionata == null) return null;
+        return caselle[casellaSelezionata[0]][casellaSelezionata[1]].copy();
     }
 
     public String[][] getTipoPedine() {
@@ -352,13 +357,13 @@ public class Scacchiera {
         for (Pedina ped : caselle[DIMENSIONE - 1]) if (ped instanceof Pedone) promuoviPedone(ped.getPosizione(), 1);
 
         this.mosseValide = filtraMosseScacco(pos, ottieniMosseFiltrate(pos));
-        this.casella_selezionata = pos;
+        this.casellaSelezionata = pos;
         return mosseValide;
     }
 
     public boolean muoviPedina(int[] pos) {
         if (pos[0] < 0 || pos[0] > DIMENSIONE - 1 || pos[1] < 0 || pos[1] > DIMENSIONE - 1) throw new IllegalArgumentException("Posizione non valida");
-        if (casella_selezionata == null || caselle[casella_selezionata[0]][casella_selezionata[1]] == null) return false;
+        if (casellaSelezionata == null || caselle[casellaSelezionata[0]][casellaSelezionata[1]] == null) return false;
 
         boolean valido = false;
         for (int[] mossa : mosseValide) {
@@ -369,12 +374,12 @@ public class Scacchiera {
         }
 
         if (valido) {
-            Pedina p = caselle[casella_selezionata[0]][casella_selezionata[1]];
+            Pedina p = caselle[casellaSelezionata[0]][casellaSelezionata[1]];
 
             if (!(mosseNeutre == 0 && turno == Color.black)) mosseNeutre++;
             if (caselle[pos[0]][pos[1]] != null || p instanceof Pedone) mosseNeutre = 0;
 
-            if (p instanceof Pedone && pos[1] != casella_selezionata[1] && caselle[pos[0]][pos[1]] == null) {
+            if (p instanceof Pedone && pos[1] != casellaSelezionata[1] && caselle[pos[0]][pos[1]] == null) {
                 if (p.getColore() == Color.white) caselle[pos[0] + 1][pos[1]] = null;
                 if (p.getColore() == Color.black) caselle[pos[0] - 1][pos[1]] = null;
             }
@@ -382,12 +387,12 @@ public class Scacchiera {
             for (Pedina[] riga : caselle) for (Pedina ped : riga) if (ped instanceof Pedone && ped.getColore() != turno) ((Pedone) ped).rimuoviEnpassant();
 
             //arrocco
-            if (p instanceof Re && casella_selezionata[1] - pos[1] == 2) {
+            if (p instanceof Re && casellaSelezionata[1] - pos[1] == 2) {
                 caselle[pos[0]][0].muovi(new int[]{pos[0], pos[1] + 1});
                 caselle[pos[0]][pos[1] + 1] = caselle[pos[0]][0];
                 caselle[pos[0]][0] = null;
             }
-            else if (p instanceof Re && casella_selezionata[1] - pos[1] == - 2) {
+            else if (p instanceof Re && casellaSelezionata[1] - pos[1] == - 2) {
                 caselle[pos[0]][DIMENSIONE - 1].muovi(new int[]{pos[0], pos[1] - 1});
                 caselle[pos[0]][pos[1] - 1] = caselle[pos[0]][DIMENSIONE - 1];
                 caselle[pos[0]][DIMENSIONE - 1] = null;
@@ -395,7 +400,7 @@ public class Scacchiera {
 
             p.muovi(pos);
             caselle[pos[0]][pos[1]] = p;
-            caselle[casella_selezionata[0]][casella_selezionata[1]] = null;
+            caselle[casellaSelezionata[0]][casellaSelezionata[1]] = null;
 
             mosseValide.clear();
             if (!(p instanceof Pedone && (pos[0] == DIMENSIONE -1 || pos[0] == 0))) {
@@ -403,7 +408,7 @@ public class Scacchiera {
                 scriviScacchiera();
             }
         }
-        casella_selezionata = null;
+        casellaSelezionata = null;
         return valido;
     }
 
@@ -447,9 +452,9 @@ public class Scacchiera {
         return -1;
     }
 
-    public int[] getCasella_selezionata() {
-        if (casella_selezionata == null) return null;
-        return casella_selezionata.clone();
+    public int[] getCasellaSelezionata() {
+        if (casellaSelezionata == null) return null;
+        return casellaSelezionata.clone();
     }
 
     public Color getTurno() {

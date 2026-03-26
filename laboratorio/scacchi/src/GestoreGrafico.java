@@ -58,7 +58,7 @@ public class GestoreGrafico {
 
         //inizializzazione parte grafica gestione utente
         panelInfo = new JPanel();
-        labelVittoria = new JLabelCustom(null, Color.red);
+        labelVittoria = new JLabelCustom(null, Color.white);
         nomeBianco = new JTextAreaCustom("Giocatore 1", 0, lunghezzaScacchiera - lunghezzaCasella / 2,  lunghezzaCasella * 2, lunghezzaCasella / 2);
         nomeNero = new JTextAreaCustom("Giocatore 2", 0, 0,  lunghezzaScacchiera / 4, lunghezzaScacchiera / 16);
         timerBianco = new TimerGrafico(0, 10, 0, 0, Color.white, Color.black);
@@ -88,7 +88,7 @@ public class GestoreGrafico {
 
         Font font = new Font("Segoe UI", Font.BOLD, lunghezzaCasella / 4);
         labelVittoria.setOpaque(false);
-        labelVittoria.setForeground(Color.white);
+        labelVittoria.setForeground(Color.black);
         labelVittoria.setFont(font);
 
         timerBianco.setFont(font);
@@ -265,8 +265,18 @@ public class GestoreGrafico {
                 else Casella.casellaSelezionata = null;
                 resetMosseValide();
 
-                if (scacchiera.getCasella_selezionata() == null || !scacchiera.muoviPedina(new int[]{y, x})) { //se la casella selezionata non è null allora seleziona la pedina; se è null prova a spostarla e se non riesce seleziona la pedina dove si intendeva spostare quella selezionata precedentemente
+                if (scacchiera.getCasellaSelezionata() == null || !scacchiera.muoviPedina(new int[]{y, x})) { //se la casella selezionata non è null allora seleziona la pedina; se è null prova a spostarla e se non riesce seleziona la pedina dove si intendeva spostare quella selezionata precedentemente
                     List<int[]> mosseValide = scacchiera.selezionaPedina(new int[]{y, x}, scacchiera.getTurno());
+                    Casella.idEnPassant[0] = null;
+                    Casella.idEnPassant[1] = null;
+                    if (scacchiera.getPedinaSelezionata() instanceof Pedone) {
+                        for (int[] mossa : mosseValide) {
+                            if (mossa[1] != scacchiera.getCasellaSelezionata()[1] && scacchiera.getPedina(mossa) == null) {
+                                if (Casella.idEnPassant[0] == null) Casella.idEnPassant[0] = casellePanel[mossa[0]][mossa[1]].getId();
+                                else Casella.idEnPassant[1] = casellePanel[mossa[0]][mossa[1]].getId();
+                            }
+                        }
+                    }
                     if (mosseValide != null) mostraMosseValide(mosseValide);
                 }
                 else if ((y == 0 || y == 7) && scacchiera.getPedina(new int[]{y, x}) instanceof Pedone) {
@@ -551,18 +561,19 @@ public class GestoreGrafico {
         dialog.setVisible(true);
     }
 
+    private void mettiASchermo(Container container) {
+        for (int i = 0; i < 4; i++) container.add(casellePromozione[i]);
+        for (int i = 0; i < DIMENSIONE; i++) for (int j = 0; j < DIMENSIONE; j++) container.add(casellePanel[i][j]);
+        container.add(panelInfo);
+        for (BottoneSpostamento b : btnSpostamenti) container.add(b);
+    }
+
     public void mettiASchermo(JPanel panel) {
-        for (int i = 0; i < 4; i++) panel.add(casellePromozione[i]);
-        for (int i = 0; i < DIMENSIONE; i++) for (int j = 0; j < DIMENSIONE; j++) panel.add(casellePanel[i][j]);
-        panel.add(panelInfo);
-        for (BottoneSpostamento b : btnSpostamenti) panel.add(b);
+        mettiASchermo((Container) panel);
     }
 
     public void mettiASchermo(JFrame frame) {
-        for (int i = 0; i < 4; i++) frame.add(casellePromozione[i]);
-        for (int i = 0; i < DIMENSIONE; i++) for (int j = 0; j < DIMENSIONE; j++) frame.add(casellePanel[i][j]);
-        frame.add(panelInfo);
-        for (BottoneSpostamento b : btnSpostamenti) frame.add(b);
+        mettiASchermo((Container) frame);
     }
 
     private void resetMosseValide() {
@@ -603,6 +614,7 @@ public class GestoreGrafico {
         private static boolean scacchieraGirata = false;
         private static boolean gestisciGrafica = false;
         private static boolean infoMossa = true;
+        private final static String[] idEnPassant = new String[]{null, null};
 
         public Casella(Boolean pari, int lunghezzaLato, String id) {
             setLunghezzaLato(lunghezzaLato);
@@ -717,7 +729,7 @@ public class GestoreGrafico {
                 Composite old = g2d.getComposite();
                 g2d.setComposite(AlphaComposite.getInstance(AlphaComposite.SRC_OVER, 0.5f));
                 int offset;
-                if (this.label.getIcon() != null) {
+                if (this.label.getIcon() != null || this.id.equals(idEnPassant[0]) || this.id.equals(idEnPassant[1])) {
                     offset = lunghezzaLato / 25;
                     g2d.drawOval(offset, offset, lunghezzaLato - 2 * offset - 1, lunghezzaLato - 2 * offset - 1);
                 }

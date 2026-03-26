@@ -1,5 +1,4 @@
 //TODO
-// l'enpassant mostra il cerchio vuoto
 // quando guardo le mosse vecchie il materiale viene aggiornato
 // grafica migliore
 // controllo finale per ottimizzazione codice
@@ -39,4 +38,18 @@ void main() {
     //    contenitore.setBounds(width / 10, (contentHeight - scacchieraPanel.lunghezzaScacchiera) / 2, scacchieraPanel.lunghezzaScacchiera * 2, scacchieraPanel.lunghezzaScacchiera * 2);
     frame.add(contenitore);
     frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
+
+    Runtime.getRuntime().addShutdownHook(new Thread(() -> {
+        String percorso = "partita.txt";
+        Path p = Path.of(percorso).toAbsolutePath().normalize();
+        Path cartellaLavoro = Path.of(System.getProperty("user.dir"));
+        if (p.startsWith(cartellaLavoro) && Files.exists(p)) {
+            try {
+                BufferedWriter writer = new BufferedWriter(new FileWriter(percorso));
+                writer.write("");
+                writer.close();
+            }
+            catch (IOException _) {}
+        }
+    }));
 }

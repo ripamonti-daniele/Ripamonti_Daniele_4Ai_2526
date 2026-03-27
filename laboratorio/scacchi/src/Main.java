@@ -1,5 +1,4 @@
 //TODO
-// quando guardo le mosse vecchie il materiale viene aggiornato
 // grafica migliore
 // controllo finale per ottimizzazione codice
 // debug generale

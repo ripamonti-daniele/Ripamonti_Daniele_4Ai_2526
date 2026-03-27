@@ -345,6 +345,11 @@ public class Scacchiera {
         return mosseFiltrate;
     }
 
+    public void deSelezionaPedina() {
+        casellaSelezionata = null;
+        mosseValide.clear();
+    }
+
     public List<int[]> selezionaPedina(int[] pos, Color turno) {
         if (pos[0] < 0 || pos[0] > DIMENSIONE - 1 || pos[1] < 0 || pos[1] > DIMENSIONE - 1) throw new IllegalArgumentException("Posizione non valida");
         if (!turno.equals(Color.white) && !turno.equals(Color.black)) throw new IllegalArgumentException("Il colore del turno può essere solo bianco o nero");
@@ -471,6 +476,27 @@ public class Scacchiera {
         int materiale = 0;
         for (Pedina[] riga : caselle) {
             for (Pedina p : riga) if (p != null && p.getColore().equals(c)) materiale += p.getMateriale();
+        }
+        return materiale;
+    }
+
+    public int getMaterialeMossa(Color c, int mossa) {
+        if (mossa < 0 || mossa > mosse) return -1;
+        if (mossa == mosse) return getMateriale(c);
+        int materiale = 0;
+        String s = getStringaScacchieraMossa(mossa);
+        for (String riga : s.split("\n")) {
+            for (String pedina : riga.split(SEP)) {
+                if (!(pedina.charAt(1) == 'B' && c.equals(Color.white) || pedina.charAt(1) == 'N' && c.equals(Color.black))) continue;
+                switch (pedina.charAt(0)) {
+                    case 'Q' -> materiale += Pedina.getMaterialePedina(Regina.class.getSimpleName());
+                    case 'T' -> materiale += Pedina.getMaterialePedina(Torre.class.getSimpleName());
+                    case 'A' -> materiale += Pedina.getMaterialePedina(Alfiere.class.getSimpleName());
+                    case 'C' -> materiale += Pedina.getMaterialePedina(Cavallo.class.getSimpleName());
+                    case 'P' -> materiale += Pedina.getMaterialePedina(Pedone.class.getSimpleName());
+                    default -> {}
+                }
+            }
         }
         return materiale;
     }

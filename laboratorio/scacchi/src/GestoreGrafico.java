@@ -261,9 +261,15 @@ public class GestoreGrafico {
             if (!promozione && gioca && !mossaNonCorrente) {
                 Pedina p = scacchiera.getPedina(new int[]{y, x});
                 String idCasellaSelOld = Casella.casellaSelezionata;
-                if (p != null && p.getColore().equals(scacchiera.getTurno()) && !casellePanel[y][x].getId().equals(Casella.casellaSelezionata)) Casella.casellaSelezionata = casellePanel[y][x].getId();
-                else Casella.casellaSelezionata = null;
                 resetMosseValide();
+                if (casellePanel[y][x].getId().equals(Casella.casellaSelezionata)) {
+                    Casella.casellaSelezionata = null;
+                    scacchiera.deSelezionaPedina();
+                    disegna();
+                    return;
+                }
+                if (p != null && p.getColore().equals(scacchiera.getTurno())) Casella.casellaSelezionata = casellePanel[y][x].getId();
+                else Casella.casellaSelezionata = null;
 
                 if (scacchiera.getCasellaSelezionata() == null || !scacchiera.muoviPedina(new int[]{y, x})) { //se la casella selezionata non è null allora seleziona la pedina; se è null prova a spostarla e se non riesce seleziona la pedina dove si intendeva spostare quella selezionata precedentemente
                     List<int[]> mosseValide = scacchiera.selezionaPedina(new int[]{y, x}, scacchiera.getTurno());
@@ -394,6 +400,7 @@ public class GestoreGrafico {
                     }
                     else if (scacchiera.getTurno().equals(Color.white) && timerBianco.isPaused()) timerBianco.start();
                     else if (scacchiera.getTurno().equals(Color.black) && timerNero.isPaused()) timerNero.start();
+                    aggiornaLabelMateriale();
                 }
                 aggiornaBtnSpostamento();
             });
@@ -458,8 +465,8 @@ public class GestoreGrafico {
     }
 
     private void aggiornaLabelMateriale() {
-        int matBianco = scacchiera.getMateriale(Color.white);
-        int matNero = scacchiera.getMateriale(Color.black);
+        int matBianco = scacchiera.getMaterialeMossa(Color.white, mossaMostrata);
+        int matNero = scacchiera.getMaterialeMossa(Color.black, mossaMostrata);
         String diffBianco = "";
         String diffNero = "";
         if (matBianco > matNero) diffBianco = "+";
@@ -633,7 +640,7 @@ public class GestoreGrafico {
             addMouseListener(new MouseAdapter() {
                 @Override
                 public void mousePressed(MouseEvent e) {
-                    if (listener != null) listener.casellaCliccata();
+                    if (listener != null && SwingUtilities.isLeftMouseButton(e)) listener.casellaCliccata();
                 }
                 @Override
                 public void mouseEntered(MouseEvent e) {

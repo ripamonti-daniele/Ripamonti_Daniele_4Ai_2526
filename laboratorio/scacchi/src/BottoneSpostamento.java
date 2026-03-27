@@ -40,7 +40,7 @@ public class BottoneSpostamento extends JButton {
 
             @Override
             public void mousePressed(MouseEvent e) {
-                if (abilitato) impostaImmagine(dimensione - dimensione / 5);
+                if (abilitato && SwingUtilities.isLeftMouseButton(e)) impostaImmagine(dimensione - dimensione / 5);
             }
 
             @Override

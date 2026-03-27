@@ -21,6 +21,7 @@ public class JButtonCustom extends JButton {
         setContentAreaFilled(false);
         setFocusPainted(false);
         setBorderPainted(false);
+        setBorder(null);
         setOpaque(false);
         setCursor(new Cursor(Cursor.HAND_CURSOR));
         setFont(new Font("Segoe UI", Font.BOLD, height / 4));
@@ -56,7 +57,7 @@ public class JButtonCustom extends JButton {
 
             @Override
             public void mousePressed(MouseEvent e) {
-                if (isEnabled()) {
+                if (isEnabled() && SwingUtilities.isLeftMouseButton(e)) {
                     pressed = true;
                     repaint();
                 }

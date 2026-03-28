@@ -16,14 +16,16 @@ public class TimerGrafico extends JLabel {
     private boolean tempoScaduto;
     private boolean off;
     private boolean modificaTesto;
-    private final Color sfondo;
+    private Color sfondo;
+    private Color textColor;
 
     public TimerGrafico(int ore, int minuti, int secondi, int guadagno, Color sfondo, Color textColor) {
         inizializzaTimer(ore, minuti, secondi, guadagno);
         displayTimer();
         tempoScaduto = false;
         modificaTesto = false;
-        this.sfondo = sfondo;
+        setSfondo(sfondo);
+        setTextColor(textColor);
         setOpaque(false);
         setForeground(textColor);
         setVerticalAlignment(SwingConstants.CENTER);
@@ -98,11 +100,15 @@ public class TimerGrafico extends JLabel {
         }
     }
 
-    public void pause() {
+    public void pause(boolean guadagno) {
         if (timer.isRunning() && !off) {
             timer.stop();
-            sommaGuadagno();
+            if (guadagno) sommaGuadagno();
         }
+    }
+
+    public void pause() {
+        pause(false);
     }
 
     public void reset() {
@@ -205,6 +211,22 @@ public class TimerGrafico extends JLabel {
 
     public int getOre() {
         return ore;
+    }
+
+    public Color getTextColor() {
+        return textColor;
+    }
+
+    public Color getSfondo() {
+        return sfondo;
+    }
+
+    public void setTextColor(Color textColor) {
+        if (textColor != null) this.textColor = textColor;
+    }
+
+    public void setSfondo(Color sfondo) {
+        if (sfondo != null) this.sfondo = sfondo;
     }
 
     @Override

@@ -1,7 +1,9 @@
+package scacchiera_pedine;
 import java.awt.Color;
 
 public class Torre extends Pedina {
     private boolean arrocco;
+    public static final int MATERIALE = 5;
 
     public Torre(Color colore, int[] posizione) {
         super(colore, posizione, 5);

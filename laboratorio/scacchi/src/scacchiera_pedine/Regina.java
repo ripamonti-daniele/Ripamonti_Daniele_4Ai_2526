@@ -1,6 +1,9 @@
+package scacchiera_pedine;
 import java.awt.Color;
 
 public class Regina extends Pedina {
+    public static final int MATERIALE = 9;
+
     public Regina(Color colore, int[] posizione) {
         super(colore, posizione, 9);
     }

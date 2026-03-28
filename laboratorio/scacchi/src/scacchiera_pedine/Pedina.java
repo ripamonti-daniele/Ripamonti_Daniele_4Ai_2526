@@ -1,3 +1,4 @@
+package scacchiera_pedine;
 import java.awt.Color;
 import java.util.ArrayList;
 import java.util.List;
@@ -81,15 +82,6 @@ public abstract class Pedina {
         List<int[]> copia = new ArrayList<>(mosseValide.size());
         for (int[] arr : mosseValide) copia.add(arr.clone());
         return copia;
-    }
-
-    public static int getMaterialePedina(String tipo) {
-        if (tipo == null) return 0;
-        if (tipo.equals(Regina.class.getSimpleName())) return 9;
-        if (tipo.equals(Torre.class.getSimpleName())) return 5;
-        if (tipo.equals(Alfiere.class.getSimpleName()) || tipo.equals(Cavallo.class.getSimpleName())) return 3;
-        if (tipo.equals(Pedone.class.getSimpleName())) return 1;
-        return 0;
     }
 
     protected abstract void trovaMosseValide(); //sistema quando vengono trovate le mosse valide

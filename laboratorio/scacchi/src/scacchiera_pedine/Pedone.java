@@ -1,8 +1,10 @@
+package scacchiera_pedine;
 import java.awt.Color;
 
 public class Pedone extends Pedina {
     private boolean muoviDiDueCaselle;
     private boolean enpassant;
+    public static final int MATERIALE = 1;
 
     public Pedone(Color colore, int[] posizione) {
         super(colore, posizione, 1);

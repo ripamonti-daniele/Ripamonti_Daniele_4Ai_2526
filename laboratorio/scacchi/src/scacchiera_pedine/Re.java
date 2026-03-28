@@ -1,3 +1,4 @@
+package scacchiera_pedine;
 import java.awt.Color;
 
 public class Re extends Pedina {

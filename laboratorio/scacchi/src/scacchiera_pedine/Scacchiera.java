@@ -1,3 +1,4 @@
+package scacchiera_pedine;
 import java.awt.*;
 import java.io.*;
 import java.util.ArrayList;
@@ -489,11 +490,11 @@ public class Scacchiera {
             for (String pedina : riga.split(SEP)) {
                 if (!(pedina.charAt(1) == 'B' && c.equals(Color.white) || pedina.charAt(1) == 'N' && c.equals(Color.black))) continue;
                 switch (pedina.charAt(0)) {
-                    case 'Q' -> materiale += Pedina.getMaterialePedina(Regina.class.getSimpleName());
-                    case 'T' -> materiale += Pedina.getMaterialePedina(Torre.class.getSimpleName());
-                    case 'A' -> materiale += Pedina.getMaterialePedina(Alfiere.class.getSimpleName());
-                    case 'C' -> materiale += Pedina.getMaterialePedina(Cavallo.class.getSimpleName());
-                    case 'P' -> materiale += Pedina.getMaterialePedina(Pedone.class.getSimpleName());
+                    case 'Q' -> materiale += Regina.MATERIALE;
+                    case 'T' -> materiale += Torre.MATERIALE;
+                    case 'A' -> materiale += Alfiere.MATERIALE;
+                    case 'C' -> materiale += Cavallo.MATERIALE;
+                    case 'P' -> materiale += Pedone.MATERIALE;
                     default -> {}
                 }
             }

@@ -1,3 +1,4 @@
+import scacchiera_pedine.*;
 import javax.swing.*;
 import java.awt.*;
 import java.awt.event.MouseAdapter;
@@ -10,7 +11,7 @@ public class GestoreGrafico {
     private final Casella[][] casellePanel;
     private final Casella[] casellePromozione;
     private final Scacchiera scacchiera;
-    private boolean gioca;
+    private boolean partitaInCorso;
     private int mossaMostrata;
     private boolean mossaNonCorrente;
     private boolean rotazioneScacchiera;
@@ -22,6 +23,8 @@ public class GestoreGrafico {
     private ImageIcon[] immagini;
     private final String SEP;
     private final Map<Integer, String> numeroToLettera;
+    private long ultimoClic;
+    private static final long SOGLIA_MS = 250;
 
     private final JPanel panelInfo;
     private final JButton btnGioca;
@@ -44,7 +47,7 @@ public class GestoreGrafico {
         lunghezzaCasella = lunghezzaScacchiera / 8;
         casellePanel = new Casella[DIMENSIONE][DIMENSIONE];
         casellePromozione = new Casella[4];
-        gioca = false;
+        partitaInCorso = false;
         mossaMostrata = 0;
         mossaNonCorrente = false;
         rotazioneScacchiera = true;
@@ -52,6 +55,7 @@ public class GestoreGrafico {
         posPromozione = new int[2];
         SEP = ";";
         numeroToLettera = Map.of(1, "A", 2, "B", 3, "C", 4, "D", 5, "E", 6, "F", 7, "G", 8, "H");
+        ultimoClic = 0;
         setImmagini(immagini);
         inizializza();
         aggiornaScacchiera(scacchiera.getStringaScacchiera());
@@ -65,9 +69,9 @@ public class GestoreGrafico {
         timerNero = new TimerGrafico(0, 10, 0, 0, Color.black, Color.white);
         materialeBianco = new JLabelCustom(null, Color.white);
         materialeNero = new JLabelCustom(null, Color.black);
-        btnGioca = new JButtonCustom("<html>Gioca</html>", 0, lunghezzaCasella * 4 - lunghezzaCasella / 2, lunghezzaCasella * 2, lunghezzaCasella, new Color(66, 133, 244), new Color(52, 103, 206), new Color(90, 160, 255), new Color(66, 133, 244), new Color(30, 70, 180), Color.white);
-        btnRotazioneScacchiera = new JButtonCustom("<html><div style='text-align:center;'>Ruota<br>On</div></html>", 0, lunghezzaCasella * 4 + lunghezzaCasella / 2 + lunghezzaCasella / 15, lunghezzaCasella * 2, lunghezzaCasella, new Color(250,250,250), new Color(190,190,190), new Color(255,255,255), new Color(200,200,200), new Color(170,170,170), Color.BLACK);
-        btnTimer = new JButtonCustom("<html><div style='text-align:center;'>Imposta timer</div></html>", 0, lunghezzaCasella * 4 - lunghezzaCasella * 3 / 2 - lunghezzaCasella / 15, lunghezzaCasella * 2, lunghezzaCasella, new Color(250,250,250), new Color(190,190,190), new Color(255,255,255), new Color(200,200,200), new Color(170,170,170), Color.BLACK);
+        btnGioca = new JButtonCustom("<html>Gioca</html>", 0, lunghezzaCasella * 4 - lunghezzaCasella / 2, lunghezzaCasella * 2, lunghezzaCasella, new Color(66, 133, 244), new Color(52, 103, 206), new Color(100, 165, 255), new Color(140, 195, 255), new Color(30, 70, 180), Color.white);
+        btnRotazioneScacchiera = new JButtonCustom("<html><div style='text-align:center;'>Ruota On</div></html>", 0, lunghezzaCasella * 4 + lunghezzaCasella / 2 + lunghezzaCasella / 15, lunghezzaCasella * 2, lunghezzaCasella, new Color(68,68,65), new Color(44,44,41), new Color(136,135,128), new Color(180,178,169), new Color(28,28,26), Color.WHITE);
+        btnTimer = new JButtonCustom("<html><div style='text-align:center;'>Imposta timer</div></html>", 0, lunghezzaCasella * 4 - lunghezzaCasella * 3 / 2 - lunghezzaCasella / 15, lunghezzaCasella * 2, lunghezzaCasella, new Color(180,130,20), new Color(140,95,10), new Color(200,160,60), new Color(220,190,110), new Color(100,65,5), Color.WHITE);
         btnBotBianco = new JButtonCustom("<html><div style='text-align:center;'>Bot<br>Off</div></html>", lunghezzaCasella * 2 + lunghezzaCasella / 15, lunghezzaScacchiera - lunghezzaCasella / 2,  lunghezzaCasella / 2, lunghezzaCasella / 2, new Color(51, 51, 51), new Color(0, 0, 0), new Color(85, 85, 85), new Color(0, 0, 0), new Color(0, 0, 0), Color.WHITE);
         btnBotNero = new JButtonCustom("<html><div style='text-align:center;'>Bot<br>Off</div></html>", lunghezzaCasella * 2 + lunghezzaCasella / 15, 0,  lunghezzaCasella / 2, lunghezzaCasella / 2, new Color(51, 51, 51), new Color(0, 0, 0), new Color(85, 85, 85), new Color(0, 0, 0), new Color(0, 0, 0), Color.WHITE);
         btnSpostamenti = new BottoneSpostamento[4];
@@ -120,39 +124,7 @@ public class GestoreGrafico {
         panelInfo.add(btnTimer);
 
         //listener gestione utente
-        btnGioca.addActionListener(_ -> {
-            scacchiera.reset();
-            aggiornaScacchiera(scacchiera.getStringaScacchiera());
-            ruotaScacchiera(scacchiera.getTurno());
-            Casella.casellaPosIniziale = null;
-            Casella.casellaPosFinale = null;
-            disegna();
-            labelVittoria.setText(null);
-            btnGioca.setEnabled(false);
-            btnGioca.setText("<html>Gioca ancora</html>");
-            gioca = true;
-            mossaMostrata = 0;
-            aggiornaBtnSpostamento();
-            mossaNonCorrente = false;
-            nomeBianco.setText(nomeBianco.getText().trim());
-            nomeNero.setText(nomeNero.getText().trim());
-            if (nomeBianco.getText().isEmpty()) nomeBianco.setText("Giocatore 1");
-            if (nomeNero.getText().isEmpty()) nomeNero.setText("Giocatore 2");
-            if (nomeBianco.getText().equals(nomeNero.getText())) {
-                if (nomeNero.getText().length() == 15) nomeNero.setText(nomeNero.getText().substring(0, 14) + "N");
-                else nomeNero.setText(nomeNero.getText() + "N");
-            }
-            nomeBianco.setEditable(false);
-            nomeNero.setEditable(false);
-            btnBotBianco.setEnabled(false);
-            btnBotNero.setEnabled(false);
-            btnRotazioneScacchiera.setEnabled(false);
-            btnTimer.setEnabled(false);
-            timerBianco.reset();
-            timerNero.reset();
-            timerBianco.start();
-            aggiornaLabelMateriale();
-        });
+        btnGioca.addActionListener(_ -> gioca());
 
         btnRotazioneScacchiera.addActionListener(_ -> {
             rotazioneScacchiera = !rotazioneScacchiera;
@@ -206,13 +178,46 @@ public class GestoreGrafico {
 
     private void setImmagini(ImageIcon[] immagini) {
         if (immagini.length != 12) throw new IllegalArgumentException("Le immagini devono essere obbligatoriamente 12");
-        if (immagini[11] == null) throw new IllegalArgumentException("Le immagini non possono essere null");
         for (int i = 0; i < immagini.length - 1; i++) {
-            if (immagini[i] == null) throw new IllegalArgumentException("Le immagini non possono essere null");
+            if (immagini[i] == null || i == immagini.length - 2 && immagini[i + 1] == null) throw new IllegalArgumentException("Le immagini non possono essere null");
             for (int j = i + 1; j < immagini.length; j++) if (immagini[i].equals(immagini[j])) throw new IllegalArgumentException("Due tipi di pedina diversi non possono avere la stessa immagine");
         }
         for (int i = 0; i < immagini.length; i++) if (immagini[i].getIconWidth() != lunghezzaCasella || immagini[i].getIconHeight() != lunghezzaCasella) immagini[i] = new ImageIcon(immagini[i].getImage().getScaledInstance(lunghezzaCasella, lunghezzaCasella, Image.SCALE_SMOOTH));
         this.immagini = immagini;
+    }
+
+    private void gioca() {
+        scacchiera.reset();
+        aggiornaScacchiera(scacchiera.getStringaScacchiera());
+        ruotaScacchiera(scacchiera.getTurno());
+        Casella.casellaPosIniziale = null;
+        Casella.casellaPosFinale = null;
+        disegna();
+        labelVittoria.setText(null);
+        btnGioca.setEnabled(false);
+        btnGioca.setText("<html>Gioca ancora</html>");
+        partitaInCorso = true;
+        mossaMostrata = 0;
+        aggiornaBtnSpostamento();
+        mossaNonCorrente = false;
+        nomeBianco.setText(nomeBianco.getText().trim());
+        nomeNero.setText(nomeNero.getText().trim());
+        if (nomeBianco.getText().isEmpty()) nomeBianco.setText("Giocatore 1");
+        if (nomeNero.getText().isEmpty()) nomeNero.setText("Giocatore 2");
+        if (nomeBianco.getText().equals(nomeNero.getText())) {
+            if (nomeNero.getText().length() == 15) nomeNero.setText(nomeNero.getText().substring(0, 14) + "N");
+            else nomeNero.setText(nomeNero.getText() + "N");
+        }
+        nomeBianco.setEditable(false);
+        nomeNero.setEditable(false);
+        btnBotBianco.setEnabled(false);
+        btnBotNero.setEnabled(false);
+        btnRotazioneScacchiera.setEnabled(false);
+        btnTimer.setEnabled(false);
+        timerBianco.reset();
+        timerNero.reset();
+        timerBianco.start();
+        aggiornaLabelMateriale();
     }
 
     private void finePartita() {
@@ -224,10 +229,12 @@ public class GestoreGrafico {
         nomeNero.setEditable(true);
         btnBotBianco.setEnabled(true);
         btnBotNero.setEnabled(true);
-        gioca = false;
+        partitaInCorso = false;
         btnRotazioneScacchiera.setEnabled(true);
-        timerBianco.pause();
-        timerNero.pause();
+        timerBianco.pause(true);
+        timerNero.pause(true);
+        timerBianco.setForeground(timerBianco.getTextColor());
+        timerNero.setForeground(timerNero.getTextColor());
         btnTimer.setEnabled(true);
     }
 
@@ -258,7 +265,18 @@ public class GestoreGrafico {
 
     private void setListener(int y, int x) {
         casellePanel[y][x].setListener(() -> {
-            if (!promozione && gioca && !mossaNonCorrente) {
+            long ora = System.currentTimeMillis();
+            if (ora - ultimoClic <= SOGLIA_MS && mossaNonCorrente && !promozione) {
+                mossaMostrata = scacchiera.getMosse();
+                aggiornaBtnSpostamento();
+                aggiornaScacchiera(scacchiera.getStringaScacchiera());
+                if (scacchiera.getTurno().equals(Color.white) && timerBianco.isPaused()) timerBianco.start();
+                else if (scacchiera.getTurno().equals(Color.black) && timerNero.isPaused()) timerNero.start();
+                aggiornaLabelMateriale();
+            }
+            ultimoClic = ora;
+
+            if (!promozione && partitaInCorso && !mossaNonCorrente) {
                 Pedina p = scacchiera.getPedina(new int[]{y, x});
                 String idCasellaSelOld = Casella.casellaSelezionata;
                 resetMosseValide();
@@ -310,6 +328,8 @@ public class GestoreGrafico {
         scacchiera.cambiaTurno();
         timerBianco.invertiStato();
         timerNero.invertiStato();
+        timerBianco.setForeground(timerBianco.getTextColor());
+        timerNero.setForeground(timerNero.getTextColor());
         mossaMostrata = scacchiera.getMosse();
         aggiornaBtnSpostamento();
         aggiornaLabelMateriale();
@@ -363,6 +383,11 @@ public class GestoreGrafico {
 
     private void setListenerTimer(TimerGrafico t) {
         t.addPropertyChangeListener("text", e -> {
+            if (t.getMinuti() == 0 && (t.getMinutiDefault() > 0 || t.getSecondi() < 10)) {
+                if (t.getSecondi() % 2 != 0) t.setForeground(Color.red);
+                else t.setForeground(t.getTextColor());
+            }
+
             if (t.isTempoScaduto()) {
                 if (t == timerBianco && scacchiera.materialeInsufficiente(Color.black)) labelVittoria.setText("<html><div style='text-align:center;'>Tempo scaduto, pareggio:<br>Materiale nero insufficiente</div></html>");
                 else if (t == timerNero && scacchiera.materialeInsufficiente(Color.white)) labelVittoria.setText("<html><div style='text-align:center;'>Tempo scaduto, pareggio:<br>Materiale bianco insufficiente</div></html>");
@@ -396,7 +421,9 @@ public class GestoreGrafico {
                     aggiornaScacchiera(scacchiera.getStringaScacchieraMossa(mossaMostrata));
                     if (mossaMostrata != scacchiera.getMosse()) {
                         timerBianco.pause();
+                        timerBianco.setForeground(timerBianco.getTextColor());
                         timerNero.pause();
+                        timerNero.setForeground(timerNero.getTextColor());
                     }
                     else if (scacchiera.getTurno().equals(Color.white) && timerBianco.isPaused()) timerBianco.start();
                     else if (scacchiera.getTurno().equals(Color.black) && timerNero.isPaused()) timerNero.start();
@@ -564,8 +591,8 @@ public class GestoreGrafico {
 
         dialog.add(panel, BorderLayout.CENTER);
         dialog.add(panelBottoni, BorderLayout.SOUTH);
-        dialog.setSize(lunghezzaCasella * 4, lunghezzaCasella * 3);
-        dialog.setMinimumSize(new Dimension(320, 260));
+        dialog.setSize(lunghezzaCasella * 9 / 2, lunghezzaCasella * 7 / 2);
+        dialog.setMinimumSize(new Dimension(350, 300));
         dialog.setLocationRelativeTo(null);
         dialog.setVisible(true);
     }

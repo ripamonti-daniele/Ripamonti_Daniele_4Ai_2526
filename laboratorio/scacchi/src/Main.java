@@ -1,8 +1,8 @@
 //TODO
-// grafica migliore
 // controllo finale per ottimizzazione codice
 // debug generale
 
+import scacchiera_pedine.Scacchiera;
 import javax.swing.*;
 import java.awt.*;
 

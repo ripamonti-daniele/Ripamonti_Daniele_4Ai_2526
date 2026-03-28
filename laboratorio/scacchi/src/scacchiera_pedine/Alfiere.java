@@ -1,6 +1,9 @@
+package scacchiera_pedine;
 import java.awt.Color;
 
 public class Alfiere extends Pedina {
+    public static final int MATERIALE = 3;
+
     public Alfiere(Color colore, int[] posizione) {
         super(colore, posizione, 3);
     }

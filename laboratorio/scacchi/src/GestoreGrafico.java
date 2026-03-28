@@ -267,12 +267,15 @@ public class GestoreGrafico {
         casellePanel[y][x].setListener(() -> {
             long ora = System.currentTimeMillis();
             if (ora - ultimoClic <= SOGLIA_MS && mossaNonCorrente && !promozione) {
+                ultimoClic = ora;
                 mossaMostrata = scacchiera.getMosse();
                 aggiornaBtnSpostamento();
                 aggiornaScacchiera(scacchiera.getStringaScacchiera());
                 if (scacchiera.getTurno().equals(Color.white) && timerBianco.isPaused()) timerBianco.start();
                 else if (scacchiera.getTurno().equals(Color.black) && timerNero.isPaused()) timerNero.start();
                 aggiornaLabelMateriale();
+                disegna();
+                return;
             }
             ultimoClic = ora;
 

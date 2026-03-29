@@ -62,18 +62,18 @@ public class GestoreGrafico {
 
         //inizializzazione parte grafica gestione utente
         panelInfo = new JPanel();
-        labelVittoria = new JLabelCustom(null, Color.white);
+        labelVittoria = new JLabelCustom(null, new Color(180,130,20), new Color(140,95,10));
         nomeBianco = new JTextAreaCustom("Giocatore 1", 0, lunghezzaScacchiera - lunghezzaCasella / 2,  lunghezzaCasella * 2, lunghezzaCasella / 2);
         nomeNero = new JTextAreaCustom("Giocatore 2", 0, 0,  lunghezzaScacchiera / 4, lunghezzaScacchiera / 16);
         timerBianco = new TimerGrafico(0, 10, 0, 0, Color.white, Color.black);
         timerNero = new TimerGrafico(0, 10, 0, 0, Color.black, Color.white);
         materialeBianco = new JLabelCustom(null, Color.white);
         materialeNero = new JLabelCustom(null, Color.black);
-        btnGioca = new JButtonCustom("<html>Gioca</html>", 0, lunghezzaCasella * 4 - lunghezzaCasella / 2, lunghezzaCasella * 2, lunghezzaCasella, new Color(66, 133, 244), new Color(52, 103, 206), new Color(100, 165, 255), new Color(140, 195, 255), new Color(30, 70, 180), Color.white);
-        btnRotazioneScacchiera = new JButtonCustom("<html><div style='text-align:center;'>Ruota On</div></html>", 0, lunghezzaCasella * 4 + lunghezzaCasella / 2 + lunghezzaCasella / 15, lunghezzaCasella * 2, lunghezzaCasella, new Color(68,68,65), new Color(44,44,41), new Color(136,135,128), new Color(180,178,169), new Color(28,28,26), Color.WHITE);
-        btnTimer = new JButtonCustom("<html><div style='text-align:center;'>Imposta timer</div></html>", 0, lunghezzaCasella * 4 - lunghezzaCasella * 3 / 2 - lunghezzaCasella / 15, lunghezzaCasella * 2, lunghezzaCasella, new Color(180,130,20), new Color(140,95,10), new Color(200,160,60), new Color(220,190,110), new Color(100,65,5), Color.WHITE);
-        btnBotBianco = new JButtonCustom("<html><div style='text-align:center;'>Bot<br>Off</div></html>", lunghezzaCasella * 2 + lunghezzaCasella / 15, lunghezzaScacchiera - lunghezzaCasella / 2,  lunghezzaCasella / 2, lunghezzaCasella / 2, new Color(51, 51, 51), new Color(0, 0, 0), new Color(85, 85, 85), new Color(0, 0, 0), new Color(0, 0, 0), Color.WHITE);
-        btnBotNero = new JButtonCustom("<html><div style='text-align:center;'>Bot<br>Off</div></html>", lunghezzaCasella * 2 + lunghezzaCasella / 15, 0,  lunghezzaCasella / 2, lunghezzaCasella / 2, new Color(51, 51, 51), new Color(0, 0, 0), new Color(85, 85, 85), new Color(0, 0, 0), new Color(0, 0, 0), Color.WHITE);
+        btnGioca = new JButtonCustom("<html>Gioca</html>", 0, lunghezzaCasella * 4 - lunghezzaCasella / 2, lunghezzaCasella * 2, lunghezzaCasella, new Color(30, 100, 210), new Color(15, 60, 160), new Color(50, 130, 240), new Color(25, 90, 190), new Color(10, 40, 120), Color.white);
+        btnRotazioneScacchiera = new JButtonCustom("<html><div style='text-align:center;'>Ruota On</div></html>", 0, lunghezzaCasella * 4 + lunghezzaCasella / 2 + lunghezzaCasella / 15, lunghezzaCasella * 2, lunghezzaCasella, new Color(60, 60, 70), new Color(35, 35, 42), new Color(80, 80, 95), new Color(55, 55, 68), new Color(20, 20, 26), Color.white);
+        btnTimer = new JButtonCustom("<html><div style='text-align:center;'>Imposta timer</div></html>", 0, lunghezzaCasella * 4 - lunghezzaCasella * 3 / 2 - lunghezzaCasella / 15, lunghezzaCasella * 2, lunghezzaCasella, new Color(240, 120, 20), new Color(200, 75, 10), new Color(255, 150, 50), new Color(225, 100, 30), new Color(160, 50, 5), Color.white);
+        btnBotBianco = new JButtonCustom("<html><div style='text-align:center;'>Bot<br>Off</div></html>", lunghezzaCasella * 2 + lunghezzaCasella / 15, lunghezzaScacchiera - lunghezzaCasella / 2,  lunghezzaCasella / 2, lunghezzaCasella / 2, new Color(51, 51, 51), new Color(0, 0, 0), new Color(85, 85, 85), new Color(0, 0, 0), new Color(0, 0, 0), Color.white);
+        btnBotNero = new JButtonCustom("<html><div style='text-align:center;'>Bot<br>Off</div></html>", lunghezzaCasella * 2 + lunghezzaCasella / 15, 0,  lunghezzaCasella / 2, lunghezzaCasella / 2, new Color(51, 51, 51), new Color(0, 0, 0), new Color(85, 85, 85), new Color(0, 0, 0), new Color(0, 0, 0), Color.white);
         btnSpostamenti = new BottoneSpostamento[4];
         for (int i = 0; i < 4; i++) btnSpostamenti[i] = new BottoneSpostamento(i + 1, lunghezzaScacchiera - lunghezzaCasella / 2 * (4 - i) - lunghezzaCasella / 15 * (4 - i), lunghezzaScacchiera + lunghezzaCasella / 8, lunghezzaCasella / 2);
 
@@ -92,7 +92,7 @@ public class GestoreGrafico {
 
         Font font = new Font("Segoe UI", Font.BOLD, lunghezzaCasella / 4);
         labelVittoria.setOpaque(false);
-        labelVittoria.setForeground(Color.black);
+        labelVittoria.setForeground(Color.white);
         labelVittoria.setFont(font);
 
         timerBianco.setFont(font);
@@ -271,8 +271,8 @@ public class GestoreGrafico {
                 mossaMostrata = scacchiera.getMosse();
                 aggiornaBtnSpostamento();
                 aggiornaScacchiera(scacchiera.getStringaScacchiera());
-                if (scacchiera.getTurno().equals(Color.white) && timerBianco.isPaused()) timerBianco.start();
-                else if (scacchiera.getTurno().equals(Color.black) && timerNero.isPaused()) timerNero.start();
+                if (partitaInCorso && scacchiera.getTurno().equals(Color.white) && timerBianco.isPaused()) timerBianco.start();
+                else if (partitaInCorso && scacchiera.getTurno().equals(Color.black) && timerNero.isPaused()) timerNero.start();
                 aggiornaLabelMateriale();
                 disegna();
                 return;
@@ -418,8 +418,7 @@ public class GestoreGrafico {
                             if (mossaMostrata < scacchiera.getMosse()) mossaMostrata++;
                         }
                         case 3 -> mossaMostrata = scacchiera.getMosse();
-                        default -> {
-                        }
+                        default -> {}
                     }
                     aggiornaScacchiera(scacchiera.getStringaScacchieraMossa(mossaMostrata));
                     if (mossaMostrata != scacchiera.getMosse()) {
@@ -428,8 +427,8 @@ public class GestoreGrafico {
                         timerNero.pause();
                         timerNero.setForeground(timerNero.getTextColor());
                     }
-                    else if (scacchiera.getTurno().equals(Color.white) && timerBianco.isPaused()) timerBianco.start();
-                    else if (scacchiera.getTurno().equals(Color.black) && timerNero.isPaused()) timerNero.start();
+                    else if (partitaInCorso && scacchiera.getTurno().equals(Color.white) && timerBianco.isPaused()) timerBianco.start();
+                    else if (partitaInCorso && scacchiera.getTurno().equals(Color.black) && timerNero.isPaused()) timerNero.start();
                     aggiornaLabelMateriale();
                 }
                 aggiornaBtnSpostamento();

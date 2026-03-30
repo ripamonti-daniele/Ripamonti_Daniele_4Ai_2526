@@ -8,7 +8,7 @@ public class JTextAreaCustom extends JTextArea {
     public JTextAreaCustom(int x, int y, int width, int height) {
         super();
         setBounds(x, y, width, height);
-        setFont(new Font("Segoe UI", Font.PLAIN, Math.max(12, height / 3)));
+        setFont(new Font("Segoe UI", Font.PLAIN, height / 3));
         setForeground(Color.BLACK);
         setBackground(Color.WHITE);
         setCaretColor(Color.BLACK);

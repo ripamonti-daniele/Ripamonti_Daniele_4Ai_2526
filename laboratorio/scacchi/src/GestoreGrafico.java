@@ -337,7 +337,7 @@ public class GestoreGrafico {
         aggiornaBtnSpostamento();
         aggiornaLabelMateriale();
         aggiornaScacchiera(scacchiera.getStringaScacchiera());
-        switch (scacchiera.getStatoPartita()) {
+        switch (scacchiera.getStatoPartita(scacchiera.getTurno())) {
             case 0 -> {
                 labelVittoria.setText("<html><div style='text-align:center;'>Scacco matto:<br>Vince " + nomeBianco.getText() + " (bianco)</div></html>");
                 finePartita();

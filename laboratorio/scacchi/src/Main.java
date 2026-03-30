@@ -11,6 +11,10 @@ void main() {
     Insets screenInsets = Toolkit.getDefaultToolkit().getScreenInsets(GraphicsEnvironment.getLocalGraphicsEnvironment().getDefaultScreenDevice().getDefaultConfiguration());
     int width = screenSize.width;
     int height = screenSize.height - screenInsets.top - screenInsets.bottom;
+
+    System.out.println(width);
+    System.out.println(height);
+
     Color sfondo = new Color(120, 72, 48);
 //    new Color(193, 154, 107) new Color(181, 140, 90) new Color(120, 72, 48)
 

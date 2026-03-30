@@ -7,9 +7,10 @@ public class Re extends Pedina {
     public Re(Color colore, int[] posizione) {
         super(colore, posizione);
         arrocco = true;
+        trovaMosseValide();
     }
 
-    public Re(Re originale) {
+    protected Re(Re originale) {
         super(originale);
         this.arrocco = originale.arrocco;
     }
@@ -38,8 +39,8 @@ public class Re extends Pedina {
 
     @Override
     public void muovi(int[] posizione) {
-        super.muovi(posizione);
         arrocco = false;
+        super.muovi(posizione);
     }
 
     @Override

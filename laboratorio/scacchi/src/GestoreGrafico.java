@@ -160,7 +160,6 @@ public class GestoreGrafico {
         for (int i = 0; i < DIMENSIONE; i++) {
             for (int j = 0; j < DIMENSIONE; j++) {
                 boolean pari =  ((j + i) % 2 == 0);
-
                 casellePanel[i][j] = new Casella(pari, lunghezzaCasella, numeroToLettera.get(j + 1) + (DIMENSIONE - i));
                 casellePanel[i][j].setBounds(lunghezzaCasella * j, lunghezzaCasella * i, lunghezzaCasella, lunghezzaCasella);
                 setListener(i, j);
@@ -386,7 +385,7 @@ public class GestoreGrafico {
 
     private void setListenerTimer(TimerGrafico t) {
         t.addPropertyChangeListener("text", e -> {
-            if (t.getMinuti() == 0 && (t.getMinutiDefault() > 0 || t.getSecondi() < 10)) {
+            if (!t.isOff() && t.getMinuti() == 0 && (t.getMinutiDefault() > 0 || t.getSecondi() < 10)) {
                 if (t.getSecondi() % 2 != 0) t.setForeground(Color.red);
                 else t.setForeground(t.getTextColor());
             }
@@ -508,7 +507,7 @@ public class GestoreGrafico {
 
     private void creaDialogTimer() {
         JSpinner s1 = new JSpinner(new SpinnerNumberModel(timerBianco.getOreDefault(), 0, 23, 1));
-        JSpinner s2 = new JSpinner(new SpinnerNumberModel(timerBianco.getMinutiDefault(), 0, 59, 5));
+        JSpinner s2 = new JSpinner(new SpinnerNumberModel(timerBianco.getMinutiDefault(), 0, 59, 1));
         JSpinner s3 = new JSpinner(new SpinnerNumberModel(timerBianco.getSecondiDefault(), 0, 59, 5));
         JSpinner s4 = new JSpinner(new SpinnerNumberModel(timerBianco.getGuadagno(), 0, 60, 5));
 
@@ -752,8 +751,7 @@ public class GestoreGrafico {
             }
 
             if (this.id.equals(casellaPosIniziale) || this.id.equals(casellaPosFinale)) setBackground(variante);
-
-            g2d.setStroke(new BasicStroke(5));
+            g2d.setStroke(new BasicStroke(((float) lunghezzaLato / 20)));
             g2d.setColor(Color.black);
 
             if (sceltaPromozione && this.id.equals("PROMOZIONE")) {

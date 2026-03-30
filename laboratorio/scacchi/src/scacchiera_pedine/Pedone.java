@@ -3,31 +3,32 @@ import java.awt.Color;
 
 public class Pedone extends Pedina {
     private boolean muoviDiDueCaselle;
-    private boolean enpassant;
+    private boolean enPassant;
     public static final int MATERIALE = 1;
 
     public Pedone(Color colore, int[] posizione) {
-        super(colore, posizione, 1);
+        super(colore, posizione, MATERIALE);
         muoviDiDueCaselle = true;
-        enpassant = false;
+        enPassant = false;
+        trovaMosseValide();
     }
 
-    public Pedone(Pedone originale) {
+    protected Pedone(Pedone originale) {
         super(originale);
         this.muoviDiDueCaselle = originale.muoviDiDueCaselle;
-        this.enpassant = originale.enpassant;
+        this.enPassant = originale.enPassant;
     }
 
     public boolean getMuoviDiDueCaselle() {
         return muoviDiDueCaselle;
     }
 
-    public boolean getEnpassant() {
-        return enpassant;
+    public boolean getEnPassant() {
+        return enPassant;
     }
 
-    public void rimuoviEnpassant() {
-        enpassant = false;
+    public void rimuoviEnPassant() {
+        enPassant = false;
     }
 
     @Override
@@ -55,9 +56,10 @@ public class Pedone extends Pedina {
 
     @Override
     public void muovi(int[] posizione) {
-        enpassant = Math.abs(posizione[0] - this.posizione[0]) == 2;
-        super.muovi(posizione);
+        boolean temp = Math.abs(posizione[0] - this.posizione[0]) == 2;
         muoviDiDueCaselle = false;
+        super.muovi(posizione);
+        enPassant = temp;
     }
 
     @Override

@@ -18,18 +18,16 @@ public abstract class Pedina {
     }
 
     public Pedina(Color colore, int[] posizione, int materiale) {
-        setColore(colore);
-        setPosizione(posizione);
+        this(colore, posizione);
         setMateriale(materiale);
-        mosseValide = new ArrayList<>();
-        trovaMosseValide();
     }
 
     protected Pedina(Pedina originale) {
+        if (originale == null) throw new IllegalArgumentException("La pedina originale non può essere null");
         this.colore = originale.colore;
-        this.posizione = originale.posizione;
         this.materiale = originale.materiale;
-        this.mosseValide = originale.mosseValide;
+        this.posizione = originale.posizione.clone();
+        this.mosseValide = originale.getMosseValide();
     }
 
     public Color getColore() {
@@ -37,6 +35,7 @@ public abstract class Pedina {
     }
 
     private void setColore(Color colore) {
+        if (colore == null) throw new IllegalArgumentException("Il colore non può essere un parametro null");
         if (!colore.equals(Color.white) && !colore.equals(Color.black)) throw new IllegalArgumentException("Colore non valido");
         this.colore = colore;
     }
@@ -45,9 +44,9 @@ public abstract class Pedina {
         return posizione.clone();
     }
 
-    protected void setPosizione(int[] posizione) {
+    private void setPosizione(int[] posizione) {
+        if (posizione == null) throw new IllegalArgumentException("La posizione non può essere un parametro null");
         if (posizione[0] < 0 || posizione[0] > 7 || posizione[1] < 0 || posizione[1] > DIMENSIONE_SCACCHIERA - 1) throw new IllegalArgumentException("Non esiste questa posizione nella scacchiera");
-        if (this.posizione != null && this.posizione[0] == posizione[0] && this.posizione[1] == posizione[1]) throw new IllegalArgumentException("La pedina si trova già sulla casella che hai scelto");
         this.posizione = posizione;
     }
 
@@ -69,16 +68,13 @@ public abstract class Pedina {
                 break;
             }
         }
-        if (!valido) {
-            throw new IllegalArgumentException("Questa mossa non è valida");
-        }
+        if (!valido) throw new IllegalArgumentException("Questa mossa non è valida");
 
         setPosizione(posizione);
         trovaMosseValide();
     }
 
     public List<int[]> getMosseValide() {
-        trovaMosseValide();
         List<int[]> copia = new ArrayList<>(mosseValide.size());
         for (int[] arr : mosseValide) copia.add(arr.clone());
         return copia;

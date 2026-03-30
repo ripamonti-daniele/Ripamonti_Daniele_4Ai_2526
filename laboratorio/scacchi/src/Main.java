@@ -7,13 +7,12 @@ import javax.swing.*;
 import java.awt.*;
 
 void main() {
+    System.setProperty("sun.java2d.uiScale", "1");
+
     Dimension screenSize = Toolkit.getDefaultToolkit().getScreenSize();
     Insets screenInsets = Toolkit.getDefaultToolkit().getScreenInsets(GraphicsEnvironment.getLocalGraphicsEnvironment().getDefaultScreenDevice().getDefaultConfiguration());
     int width = screenSize.width;
     int height = screenSize.height - screenInsets.top - screenInsets.bottom;
-
-    System.out.println(width);
-    System.out.println(height);
 
     Color sfondo = new Color(120, 72, 48);
 //    new Color(193, 154, 107) new Color(181, 140, 90) new Color(120, 72, 48)
@@ -45,8 +44,7 @@ void main() {
     Runtime.getRuntime().addShutdownHook(new Thread(() -> {
         String percorso = "partita.txt";
         Path p = Path.of(percorso).toAbsolutePath().normalize();
-        Path cartellaLavoro = Path.of(System.getProperty("user.dir"));
-        if (p.startsWith(cartellaLavoro) && Files.exists(p)) {
+        if (p.startsWith(Path.of(System.getProperty("user.dir"))) && Files.exists(p)) {
             try {
                 BufferedWriter writer = new BufferedWriter(new FileWriter(percorso));
                 writer.write("");

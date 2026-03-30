@@ -5,10 +5,10 @@ public class Regina extends Pedina {
     public static final int MATERIALE = 9;
 
     public Regina(Color colore, int[] posizione) {
-        super(colore, posizione, 9);
+        super(colore, posizione, MATERIALE);
     }
 
-    public Regina(Regina originale) {
+    protected Regina(Regina originale) {
         super(originale);
     }
 
@@ -21,39 +21,29 @@ public class Regina extends Pedina {
             if (i != posizione[1]) mosseValide.add(new int[] {posizione[0], i});
         }
 
-        int i = posizione[0] + 1;
-        int j = posizione[1] + 1;
-        while (i < DIMENSIONE_SCACCHIERA && j < DIMENSIONE_SCACCHIERA) {
-            mosseValide.add(new int[]{i, j});
-            i++;
-            j++;
-        }
-
-        i = posizione[0] + 1;
-        j = posizione[1] - 1;
-        while (i < DIMENSIONE_SCACCHIERA && j >= 0) {
-            mosseValide.add(new int[]{i, j});
-            i++;
-            j--;
-        }
-
-        i = posizione[0] - 1;
-        j = posizione[1] + 1;
-        while (i >= 0 && j < DIMENSIONE_SCACCHIERA) {
-            mosseValide.add(new int[]{i, j});
-            i--;
-            j++;
-        }
-
-        i = posizione[0] - 1;
-        j = posizione[1] - 1;
-        while (i >= 0 && j >= 0) {
-            mosseValide.add(new int[]{i, j});
-            i--;
-            j--;
+        int y = posizione[0];
+        int x = posizione[1];
+        for (int i = 1; i < DIMENSIONE_SCACCHIERA; i++) {
+            boolean esci = true;
+            if (y + i < DIMENSIONE_SCACCHIERA && x + i < DIMENSIONE_SCACCHIERA) {
+                mosseValide.add(new int[]{y + i, x + i});
+                esci = false;
+            }
+            if (y + i < DIMENSIONE_SCACCHIERA && x - i >= 0) {
+                mosseValide.add(new int[]{y + i, x - i});
+                esci = false;
+            }
+            if (y - i >= 0 && x + i < DIMENSIONE_SCACCHIERA) {
+                mosseValide.add(new int[]{y - i, x + i});
+                esci = false;
+            }
+            if (y - i >= 0 && x - i >= 0) {
+                mosseValide.add(new int[]{y - i, x - i});
+                esci = false;
+            }
+            if (esci) break;
         }
     }
-
 
     @Override
     public Pedina copy() {

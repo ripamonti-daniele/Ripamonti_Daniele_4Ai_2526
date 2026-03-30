@@ -6,11 +6,12 @@ public class Torre extends Pedina {
     public static final int MATERIALE = 5;
 
     public Torre(Color colore, int[] posizione) {
-        super(colore, posizione, 5);
+        super(colore, posizione, MATERIALE);
         arrocco = true;
+        trovaMosseValide();
     }
 
-    public Torre(Torre originale) {
+    protected Torre(Torre originale) {
         super(originale);
         arrocco = originale.arrocco;
     }
@@ -31,8 +32,8 @@ public class Torre extends Pedina {
 
     @Override
     public void muovi(int[] posizione) {
-        super.muovi(posizione);
         arrocco = false;
+        super.muovi(posizione);
     }
 
     @Override

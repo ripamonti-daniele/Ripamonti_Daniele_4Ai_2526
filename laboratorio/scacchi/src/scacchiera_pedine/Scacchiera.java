@@ -121,8 +121,8 @@ public class Scacchiera {
             //cattura diagonale
             if (mossa[1] != pos[1] && caselle[mossa[0]][mossa[1]] != null) mosseFiltrate.add(mossa);
             //en passant
-            else if (mossa[1] != pos[1] && caselle[pos[0]][pos[1]].getColore().equals(Color.black) && pos[0] == DIMENSIONE - 4 && caselle[mossa[0] - 1][mossa[1]] instanceof Pedone pedone && pedone.getEnpassant()) mosseFiltrate.add(mossa);
-            else if (mossa[1] != pos[1] && caselle[pos[0]][pos[1]].getColore().equals(Color.white) && pos[0] == 3 && caselle[mossa[0] + 1][mossa[1]] instanceof Pedone pedone && pedone.getEnpassant()) mosseFiltrate.add(mossa);
+            else if (mossa[1] != pos[1] && caselle[pos[0]][pos[1]].getColore().equals(Color.black) && pos[0] == DIMENSIONE - 4 && caselle[mossa[0] - 1][mossa[1]] instanceof Pedone pedone && pedone.getEnPassant()) mosseFiltrate.add(mossa);
+            else if (mossa[1] != pos[1] && caselle[pos[0]][pos[1]].getColore().equals(Color.white) && pos[0] == 3 && caselle[mossa[0] + 1][mossa[1]] instanceof Pedone pedone && pedone.getEnPassant()) mosseFiltrate.add(mossa);
             //avanzamento frontale
             else if (mossa[1] == pos[1] && caselle[mossa[0]][mossa[1]] == null) {
                 if (Math.abs(mossa[0] - pos[0]) == 1) mosseFiltrate.add(mossa);
@@ -325,6 +325,8 @@ public class Scacchiera {
         return mosseFiltrate;
     }
 
+    // --- gestione gioco utente ---
+
     public List<int[]> selezionaPedina(int[] pos, Color turno) {
         if (pos == null || turno == null) throw new IllegalArgumentException("La posizione e il turno non possono essere parametri null");
         if (pos[0] < 0 || pos[0] >= DIMENSIONE || pos[1] < 0 || pos[1] >= DIMENSIONE) throw new IllegalArgumentException("Posizione non valida");
@@ -374,7 +376,7 @@ public class Scacchiera {
                 else if (p.getColore() == Color.black) caselle[pos[0] - 1][pos[1]] = null;
             }
 
-            for (Pedina[] riga : caselle) for (Pedina ped : riga) if (ped instanceof Pedone && ped.getColore() != turno) ((Pedone) ped).rimuoviEnpassant();
+            for (Pedina[] riga : caselle) for (Pedina ped : riga) if (ped instanceof Pedone && ped.getColore() != turno) ((Pedone) ped).rimuoviEnPassant();
 
             //arrocco
             if (p instanceof Re && casellaSelezionata[1] - pos[1] == 2) {
@@ -423,6 +425,8 @@ public class Scacchiera {
         scriviScacchiera();
     }
 
+    // --- condizioni di vittoria / pareggio ---
+
     // -1 partita non finita; 0 vittoria bianco; 1 vittoria nero; 2 stallo; 3 materiale insufficiente; 4 pareggio ripetizioni; 5 pareggio mosse neutre
     public int getStatoPartita(Color turno) {
         if (turno == null) throw new IllegalArgumentException("Il turno non può essere un parametro null");
@@ -456,6 +460,7 @@ public class Scacchiera {
     }
 
     public int getMateriale(Color c) {
+        if (c == null) throw new IllegalArgumentException("Il colore non può essere un parametro null");
         if (!c.equals(Color.black) && !c.equals(Color.white)) throw new IllegalArgumentException("Il colore del giocatore scelto può essere solo bianco o nero");
         int materiale = 0;
         for (Pedina[] riga : caselle) {
@@ -465,10 +470,12 @@ public class Scacchiera {
     }
 
     public int getMaterialeMossa(Color c, int mossa) {
+        if (c == null) throw new IllegalArgumentException("Il colore non può essere un parametro null");
         if (mossa < 0 || mossa > mosse) return -1;
         if (mossa == mosse) return getMateriale(c);
         int materiale = 0;
         String s = getStringaScacchieraMossa(mossa);
+        //prende la stringa della scacchiera alla mossa indicata come parametro e restituisce il materiale del giocatore del colore passato come parametro
         for (String riga : s.split("\n")) {
             for (String pedina : riga.split(SEP)) {
                 if (!(pedina.charAt(1) == 'B' && c.equals(Color.white) || pedina.charAt(1) == 'N' && c.equals(Color.black))) continue;
@@ -485,9 +492,11 @@ public class Scacchiera {
         return materiale;
     }
 
-    public boolean materialeInsufficiente(Color c) {
+    //se un giocatore oltre al re non ha pedine o ha solo un cavallo o solo un alfiere allora ha materiale insufficiente per vincere
+    public boolean materialeInsufficienteMossa(Color c, int mossa) {
+        if (c == null) throw new IllegalArgumentException("Il colore non può essere un parametro null");
         if (!c.equals(Color.black) && !c.equals(Color.white)) throw new IllegalArgumentException("Il colore del giocatore scelto può essere solo bianco o nero");
-        int materiale = getMateriale(c);
+        int materiale = getMaterialeMossa(c, mossa);
         if (materiale == 0) return true;
         if (materiale == 3) {
             for (Pedina[] riga : caselle) {
@@ -497,6 +506,11 @@ public class Scacchiera {
         return false;
     }
 
+    public boolean materialeInsufficiente(Color c) {
+        return materialeInsufficienteMossa(c, mosse);
+    }
+
+    //se una mossa del bianco seguita da una mossa del nero è identica per 5 volte allora è automaticamente pareggio
     public boolean pareggioRipetizioni() {
         if (mosse < 17) return false;
         String mossaCorrente = getStringaScacchieraMossa(mosse,true);
@@ -508,6 +522,8 @@ public class Scacchiera {
         }
         return mosseRipetute >= 4;
     }
+
+    // --- scrittura e lettera scacchiera su file ---
 
     private void scriviScacchiera() {
         BufferedWriter writer;
@@ -547,6 +563,7 @@ public class Scacchiera {
             scacchiera.deleteCharAt(scacchiera.length() - 1);
             scacchiera.append("\n");
         }
+        //per avere un pareggio per ripetizione le condizioni di arrocco e di en passant devono essere sempre uguali, queste vengono scritte se info == true
         if (info) {
             StringBuilder infoRipetizioni = new StringBuilder();
             for (Pedina[] riga : caselle) {
@@ -578,6 +595,7 @@ public class Scacchiera {
         return getStringaScacchiera(false);
     }
 
+    //legge il file indicato in percorso e restituisce la scacchiera alla mossa indicata come parametro
     public String getStringaScacchieraMossa(int mossa, boolean info) {
         if (mossa < 0 || mossa > mosse) return null;
 
@@ -592,7 +610,7 @@ public class Scacchiera {
                 if (i < iterazioni - 1) scacchiera.append("\n");
             }
         }
-        catch (IOException e) {
+        catch (IOException _) {
             return null;
         }
 

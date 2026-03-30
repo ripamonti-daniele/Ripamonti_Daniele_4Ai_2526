@@ -5,18 +5,11 @@ public class Cavallo extends Pedina {
     public static final int MATERIALE = 3;
 
     public Cavallo(Color colore, int[] posizione) {
-        super(colore, posizione, 3);
+        super(colore, posizione, MATERIALE);
     }
 
-    public Cavallo(Cavallo originale) {
+    protected Cavallo(Cavallo originale) {
         super(originale);
-    }
-
-    @Override
-    public void muovi(int[] posizione) {
-        int[] posizione_attuale = getPosizione();
-        if (Math.abs(posizione_attuale[0] - posizione[0]) == 2 && Math.abs(posizione_attuale[1] - posizione[1]) == 1 || Math.abs(posizione_attuale[1] - posizione[1]) == 2 && Math.abs(posizione_attuale[0] - posizione[0]) == 1) setPosizione(posizione);
-        else throw new IllegalArgumentException("Mossa non valida");
     }
 
     @Override

@@ -1,4 +1,5 @@
 //TODO
+// rivedere gestione turno
 // controllo finale per ottimizzazione codice
 // debug generale
 
@@ -25,8 +26,9 @@ void main() {
     frame.setIconImage(new ImageIcon(new ImageIcon("img/chess.png").getImage().getScaledInstance(30, 30, Image.SCALE_SMOOTH)).getImage());
 
     Scacchiera scacchiera = new Scacchiera();
-    GestoreGrafico gestoreGrafico = new GestoreGrafico(scacchiera, (int) Math.round(height * 0.8), sfondo);
-//    GestoreGrafico gestoreGrafico = new GestoreGrafico(scacchiera, 500, sfondo);
+    GestoreGrafico gestoreGrafico = new GestoreGrafico(scacchiera, (int) Math.round(height * 0.8), sfondo, new Color(240, 217, 181), new Color(161, 116, 79));
+//    GestoreGrafico gestoreGrafico = new GestoreGrafico(scacchiera, 500, sfondo, new Color(240, 217, 181), new Color(161, 116, 79));
+//    GestoreGrafico gestoreGrafico = new GestoreGrafico(scacchiera, (int) Math.round(height * 0.8));
 
     frame.setVisible(true);
     JPanel contenitore = new JPanel(null);

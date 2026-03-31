@@ -41,6 +41,6 @@ public enum IconaPedina {
     }
 
     public ImageIcon getImageIcon() {
-        return getImageIcon(100);
+        return new ImageIcon(iconPath);
     }
 }

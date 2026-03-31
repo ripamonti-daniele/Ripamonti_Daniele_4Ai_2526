@@ -327,14 +327,11 @@ public class Scacchiera {
 
     // --- gestione gioco utente ---
 
-    public List<int[]> selezionaPedina(int[] pos, Color turno) {
-        if (pos == null || turno == null) throw new IllegalArgumentException("La posizione e il turno non possono essere parametri null");
-        if (pos[0] < 0 || pos[0] >= DIMENSIONE || pos[1] < 0 || pos[1] >= DIMENSIONE) throw new IllegalArgumentException("Posizione non valida");
+    public List<int[]> selezionaPedina(Pedina p, Color turno) {
+        if (turno == null) throw new IllegalArgumentException("Il turno non può essere un parametro null");
         if (!turno.equals(Color.white) && !turno.equals(Color.black)) throw new IllegalArgumentException("Il colore del turno può essere solo bianco o nero");
-        if (caselle[pos[0]][pos[1]] == null) return null;
-
-        Pedina p = caselle[pos[0]][pos[1]];
-        if (!p.getColore().equals(turno)) return null;
+        if (p == null || !p.getColore().equals(turno)) return null;
+        int[] pos = p.getPosizione();
 
         //se sono rimasti dei pedoni non promossi in fondo alla scacchiera questi vengono automaticamente trasformati in regine
         for (Pedina ped : caselle[0]) if (ped instanceof Pedone) promuoviPedone(ped.getPosizione(), 1);
@@ -343,6 +340,13 @@ public class Scacchiera {
         this.mosseValide = filtraMosseScacco(pos, ottieniMosseFiltrate(pos));
         this.casellaSelezionata = pos;
         return mosseValide;
+    }
+
+    public List<int[]> selezionaPedina(int[] pos, Color turno) {
+        if (pos == null) throw new IllegalArgumentException("La posizione non può essere un parametro null");
+        if (pos[0] < 0 || pos[0] >= DIMENSIONE || pos[1] < 0 || pos[1] >= DIMENSIONE) throw new IllegalArgumentException("Posizione non valida");
+        if (caselle[pos[0]][pos[1]] == null) return null;
+        return selezionaPedina(caselle[pos[0]][pos[1]], turno);
     }
 
     public void deSelezionaPedina() {

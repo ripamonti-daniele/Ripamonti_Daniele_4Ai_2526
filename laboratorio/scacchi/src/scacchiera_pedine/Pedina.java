@@ -14,7 +14,6 @@ public abstract class Pedina {
         setColore(colore);
         setPosizione(posizione);
         mosseValide = new ArrayList<>();
-        trovaMosseValide();
     }
 
     public Pedina(Color colore, int[] posizione, int materiale) {

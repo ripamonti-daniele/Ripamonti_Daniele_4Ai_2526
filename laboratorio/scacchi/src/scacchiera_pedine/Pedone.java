@@ -56,10 +56,10 @@ public class Pedone extends Pedina {
 
     @Override
     public void muovi(int[] posizione) {
-        boolean temp = Math.abs(posizione[0] - this.posizione[0]) == 2;
+        boolean mossaDoppia = Math.abs(posizione[0] - this.posizione[0]) == 2;
         muoviDiDueCaselle = false;
         super.muovi(posizione);
-        enPassant = temp;
+        enPassant = mossaDoppia;
     }
 
     @Override

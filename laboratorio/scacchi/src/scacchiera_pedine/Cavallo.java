@@ -6,6 +6,7 @@ public class Cavallo extends Pedina {
 
     public Cavallo(Color colore, int[] posizione) {
         super(colore, posizione, MATERIALE);
+        trovaMosseValide();
     }
 
     protected Cavallo(Cavallo originale) {

@@ -6,6 +6,7 @@ public class Regina extends Pedina {
 
     public Regina(Color colore, int[] posizione) {
         super(colore, posizione, MATERIALE);
+        trovaMosseValide();
     }
 
     protected Regina(Regina originale) {

@@ -21,8 +21,6 @@ public class Scacchiera {
         percorso = "partita.txt";
         SEP = ";";
         reset();
-        inizializza();
-        scriviScacchiera();
     }
 
     // --- inizializzazione e reset ---
@@ -105,9 +103,10 @@ public class Scacchiera {
         return turno;
     }
 
-    public void cambiaTurno() {
-        if (turno == Color.white) turno = Color.black;
-        else turno = Color.white;
+    public void setTurno(Color turno) {
+        if (turno == null) throw new IllegalArgumentException("Il turno non può essere null");
+        if (!turno.equals(Color.white) && !turno.equals(Color.black)) throw new IllegalArgumentException("Il turno può essere solo bianco o nero");
+        this.turno = turno;
     }
 
     // --- calcolo mosse valide ---
@@ -164,7 +163,7 @@ public class Scacchiera {
             else if (vincoli[1] != null && mossa[0] > y && mossa[1] < x && mossa[0] <= vincoli[1][0] && mossa[1] >= vincoli[1][1]) mosseFiltrate.add(mossa);
             else if (vincoli[2] != null && mossa[0] < y && mossa[1] > x && mossa[0] >= vincoli[2][0] && mossa[1] <= vincoli[2][1]) mosseFiltrate.add(mossa);
             else if (vincoli[3] != null && mossa[0] < y && mossa[1] < x && mossa[0] >= vincoli[3][0] && mossa[1] >= vincoli[3][1]) mosseFiltrate.add(mossa);
-            if (caselle[pos[0]][pos[1]] instanceof Regina && mossa[0] == y || mossa[1] == x) mosseFiltrate.add(mossa);
+            else if (caselle[pos[0]][pos[1]] instanceof Regina && (mossa[0] == y || mossa[1] == x)) mosseFiltrate.add(mossa);
         }
 
         return mosseFiltrate;
@@ -406,6 +405,7 @@ public class Scacchiera {
             if (!(p instanceof Pedone && (pos[0] == DIMENSIONE - 1 || pos[0] == 0))) {
                 mosse++;
                 scriviScacchiera();
+                cambiaTurno();
             }
         }
         casellaSelezionata = null;
@@ -427,12 +427,18 @@ public class Scacchiera {
         //aggiorna la scacchiera
         mosse++;
         scriviScacchiera();
+        cambiaTurno();
+    }
+
+    private void cambiaTurno() {
+        if (turno == Color.white) turno = Color.black;
+        else turno = Color.white;
     }
 
     // --- condizioni di vittoria / pareggio ---
 
     // -1 partita non finita; 0 vittoria bianco; 1 vittoria nero; 2 stallo; 3 materiale insufficiente; 4 pareggio ripetizioni; 5 pareggio mosse neutre
-    public int getStatoPartita(Color turno) {
+    public int getStatoPartita() {
         if (turno == null) throw new IllegalArgumentException("Il turno non può essere un parametro null");
         if (!turno.equals(Color.black) && !turno.equals(Color.white)) throw new IllegalArgumentException("Il colore del turno può essere solo bianco o nero");
 
@@ -503,8 +509,13 @@ public class Scacchiera {
         int materiale = getMaterialeMossa(c, mossa);
         if (materiale == 0) return true;
         if (materiale == 3) {
-            for (Pedina[] riga : caselle) {
-                for (Pedina p : riga) if (p != null && p.getColore().equals(c) && p instanceof Cavallo || p instanceof Alfiere) return true;
+            String s = getStringaScacchieraMossa(mossa);
+            for (String riga : s.split("\n")) {
+                for (String pedina : riga.split(SEP)) {
+                    if (pedina.length() < 2) continue;
+                    if (!(pedina.charAt(1) == 'B' && c.equals(Color.white) || pedina.charAt(1) == 'N' && c.equals(Color.black))) continue;
+                    if (pedina.charAt(0) == 'C' || pedina.charAt(0) == 'A') return true;
+                }
             }
         }
         return false;
@@ -530,22 +541,17 @@ public class Scacchiera {
     // --- scrittura e lettera scacchiera su file ---
 
     private void scriviScacchiera() {
-        BufferedWriter writer;
         if (mosse == 0) {
-            try {
-                writer = new BufferedWriter(new FileWriter(percorso));
+            try (BufferedWriter writer = new BufferedWriter(new FileWriter(percorso))) {
                 writer.write("");
-                writer.close();
             }
             catch (IOException _) {
                 return;
             }
         }
 
-        try {
-            writer = new BufferedWriter(new FileWriter(percorso, true));
+        try (BufferedWriter writer = new BufferedWriter(new FileWriter(percorso, true))) {
             writer.write(mosse + "\n" + getStringaScacchiera(true) + "\n");
-            writer.close();
         }
         catch (IOException _) {}
     }
@@ -604,8 +610,7 @@ public class Scacchiera {
         if (mossa < 0 || mossa > mosse) return null;
 
         StringBuilder scacchiera = new StringBuilder();
-        try {
-            BufferedReader reader = new BufferedReader(new FileReader(percorso));
+        try (BufferedReader reader = new BufferedReader(new FileReader(percorso))) {
             for (int i = 0; i < mossa * 10 + 1; i++) reader.readLine();
             int iterazioni = 8;
             if (info) iterazioni++;

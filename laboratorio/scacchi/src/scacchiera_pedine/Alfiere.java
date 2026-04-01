@@ -6,6 +6,7 @@ public class Alfiere extends Pedina {
 
     public Alfiere(Color colore, int[] posizione) {
         super(colore, posizione, MATERIALE);
+        trovaMosseValide();
     }
 
     protected Alfiere(Alfiere originale) {

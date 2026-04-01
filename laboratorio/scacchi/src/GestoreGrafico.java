@@ -355,7 +355,6 @@ public class GestoreGrafico {
     }
 
     private void aggiornaInfoScacchiera() {
-        scacchiera.cambiaTurno();
         timerBianco.invertiStato();
         timerNero.invertiStato();
         timerBianco.setForeground(timerBianco.getTextColor());
@@ -364,7 +363,7 @@ public class GestoreGrafico {
         aggiornaBtnSpostamento();
         aggiornaLabelMateriale();
         aggiornaScacchiera(scacchiera.getStringaScacchiera());
-        switch (scacchiera.getStatoPartita(scacchiera.getTurno())) {
+        switch (scacchiera.getStatoPartita()) {
             case 0 -> {
                 labelVittoria.setText("<html><div style='text-align:center;'>Scacco matto:<br>Vince " + nomeBianco.getText() + " (bianco)</div></html>");
                 finePartita();

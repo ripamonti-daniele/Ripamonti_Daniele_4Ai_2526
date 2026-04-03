@@ -1,0 +1,12 @@
+package scacchiera_pedine;
+
+public enum StatoPartita {
+    IN_CORSO,
+    VITTORIA_BIANCO,
+    VITTORIA_NERO,
+    STALLO,
+    MATERIALE_INSUFFICIENTE,
+    PAREGGIO_RIPETIZIONI,
+    PAREGGIO_MOSSE_NEUTRE,
+    PROMOZIONE_IN_SOSPESO
+}

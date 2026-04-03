@@ -18,9 +18,9 @@ public class GestoreGrafico {
     private int[] posPromozione;
     public final int lunghezzaScacchiera;
     public final int lunghezzaCasella;
-    public final int DIMENSIONE = 8;
+    public static final int DIMENSIONE = Scacchiera.DIMENSIONE;
     private ImageIcon[] immagini;
-    private final String SEP;
+    private static final String SEP = Scacchiera.getSEP();
     private final Map<Integer, String> numeroToLettera;
     private long ultimoClic;
     private static final long SOGLIA_MS = 250;
@@ -52,7 +52,6 @@ public class GestoreGrafico {
         rotazioneScacchiera = true;
         promozione = false;
         posPromozione = new int[2];
-        SEP = ";";
         numeroToLettera = Map.of(1, "A", 2, "B", 3, "C", 4, "D", 5, "E", 6, "F", 7, "G", 8, "H");
         ultimoClic = 0;
         setImmagini(immagini);
@@ -318,7 +317,7 @@ public class GestoreGrafico {
 
                 //se la casella selezionata non è null allora seleziona la pedina; se è null prova a spostarla e se non riesce seleziona la pedina dove si intendeva spostare quella selezionata precedentemente
                 if (scacchiera.getCasellaSelezionata() == null || !scacchiera.muoviPedina(pos)) {
-                    List<int[]> mosseValide = scacchiera.selezionaPedina(pos, scacchiera.getTurno());
+                    List<int[]> mosseValide = scacchiera.selezionaPedina(pos);
                     Casella.idEnPassant = null;
                     //se c'è un en passant tre le mosse valide viene indicato che il pedone avversario viene mangiato
                     if (scacchiera.getPedinaSelezionata() instanceof Pedone) {
@@ -333,7 +332,7 @@ public class GestoreGrafico {
                 }
 
                 //promozione pedone
-                else if ((y == 0 || y == DIMENSIONE - 1) && scacchiera.getPedina(pos) instanceof Pedone) {
+                else if (scacchiera.promozioneInSospeso() != null) {
                     Casella.casellaPosFinale = casellePanel[y][x].getId();
                     Casella.casellaPosIniziale = idCasellaSelOld;
                     promozione = true;
@@ -364,31 +363,36 @@ public class GestoreGrafico {
         aggiornaLabelMateriale();
         aggiornaScacchiera(scacchiera.getStringaScacchiera());
         switch (scacchiera.getStatoPartita()) {
-            case 0 -> {
+            case StatoPartita.IN_CORSO -> ruotaScacchiera(scacchiera.getTurno());
+
+            case StatoPartita.VITTORIA_BIANCO -> {
                 labelVittoria.setText("<html><div style='text-align:center;'>Scacco matto:<br>Vince " + nomeBianco.getText() + " (bianco)</div></html>");
                 finePartita();
             }
-            case 1 -> {
+            case StatoPartita.VITTORIA_NERO -> {
                 labelVittoria.setText("<html><div style='text-align:center;'>Scacco matto:<br>Vince " + nomeNero.getText() + " (nero)</div></html>");
                 finePartita();
             }
-            case 2 -> {
+            case StatoPartita.STALLO -> {
                 labelVittoria.setText("<html><div style='text-align:center;'>Stallo:<br>Pareggio</div></html>");
                 finePartita();
             }
-            case 3 -> {
+            case StatoPartita.MATERIALE_INSUFFICIENTE -> {
                 labelVittoria.setText("<html><div style='text-align:center;'>Materiale insufficiente:<br>Pareggio</div></html>");
                 finePartita();
             }
-            case 4 -> {
+            case StatoPartita.PAREGGIO_MOSSE_NEUTRE -> {
                 labelVittoria.setText("<html><div style='text-align:center;'>75 mosse neutre:<br>Pareggio</div></html>");
                 finePartita();
             }
-            case 5 -> {
+            case StatoPartita.PAREGGIO_RIPETIZIONI -> {
                 labelVittoria.setText("<html><div style='text-align:center;'>5 posizioni ripetute:<br>Pareggio</div></html>");
                 finePartita();
             }
-            default -> ruotaScacchiera(scacchiera.getTurno());
+            case StatoPartita.PROMOZIONE_IN_SOSPESO -> {
+                scacchiera.promuoviPedone(scacchiera.promozioneInSospeso(), 1);
+                aggiornaInfoScacchiera();
+            }
         }
     }
 
@@ -444,7 +448,7 @@ public class GestoreGrafico {
                         case 3 -> mossaMostrata = scacchiera.getMosse();
                         default -> {}
                     }
-                    aggiornaScacchiera(scacchiera.getStringaScacchieraMossa(mossaMostrata));
+                    aggiornaScacchiera(PartitaFileManager.leggiScacchiera(mossaMostrata));
                     if (mossaMostrata != scacchiera.getMosse()) {
                         timerBianco.pause();
                         timerBianco.setForeground(timerBianco.getTextColor());

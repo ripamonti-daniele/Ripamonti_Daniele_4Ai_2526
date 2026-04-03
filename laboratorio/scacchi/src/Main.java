@@ -1,5 +1,5 @@
 //TODO
-// rivedere gestione turno
+// suoni
 // controllo finale per ottimizzazione codice
 // debug generale
 
@@ -21,6 +21,7 @@ void main() {
     JFrame frame = new JFrame("Scacchi");
     frame.setLayout(null);
     frame.setSize(width, height);
+    frame.setLocationRelativeTo(null);
     frame.setExtendedState(JFrame.MAXIMIZED_BOTH);
     frame.getContentPane().setBackground(sfondo);
     frame.setIconImage(new ImageIcon(new ImageIcon("img/chess.png").getImage().getScaledInstance(30, 30, Image.SCALE_SMOOTH)).getImage());

@@ -8,7 +8,7 @@ public abstract class Pedina {
     protected int[] posizione;
     private int materiale;
     protected List<int[]> mosseValide;
-    public final int DIMENSIONE_SCACCHIERA = 8;
+    public static final int DIMENSIONE_SCACCHIERA = 8;
 
     public Pedina(Color colore, int[] posizione) {
         setColore(colore);

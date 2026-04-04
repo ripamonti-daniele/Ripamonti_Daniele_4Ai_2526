@@ -31,18 +31,18 @@ void main() {
 //    GestoreGrafico gestoreGrafico = new GestoreGrafico(scacchiera, 500, sfondo, new Color(240, 217, 181), new Color(161, 116, 79));
 //    GestoreGrafico gestoreGrafico = new GestoreGrafico(scacchiera, (int) Math.round(height * 0.8));
 
-    frame.setVisible(true);
     JPanel contenitore = new JPanel(null);
-    gestoreGrafico.mettiASchermo(contenitore);
 
     Insets insets = frame.getInsets();
     int contentHeight = frame.getHeight() - insets.top - insets.bottom;
 
     contenitore.setBounds(gestoreGrafico.lunghezzaCasella, (contentHeight - gestoreGrafico.lunghezzaScacchiera) / 2, 2 * gestoreGrafico.lunghezzaScacchiera, gestoreGrafico.lunghezzaScacchiera + gestoreGrafico.lunghezzaCasella / 4 * 3);
     contenitore.setBackground(sfondo);
-    //    contenitore.setBounds(width / 10, (contentHeight - scacchieraPanel.lunghezzaScacchiera) / 2, scacchieraPanel.lunghezzaScacchiera * 2, scacchieraPanel.lunghezzaScacchiera * 2);
+    gestoreGrafico.mettiASchermo(contenitore);
+
     frame.add(contenitore);
     frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
+    frame.setVisible(true);
 
     Runtime.getRuntime().addShutdownHook(new Thread(() -> {
         String percorso = "partita.txt";

@@ -1,5 +1,6 @@
 import scacchiera_pedine.*;
 import javax.swing.*;
+import javax.swing.border.Border;
 import java.awt.*;
 import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
@@ -24,6 +25,7 @@ public class GestoreGrafico {
     private final Map<Integer, String> numeroToLettera;
     private long ultimoClic;
     private static final long SOGLIA_MS = 250;
+    private boolean aggiuntoASchermo;
 
     private final JPanel panelInfo;
     private final JButton btnGioca;
@@ -51,9 +53,10 @@ public class GestoreGrafico {
         mossaMostrata = 0;
         rotazioneScacchiera = true;
         promozione = false;
-        posPromozione = new int[2];
+        posPromozione = null;
         numeroToLettera = Map.of(1, "A", 2, "B", 3, "C", 4, "D", 5, "E", 6, "F", 7, "G", 8, "H");
         ultimoClic = 0;
+        aggiuntoASchermo = false;
         setImmagini(immagini);
         inizializzaCaselle(caselleChiare, caselleScure);
         aggiornaScacchiera(scacchiera.getStringaScacchiera());
@@ -170,6 +173,7 @@ public class GestoreGrafico {
                 Casella.caselleScure = caselleScure;
             }
         }
+        Casella.idUtilizzati.clear();
 
         Casella.gestisciGrafica = true;
         for (int i = 0; i < DIMENSIONE; i++) {
@@ -317,18 +321,21 @@ public class GestoreGrafico {
 
                 //se la casella selezionata non è null allora seleziona la pedina; se è null prova a spostarla e se non riesce seleziona la pedina dove si intendeva spostare quella selezionata precedentemente
                 if (scacchiera.getCasellaSelezionata() == null || !scacchiera.muoviPedina(pos)) {
+//                    SuoniScacchi.seleziona();
                     List<int[]> mosseValide = scacchiera.selezionaPedina(pos);
                     Casella.idEnPassant = null;
-                    //se c'è un en passant tre le mosse valide viene indicato che il pedone avversario viene mangiato
-                    if (scacchiera.getPedinaSelezionata() instanceof Pedone) {
-                        for (int[] mossa : mosseValide) {
-                            if (mossa[1] != scacchiera.getCasellaSelezionata()[1] && scacchiera.getPedina(mossa) == null) {
-                                Casella.idEnPassant = casellePanel[mossa[0]][mossa[1]].getId();
-                                break;
+                    if (mosseValide != null) {
+                        //se c'è un en passant tre le mosse valide viene indicato che il pedone avversario viene mangiato
+                        if (scacchiera.getPedinaSelezionata() instanceof Pedone) {
+                            for (int[] mossa : mosseValide) {
+                                if (mossa[1] != scacchiera.getCasellaSelezionata()[1] && scacchiera.getPedina(mossa) == null) {
+                                    Casella.idEnPassant = casellePanel[mossa[0]][mossa[1]].getId();
+                                    break;
+                                }
                             }
                         }
+                        mostraMosseValide(mosseValide);
                     }
-                    if (mosseValide != null) mostraMosseValide(mosseValide);
                 }
 
                 //promozione pedone
@@ -402,6 +409,7 @@ public class GestoreGrafico {
                 scacchiera.promuoviPedone(posPromozione, i + 1);
                 promozione = false;
                 Casella.promozione = false;
+                posPromozione = null;
                 for (Casella c : casellePromozione) c.rimuoviImg();
                 aggiornaInfoScacchiera();
                 aggiornaScacchiera(scacchiera.getStringaScacchiera());
@@ -500,6 +508,7 @@ public class GestoreGrafico {
 
     private void ruotaScacchiera(Color c, boolean rotazioneObbligatoria) {
         if (c == null) throw new IllegalArgumentException("Il colore non può essere null");
+        if (!c.equals(Color.white) && !c.equals(Color.black)) throw new IllegalArgumentException("Il colore può essere solo bianco o nero");
         if (!(rotazioneObbligatoria || rotazioneScacchiera)) return;
         Casella.gestisciGrafica = true;
         for (int i = 0; i < DIMENSIONE; i++) {
@@ -628,10 +637,12 @@ public class GestoreGrafico {
     }
 
     private void mettiASchermo(Container container) {
+        if (aggiuntoASchermo) throw new IllegalStateException("Impossibile mettere a schermo più di una volta");
         for (int i = 0; i < 4; i++) container.add(casellePromozione[i]);
         for (int i = 0; i < DIMENSIONE; i++) for (int j = 0; j < DIMENSIONE; j++) container.add(casellePanel[i][j]);
         container.add(panelInfo);
         for (BottoneSpostamento b : btnSpostamenti) container.add(b);
+        aggiuntoASchermo = true;
     }
 
     public void mettiASchermo(JPanel panel) {
@@ -675,14 +686,14 @@ public class GestoreGrafico {
         private static String casellaPosFinale = null;
         private static final List<String> idUtilizzati = new ArrayList<>();
         private casellaClickListener listener;
-        public boolean mossaValida;
+        private boolean mossaValida;
         private static boolean promozione = false;
         private static boolean scacchieraGirata = false;
         private static boolean gestisciGrafica = false;
         private static boolean infoMossa = true;
         private static String idEnPassant = null;
 
-        public Casella(Boolean pari, int lunghezzaLato, String id) {
+        Casella(Boolean pari, int lunghezzaLato, String id) {
             setLunghezzaLato(lunghezzaLato);
             label = new JLabel();
             label.setPreferredSize(new Dimension(lunghezzaLato,lunghezzaLato));
@@ -706,7 +717,7 @@ public class GestoreGrafico {
             });
         }
 
-        public int getLunghezzaLato() {
+        int getLunghezzaLato() {
             return lunghezzaLato;
         }
 
@@ -715,17 +726,17 @@ public class GestoreGrafico {
             this.lunghezzaLato = lunghezzaLato;
         }
 
-        public Color getColore() {
+        Color getColore() {
             return colore;
         }
 
         private void setColore(Color colore) {
             this.colore = colore;
-            this.setBackground(colore);
+            super.setBackground(colore);
             variante = varianteColore(colore);
         }
 
-        public String getId() {
+        String getId() {
             return id;
         }
 
@@ -740,11 +751,11 @@ public class GestoreGrafico {
             }
         }
 
-        public Icon getImg() {
+        Icon getImg() {
             return label.getIcon();
         }
 
-        public void setImg(ImageIcon img) {
+        void setImg(ImageIcon img) {
             if (img.getIconWidth() != lunghezzaLato || img.getIconHeight() != lunghezzaLato) {
                 Image scaled = img.getImage().getScaledInstance(lunghezzaLato, lunghezzaLato, Image.SCALE_SMOOTH);
                 label.setIcon(new ImageIcon(scaled));
@@ -752,11 +763,11 @@ public class GestoreGrafico {
             else label.setIcon(img);
         }
 
-        public void rimuoviImg() {
+        void rimuoviImg() {
             label.setIcon(null);
         }
 
-        public void setListener(casellaClickListener l) {
+        void setListener(casellaClickListener l) {
             this.listener = l;
         }
 
@@ -773,13 +784,13 @@ public class GestoreGrafico {
             disegnaCoordinata(g2d);
             g2d.setRenderingHint(RenderingHints.KEY_ANTIALIASING, RenderingHints.VALUE_ANTIALIAS_ON);
 
-            if (!getBackground().equals(colore)) setBackground(colore);
+            if (!getBackground().equals(colore)) super.setBackground(colore);
             if (!infoMossa) {
                 g2d.dispose();
                 return;
             }
 
-            if (this.id.equals(casellaPosIniziale) || this.id.equals(casellaPosFinale)) setBackground(variante);
+            if (this.id.equals(casellaPosIniziale) || this.id.equals(casellaPosFinale)) super.setBackground(variante);
             g2d.setStroke(new BasicStroke(((float) lunghezzaLato / 20)));
             g2d.setColor(Color.black);
 
@@ -808,6 +819,7 @@ public class GestoreGrafico {
         }
 
         private void disegnaCoordinata(Graphics2D g2d) {
+            if (id.equals("PROMOZIOE")) return;
             if (!scacchieraGirata && (id.charAt(0) == 'A' || id.charAt(1) == '1') || scacchieraGirata && (id.charAt(0) == 'H' || id.charAt(1) == '8')) {
                 g2d.setRenderingHint(RenderingHints.KEY_TEXT_ANTIALIASING, RenderingHints.VALUE_TEXT_ANTIALIAS_ON);
                 Font font = new Font("Arial", Font.BOLD, lunghezzaLato / 5);
@@ -828,8 +840,7 @@ public class GestoreGrafico {
             }
         }
 
-        //da rivedere
-
+        //rende meno modificabili possibili le caselle da classi esterne
         @Override
         public void setBounds(Rectangle r) {
             if (gestisciGrafica) super.setBounds(r);
@@ -860,18 +871,6 @@ public class GestoreGrafico {
             if (gestisciGrafica) super.remove(comp);
         }
 
-//        @Override
-//        public Component[] getComponents() {
-//            if (gestisciGrafica) return super.getComponents();
-//            return null;
-//        }
-
-//        @Override
-//        public Component getComponent(int n) {
-//            if (gestisciGrafica) return super.getComponent(n);
-//            return null;
-//        }
-
         @Override
         public void setSize(Dimension d) {
             if (gestisciGrafica) super.setSize(d);
@@ -880,6 +879,53 @@ public class GestoreGrafico {
         @Override
         public void setSize(int width, int height) {
             if (gestisciGrafica) super.setSize(width, height);
+        }
+
+        @Override
+        public Component add(Component comp) {
+            if (gestisciGrafica) return super.add(comp);
+            return comp;
+        }
+
+        @Override
+        public Component add(Component comp, int index) {
+            if (gestisciGrafica) return super.add(comp, index);
+            return comp;
+        }
+
+        @Override
+        public void add(Component comp, Object constraints) {
+            if (gestisciGrafica) super.add(comp, constraints);
+        }
+
+        @Override
+        public void setBackground(Color bg) {
+            if (gestisciGrafica) super.setBackground(bg);
+        }
+
+        @Override
+        public void setForeground(Color fg) {
+            if (gestisciGrafica) super.setForeground(fg);
+        }
+
+        @Override
+        public void setOpaque(boolean isOpaque) {
+            if (gestisciGrafica) super.setOpaque(isOpaque);
+        }
+
+        @Override
+        public void setBorder(Border border) {
+            if (gestisciGrafica) super.setBorder(border);
+        }
+
+        @Override
+        public void setVisible(boolean aFlag) {
+            if (gestisciGrafica) super.setVisible(aFlag);
+        }
+
+        @Override
+        public void setEnabled(boolean enabled) {
+            if (gestisciGrafica) super.setEnabled(enabled);
         }
     }
 }

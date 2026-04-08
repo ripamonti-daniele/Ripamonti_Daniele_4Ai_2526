@@ -46,7 +46,7 @@ public abstract class Pedina {
     private void setPosizione(int[] posizione) {
         if (posizione == null) throw new IllegalArgumentException("La posizione non può essere un parametro null");
         if (posizione[0] < 0 || posizione[0] > 7 || posizione[1] < 0 || posizione[1] > DIMENSIONE_SCACCHIERA - 1) throw new IllegalArgumentException("Non esiste questa posizione nella scacchiera");
-        this.posizione = posizione;
+        this.posizione = posizione.clone();
     }
 
     public int getMateriale() {

@@ -56,10 +56,10 @@ public class BottoneSpostamento extends JButton {
 
     private void impostaImmagine(int dimensione) {
         switch (tipo) {
-            case 1 -> setIcon(creaIconaScalata("frecce/frecciaStart.png", dimensione));
-            case 2 -> setIcon(creaIconaScalata("frecce/frecciaSx.png", dimensione));
-            case 3 -> setIcon(creaIconaScalata("frecce/frecciaDx.png", dimensione));
-            case 4 -> setIcon(creaIconaScalata("frecce/frecciaEnd.png", dimensione));
+            case 1 -> setIcon(creaIconaScalata("img/frecce/frecciaStart.png", dimensione));
+            case 2 -> setIcon(creaIconaScalata("img/frecce/frecciaSx.png", dimensione));
+            case 3 -> setIcon(creaIconaScalata("img/frecce/frecciaDx.png", dimensione));
+            case 4 -> setIcon(creaIconaScalata("img/frecce/frecciaEnd.png", dimensione));
             default -> {}
         }
     }

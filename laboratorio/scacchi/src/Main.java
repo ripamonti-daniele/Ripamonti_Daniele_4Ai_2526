@@ -3,6 +3,7 @@
 // controllo finale per ottimizzazione codice
 // debug generale
 
+import scacchiera_pedine.PartitaFileManager;
 import scacchiera_pedine.Scacchiera;
 import javax.swing.*;
 import java.awt.*;
@@ -44,16 +45,5 @@ void main() {
     frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
     frame.setVisible(true);
 
-    Runtime.getRuntime().addShutdownHook(new Thread(() -> {
-        String percorso = "partita.txt";
-        Path p = Path.of(percorso).toAbsolutePath().normalize();
-        if (p.startsWith(Path.of(System.getProperty("user.dir"))) && Files.exists(p)) {
-            try {
-                BufferedWriter writer = new BufferedWriter(new FileWriter(percorso));
-                writer.write("");
-                writer.close();
-            }
-            catch (IOException _) {}
-        }
-    }));
+    Runtime.getRuntime().addShutdownHook(new Thread(PartitaFileManager::svuotaFile));
 }

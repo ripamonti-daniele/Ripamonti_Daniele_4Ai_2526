@@ -4,7 +4,6 @@ import java.io.*;
 
 public class PartitaFileManager {
     static final String percorsoFile = "partita.txt"; //package-private
-    private static final int RIGHE_PER_MOSSA = 10;
 
     //fa in modo che la classe non possa essere istanziata
     private PartitaFileManager() {}
@@ -12,14 +11,7 @@ public class PartitaFileManager {
     //package-private
     static void scriviScacchiera(String percorso, int mosse, String scacchiera) {
         if (mosse < 0) return;
-        if (mosse == 0) {
-            try (BufferedWriter writer = new BufferedWriter(new FileWriter(percorso))) {
-                writer.write("");
-            }
-            catch (IOException _) {
-                return;
-            }
-        }
+        if (mosse == 0) svuotaFile(percorso);
 
         try (BufferedWriter writer = new BufferedWriter(new FileWriter(percorso, true))) {
             writer.write(mosse + "\n" + scacchiera + "\n");
@@ -36,7 +28,7 @@ public class PartitaFileManager {
         if (mossa < 0) return null;
         StringBuilder scacchiera = new StringBuilder();
         try (BufferedReader reader = new BufferedReader(new FileReader(percorso))) {
-            for (int i = 0; i < mossa * RIGHE_PER_MOSSA + 1; i++) reader.readLine();
+            for (int i = 0; i < mossa * 10 + 1; i++) reader.readLine();
             int iterazioni = 8;
             if (info) iterazioni++;
             for (int i = 0; i < iterazioni; i++) {
@@ -51,7 +43,6 @@ public class PartitaFileManager {
         }
 
         return scacchiera.toString();
-
     }
 
     public static String leggiScacchiera(int mossa, boolean info) {
@@ -64,5 +55,16 @@ public class PartitaFileManager {
 
     public static String leggiScacchiera(int mossa) {
         return leggiScacchiera(percorsoFile, mossa, false);
+    }
+
+    public static void svuotaFile(String percorso) {
+        try (BufferedWriter writer = new BufferedWriter(new FileWriter(percorso))) {
+            writer.write("");
+        }
+        catch (IOException _) {}
+    }
+
+    public static void svuotaFile() {
+        svuotaFile(percorsoFile);
     }
 }

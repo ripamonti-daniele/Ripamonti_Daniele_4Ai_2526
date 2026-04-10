@@ -6,12 +6,13 @@ import java.util.List;
 
 public class Scacchiera {
     public static final int DIMENSIONE = Pedina.DIMENSIONE_SCACCHIERA;
-    private final Pedina[][] caselle;
+    private Pedina[][] caselle;
     private Color turno;
     private int mosse;
     private int mosseNeutre;
     private List<int[]> mosseValide;
     private int[] casellaSelezionata;
+    private int[] casellaSelezionataSimulazione;
     private static final String SEP = ";";
     private boolean autoCambioTurno;
 
@@ -464,6 +465,28 @@ public class Scacchiera {
         else turno = Color.white;
     }
 
+    public List<int[]> simulaSelezionePedina(Pedina[][] caselle, int[] pos, Color turno) {
+        Pedina[][] temp1 = this.caselle;
+        int[] temp2 = casellaSelezionata;
+        this.caselle = caselle;
+        List<int[]> mosse = selezionaPedina(caselle[pos[0]][pos[1]], turno);
+        casellaSelezionataSimulazione = casellaSelezionata;
+        this.caselle = temp1;
+        casellaSelezionata = temp2;
+        return mosse;
+    }
+
+    public boolean simulaSpostamento(Pedina[][] caselle, int[] pos) {
+        Pedina[][] temp1 = this.caselle;
+        int[] temp2 = casellaSelezionata;
+        this.caselle = caselle;
+        boolean statoMossa = muoviPedina(pos);
+        casellaSelezionataSimulazione = casellaSelezionata;
+        this.caselle = temp1;
+        casellaSelezionata = temp2;
+        return statoMossa;
+    }
+
     // --- condizioni di vittoria / pareggio ---
     
     public StatoPartita getStatoPartita(Color turno) {
@@ -501,6 +524,14 @@ public class Scacchiera {
 
     public StatoPartita getStatoPartita() {
         return getStatoPartita(turno);
+    }
+
+    public StatoPartita simulaStatoPartita(Pedina[][] caselle, Color turno) {
+        Pedina[][] temp = this.caselle;
+        this.caselle = caselle;
+        StatoPartita statoPartita = getStatoPartita(turno);
+        this.caselle = temp;
+        return statoPartita;
     }
 
     public int getMateriale(Color c) {

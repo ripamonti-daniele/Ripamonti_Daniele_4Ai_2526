@@ -26,6 +26,7 @@ public class GestoreGrafico {
     private long ultimoClic;
     private static final long SOGLIA_MS = 250;
     private boolean aggiuntoASchermo;
+    private Bot bot;
 
     private final JPanel panelInfo;
     private final JButton btnGioca;
@@ -69,6 +70,7 @@ public class GestoreGrafico {
         numeroToLettera = Map.of(1, "A", 2, "B", 3, "C", 4, "D", 5, "E", 6, "F", 7, "G", 8, "H");
         ultimoClic = 0;
         aggiuntoASchermo = false;
+        bot = null;
         idUtilizzati = new ArrayList<>();
         casellaSelezionata = null;
         casellaPosIniziale = null;
@@ -156,6 +158,28 @@ public class GestoreGrafico {
         });
 
         btnTimer.addActionListener(_ -> new DialogTimer(timerBianco, timerNero, lunghezzaCasella));
+
+        btnBotBianco.addActionListener(_ -> {
+            if (bot == null) {
+                bot = new Bot(scacchiera, Color.white);
+                btnBotBianco.setText("<html><div style='text-align:center;'>Bot<br>On</div></html>");
+            }
+            else {
+                bot = null;
+                btnBotBianco.setText("<html><div style='text-align:center;'>Bot<br>Off</div></html>");
+            }
+        });
+
+        btnBotNero.addActionListener(_ -> {
+            if (bot == null) {
+                bot = new Bot(scacchiera, Color.black);
+                btnBotNero.setText("<html><div style='text-align:center;'>Bot<br>On</div></html>");
+            }
+            else {
+                bot = null;
+                btnBotNero.setText("<html><div style='text-align:center;'>Bot<br>Off</div></html>");
+            }
+        });
     }
 
     public GestoreGrafico(Scacchiera scacchiera, int lunghezzaScacchiera, Color sfondo, Color caselleChiare, Color caselleScure) {
@@ -379,6 +403,7 @@ public class GestoreGrafico {
                 else {
                     casellaPosFinale = casellePanel[y][x].getId();
                     casellaPosIniziale = idCasellaSelOld;
+                    mossaBot();
                     aggiornaInfoScacchiera();
                 }
 
@@ -427,6 +452,12 @@ public class GestoreGrafico {
                 aggiornaInfoScacchiera();
             }
         }
+    }
+
+    private void mossaBot() {
+        if (bot == null) return;
+        if (scacchiera.getTurno().equals(bot.getColore())) bot.muovi();
+        else bot.mossaAvversario(scacchiera.getCaselle());
     }
 
     private void setListenerPromozione(int i) {

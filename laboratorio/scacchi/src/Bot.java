@@ -24,7 +24,6 @@ public class Bot {
             numeroMossa = mosse;
             trovaVantaggio();
             this.moltiplicatore = moltiplicatore;
-            creaLayer();
         }
 
         public Nodo(Pedina[][] scacchiera, int[] casellaSelezionata, int[] mossa, int moltiplicatore) {
@@ -91,17 +90,23 @@ public class Bot {
         public void creaLayer() {
             if (statoPartita != StatoPartita.IN_CORSO) return;
             if (numeroMossa - scacchiera.getMosse() > 5) return;
+
+            List<Nodo> nuovi = new ArrayList<>();
+
             for (int i = 0; i < 8; i++) {
                 for (int j = 0; j < 8; j++) {
                     Pedina[][] copia = copiaCaselle();
-                    for (int[] mossa : scacchiera.simulaSelezionePedina(caselle, new int[]{i, j}, scacchiera.getTurno())) {
+                    if (copia[i][j] == null || !copia[i][j].getColore().equals(colore)) continue;
+                    List<int[]> mosse = scacchiera.simulaSelezionePedina(caselle, new int[]{i, j}, colore);
+                    if (mosse == null) continue;
+                    for (int[] mossa : mosse) {
                         if (scacchiera.simulaSpostamento(copia, mossa)) {
-
-                            sottoNodi.add(new Nodo(copia, new int[]{i, j}, mossa, moltiplicatore * (-1)));
+                            nuovi.add(new Nodo(copia, new int[]{i, j}, mossa, moltiplicatore * (-1)));
                         }
                     }
                 }
             }
+            sottoNodi.addAll(nuovi);
         }
 
         public Pedina[][] getCaselle() {
@@ -116,9 +121,14 @@ public class Bot {
     public Bot(Scacchiera scacchiera, Color colore) {
         if (scacchiera == null) throw new IllegalArgumentException("La scacchiera non può essere null");
         this.scacchiera = scacchiera;
+        this.colore = colore;
         Nodo.mosse = scacchiera.getMosse() - 1;
         root = new Nodo(scacchiera.getCaselle(), null, null, 1);
-        this.colore = colore;
+        root.creaLayer();
+    }
+
+    public Color getColore() {
+        return colore;
     }
 
     public void muovi() {
@@ -134,6 +144,7 @@ public class Bot {
         scacchiera.selezionaPedina(scelta.casellaSelezionata);
         scacchiera.muoviPedina(scelta.mossa);
         root = scelta;
+        root.creaLayer();
     }
 
     public void mossaAvversario(Pedina[][] caselle) {

@@ -480,8 +480,8 @@ public class Scacchiera {
         Pedina[][] temp1 = this.caselle;
         int[] temp2 = casellaSelezionata;
         this.caselle = caselle;
+        casellaSelezionata = casellaSelezionataSimulazione;
         boolean statoMossa = muoviPedina(pos);
-        casellaSelezionataSimulazione = casellaSelezionata;
         this.caselle = temp1;
         casellaSelezionata = temp2;
         return statoMossa;

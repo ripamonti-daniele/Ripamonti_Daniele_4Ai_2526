@@ -160,24 +160,48 @@ public class GestoreGrafico {
         btnTimer.addActionListener(_ -> new DialogTimer(timerBianco, timerNero, lunghezzaCasella));
 
         btnBotBianco.addActionListener(_ -> {
-            if (bot == null) {
+            if (bot == null || !bot.getColore().equals(Color.white)) {
+                if (bot != null) {
+                    nomeNero.setText("Giocatore 2");
+                    btnBotNero.setText("<html><div style='text-align:center;'>Bot<br>Off</div></html>");
+                }
                 bot = new Bot(scacchiera, Color.white);
                 btnBotBianco.setText("<html><div style='text-align:center;'>Bot<br>On</div></html>");
+                nomeBianco.setText("Bot bianco");
+                btnRotazioneScacchiera.setText("<html><div style='text-align:center;'>Ruota<br>Off</div></html>");
+                btnRotazioneScacchiera.setEnabled(false);
+                rotazioneScacchiera = false;
             }
             else {
                 bot = null;
                 btnBotBianco.setText("<html><div style='text-align:center;'>Bot<br>Off</div></html>");
+                nomeBianco.setText("Giocatore 1");
+                btnRotazioneScacchiera.setText("<html><div style='text-align:center;'>Ruota<br>On</div></html>");
+                btnRotazioneScacchiera.setEnabled(true);
+                rotazioneScacchiera = true;
             }
         });
 
         btnBotNero.addActionListener(_ -> {
-            if (bot == null) {
+            if (bot == null || !bot.getColore().equals(Color.black)) {
+                if (bot != null) {
+                    nomeBianco.setText("Giocatore 1");
+                    btnBotBianco.setText("<html><div style='text-align:center;'>Bot<br>Off</div></html>");
+                }
                 bot = new Bot(scacchiera, Color.black);
                 btnBotNero.setText("<html><div style='text-align:center;'>Bot<br>On</div></html>");
+                nomeNero.setText("Bot nero");
+                btnRotazioneScacchiera.setText("<html><div style='text-align:center;'>Ruota<br>Off</div></html>");
+                btnRotazioneScacchiera.setEnabled(false);
+                rotazioneScacchiera = false;
             }
             else {
                 bot = null;
                 btnBotNero.setText("<html><div style='text-align:center;'>Bot<br>Off</div></html>");
+                nomeNero.setText("Giocatore 2");
+                btnRotazioneScacchiera.setText("<html><div style='text-align:center;'>Ruota<br>On</div></html>");
+                btnRotazioneScacchiera.setEnabled(true);
+                rotazioneScacchiera = true;
             }
         });
     }
@@ -259,7 +283,9 @@ public class GestoreGrafico {
     private void gioca() {
         scacchiera.reset();
         aggiornaScacchiera(scacchiera.getStringaScacchiera());
-        ruotaScacchiera(scacchiera.getTurno(), true);
+        if (bot != null && bot.getColore().equals(Color.white)) ruotaScacchiera(Color.black, true);
+        else if (bot != null && bot.getColore().equals(Color.black)) ruotaScacchiera(Color.white, true);
+        else ruotaScacchiera(scacchiera.getTurno(), true);
         casellaPosIniziale = null;
         casellaPosFinale = null;
         disegna();
@@ -291,6 +317,14 @@ public class GestoreGrafico {
         timerNero.reset();
         timerBianco.start();
         aggiornaLabelMateriale();
+
+        if (bot != null) {
+            mossaBot();
+            if (bot.getColore().equals(Color.white)) {
+                aggiornaScacchiera(scacchiera.getStringaScacchiera());
+                aggiornaInfoScacchiera();
+            }
+        }
     }
 
     private void finePartita() {
@@ -352,6 +386,8 @@ public class GestoreGrafico {
                 return;
             }
             ultimoClic = ora;
+
+            if (bot != null && bot.getColore().equals(scacchiera.getTurno())) return;
 
             if (!promozione && partitaInCorso && mossaMostrata == scacchiera.getMosse()) {
                 //se clicco su una casella già selezionata la deseleziono

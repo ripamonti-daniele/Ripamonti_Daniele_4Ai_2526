@@ -9,19 +9,20 @@ public class Bot {
         private List<Nodo> sottoNodi;
         private int vantaggio;
         private StatoPartita statoPartita;
-        private final int moltiplicatore;
+        private final Color turno;
+        private final int profondita;
         private int[] casellaSelezionata;
         private int[] mossa;
 
-        public Nodo(Pedina[][] scacchiera, int[] casellaSelezionata, int[] mossa, int moltiplicatore, int profondita) {
+        public Nodo(Pedina[][] scacchiera, int[] casellaSelezionata, int[] mossa, Color turno, int profondita) {
             if (scacchiera == null) throw new IllegalArgumentException("La scacchiera non può essere null");
             this.caselle = scacchiera;
             this.sottoNodi = new ArrayList<>();
-            this.moltiplicatore = moltiplicatore;
+            this.turno = turno;
             this.mossa = mossa;
             this.casellaSelezionata = casellaSelezionata;
+            this.profondita = profondita;
             trovaVantaggio();
-            creaLayer(profondita);
         }
 
         private void trovaVantaggio() {
@@ -32,12 +33,12 @@ public class Bot {
                     else vantaggio -= p.getMateriale();
                 }
             }
-            vantaggio *= moltiplicatore;
-            statoPartita = scacchiera.simulaStatoPartita(caselle, scacchiera.getTurno());
+            if (!colore.equals(turno)) vantaggio *= -1;
+            statoPartita = scacchiera.simulaStatoPartita(caselle, turno);
             if (statoPartita == StatoPartita.PROMOZIONE_IN_SOSPESO) {
-                aggiungiNodo(new Nodo(pedinePromosse(2), mossa, casellaSelezionata, moltiplicatore, 0), this);
-                aggiungiNodo(new Nodo(pedinePromosse(3), mossa, casellaSelezionata, moltiplicatore, 0), this);
-                aggiungiNodo(new Nodo(pedinePromosse(4), mossa, casellaSelezionata, moltiplicatore, 0), this);
+                aggiungiNodo(new Nodo(pedinePromosse(2), mossa, casellaSelezionata, turno, 0), this);
+                aggiungiNodo(new Nodo(pedinePromosse(3), mossa, casellaSelezionata, turno, 0), this);
+                aggiungiNodo(new Nodo(pedinePromosse(4), mossa, casellaSelezionata, turno, 0), this);
                 caselle = pedinePromosse(1);
             }
         }
@@ -83,30 +84,28 @@ public class Bot {
             if (statoPartita != StatoPartita.IN_CORSO) return;
             if (profondita <= 0) return;
 
-            Color coloreTurno;
-            if (moltiplicatore == 1) coloreTurno = colore;
-            else if (colore.equals(Color.white)) coloreTurno = Color.black;
-            else coloreTurno = Color.white;
-
             List<Nodo> nuovi = new ArrayList<>();
+            Color prossimoTurno = Color.white;
+            if (prossimoTurno.equals(turno)) prossimoTurno = Color.black;
 
             for (int i = 0; i < 8; i++) {
                 for (int j = 0; j < 8; j++) {
-                    if (caselle[i][j] == null || !caselle[i][j].getColore().equals(coloreTurno)) continue;
+                    if (caselle[i][j] == null || !caselle[i][j].getColore().equals(turno)) continue;
                     int[] casellaSelezionata = new int[]{i, j};
-                    List<int[]> mosse = scacchiera.simulaSelezionePedina(caselle, casellaSelezionata, coloreTurno);
+                    List<int[]> mosse = scacchiera.simulaSelezionePedina(caselle, casellaSelezionata, turno);
                     if (mosse == null) continue;
                     for (int[] mossa : mosse) {
                         Pedina[][] copia = copiaCaselle();
                         if (scacchiera.simulaSpostamento(copia, mosse, casellaSelezionata, mossa)) {
-                            nuovi.add(new Nodo(copia, new int[]{i, j}, mossa, moltiplicatore * (-1), profondita - 1));
+                            nuovi.add(new Nodo(copia, new int[]{i, j}, mossa, prossimoTurno, profondita - 1));
+                            nuovi.getLast().creaLayer(profondita - 1);
                         }
                     }
                 }
             }
             sottoNodi.addAll(nuovi);
-            System.out.println("aa" + sottoNodi.size());
-            System.out.println("---------------------");
+//            System.out.println("aa" + sottoNodi.size());
+//            System.out.println("---------------------");
         }
 
         public Pedina[][] getCaselle() {
@@ -123,8 +122,8 @@ public class Bot {
         if (scacchiera == null) throw new IllegalArgumentException("La scacchiera non può essere null");
         this.scacchiera = scacchiera;
         this.colore = colore;
-        root = new Nodo(scacchiera.getCaselle(), null, null, 1, PROFONDITA);
-//        root.creaLayer();
+        root = new Nodo(scacchiera.getCaselle(), null, null, colore, PROFONDITA);
+        root.creaLayer(PROFONDITA);
     }
 
     public Color getColore() {
@@ -148,23 +147,48 @@ public class Bot {
         root.creaLayer(PROFONDITA);
     }
 
-    public void mossaAvversario(Pedina[][] caselle) {
+//    public void mossaAvversario(Pedina[][] caselle) {
+//        System.out.println("sottoNodi disponibili: " + root.sottoNodi.size());
+//        for (Nodo n : root.sottoNodi) {
+//            boolean uguale = true;
+//            for (int i = 0; i < 8; i++) {
+//                for (int j = 0; j < 8; j++) {
+//                    Pedina a = caselle[i][j];
+//                    Pedina b = n.caselle[i][j];
+//                    if (a == null && b == null) continue;
+//                    if (a == null || b == null || !a.getClass().equals(b.getClass()) || !a.getColore().equals(b.getColore())) {
+//                        uguale = false;
+//                        break;
+//                    }
+//                }
+//                if (!uguale) break;
+//            }
+//            if (uguale) {
+//                System.out.println("tartora");
+//                root = n;
+//                root.creaLayer(PROFONDITA);
+//                break;
+//            }
+//            else System.out.println("doc");
+//        }
+//    }
+
+    public void mossaAvversario(int[] casellaSelezionata, int[] mossa) {
         for (Nodo n : root.sottoNodi) {
-            boolean uguale = true;
-            for (int i = 0; i < 8; i++) {
-                for (int j = 0; j < 8; j++) {
-                    if (caselle[i][j] != n.caselle[i][j]) {
-                        uguale = false;
-                        break;
-                    }
-                }
-                if (!uguale) break;
-            }
-            if (uguale) {
+            System.out.println("confronto: n.casellaSelezionata=" + java.util.Arrays.toString(n.casellaSelezionata) + " n.mossa=" + java.util.Arrays.toString(n.mossa));
+            if (n.casellaSelezionata[0] == casellaSelezionata[0]
+                    && n.casellaSelezionata[1] == casellaSelezionata[1]
+                    && n.mossa[0] == mossa[0]
+                    && n.mossa[1] == mossa[1]) {
+                System.out.println("nodo trovato");
                 root = n;
-//                root.creaLayer();
-                break;
+                root.creaLayer(PROFONDITA);
+                return;
             }
         }
+        System.out.println("nodo NON trovato, ricalcolo");
+        System.out.println("cercavo: casellaSelezionata=" + java.util.Arrays.toString(casellaSelezionata) + " mossa=" + java.util.Arrays.toString(mossa));
+        root = new Nodo(scacchiera.getCaselle(), null, null, colore, PROFONDITA);
+        root.creaLayer(PROFONDITA);
     }
 }

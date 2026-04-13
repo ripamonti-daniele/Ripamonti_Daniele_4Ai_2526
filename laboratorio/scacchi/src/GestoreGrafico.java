@@ -170,15 +170,13 @@ public class GestoreGrafico {
                 nomeBianco.setText("Bot bianco");
                 btnRotazioneScacchiera.setText("<html><div style='text-align:center;'>Ruota<br>Off</div></html>");
                 btnRotazioneScacchiera.setEnabled(false);
-                rotazioneScacchiera = false;
             }
             else {
                 bot = null;
                 btnBotBianco.setText("<html><div style='text-align:center;'>Bot<br>Off</div></html>");
                 nomeBianco.setText("Giocatore 1");
-                btnRotazioneScacchiera.setText("<html><div style='text-align:center;'>Ruota<br>On</div></html>");
+                if (rotazioneScacchiera) btnRotazioneScacchiera.setText("<html><div style='text-align:center;'>Ruota<br>On</div></html>");
                 btnRotazioneScacchiera.setEnabled(true);
-                rotazioneScacchiera = true;
             }
         });
 
@@ -193,15 +191,13 @@ public class GestoreGrafico {
                 nomeNero.setText("Bot nero");
                 btnRotazioneScacchiera.setText("<html><div style='text-align:center;'>Ruota<br>Off</div></html>");
                 btnRotazioneScacchiera.setEnabled(false);
-                rotazioneScacchiera = false;
             }
             else {
                 bot = null;
                 btnBotNero.setText("<html><div style='text-align:center;'>Bot<br>Off</div></html>");
                 nomeNero.setText("Giocatore 2");
-                btnRotazioneScacchiera.setText("<html><div style='text-align:center;'>Ruota<br>On</div></html>");
+                if (rotazioneScacchiera) btnRotazioneScacchiera.setText("<html><div style='text-align:center;'>Ruota<br>On</div></html>");
                 btnRotazioneScacchiera.setEnabled(true);
-                rotazioneScacchiera = true;
             }
         });
     }
@@ -319,7 +315,7 @@ public class GestoreGrafico {
         aggiornaLabelMateriale();
 
         if (bot != null) {
-            mossaBot();
+            mossaBot(null, null, scacchiera.getTurno());
             if (bot.getColore().equals(Color.white)) {
                 aggiornaScacchiera(scacchiera.getStringaScacchiera());
                 aggiornaInfoScacchiera();
@@ -399,7 +395,11 @@ public class GestoreGrafico {
                     return;
                 }
 
+                System.out.println("listener chiamato, turno=" + scacchiera.getTurno());
+                Color turno = scacchiera.getTurno();
+
                 int[] pos = new int[]{y, x};
+                int[] cs = scacchiera.getCasellaSelezionata();
                 Pedina p = scacchiera.getPedina(pos);
                 String idCasellaSelOld = casellaSelezionata;
 
@@ -439,7 +439,7 @@ public class GestoreGrafico {
                 else {
                     casellaPosFinale = casellePanel[y][x].getId();
                     casellaPosIniziale = idCasellaSelOld;
-                    mossaBot();
+                    mossaBot(cs, pos, turno);
                     aggiornaInfoScacchiera();
                 }
 
@@ -490,10 +490,12 @@ public class GestoreGrafico {
         }
     }
 
-    private void mossaBot() {
+    private void mossaBot(int[] cs, int[] mossa, Color turno) {
         if (bot == null) return;
-        if (scacchiera.getTurno().equals(bot.getColore())) bot.muovi();
-        else bot.mossaAvversario(scacchiera.getCaselle());
+        System.out.println("mossaBot chiamato, turnoAllaChiamata=" + turno + " bot.colore=" + bot.getColore());
+        System.out.println("cs=" + java.util.Arrays.toString(cs) + " mossa=" + java.util.Arrays.toString(mossa));
+        if (turno.equals(bot.getColore())) bot.muovi();
+        else bot.mossaAvversario(cs, mossa);
     }
 
     private void setListenerPromozione(int i) {
@@ -601,7 +603,7 @@ public class GestoreGrafico {
     private void ruotaScacchiera(Color c, boolean rotazioneObbligatoria) {
         if (c == null) throw new IllegalArgumentException("Il colore non può essere null");
         if (!c.equals(Color.white) && !c.equals(Color.black)) throw new IllegalArgumentException("Il colore può essere solo bianco o nero");
-        if (!(rotazioneObbligatoria || rotazioneScacchiera)) return;
+        if (!(rotazioneObbligatoria || rotazioneScacchiera) || bot != null && !rotazioneObbligatoria) return;
         gestisciGrafica = true;
         for (int i = 0; i < DIMENSIONE; i++) {
             for (int j = 0; j < DIMENSIONE; j++) {

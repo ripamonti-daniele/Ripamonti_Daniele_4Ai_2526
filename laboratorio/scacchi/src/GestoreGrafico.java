@@ -16,7 +16,7 @@ public class GestoreGrafico {
     private int mossaMostrata;
     private boolean rotazioneScacchiera;
     private boolean promozione;
-    private int[] posPromozione;
+    private int[][] posPromozione;
     public final int lunghezzaScacchiera;
     public final int lunghezzaCasella;
     public static final int DIMENSIONE = Scacchiera.DIMENSIONE;
@@ -26,6 +26,7 @@ public class GestoreGrafico {
     private long ultimoClic;
     private static final long SOGLIA_MS = 250;
     private boolean aggiuntoASchermo;
+    private Color coloreBot;
     private Bot bot;
 
     private final JPanel panelInfo;
@@ -70,6 +71,7 @@ public class GestoreGrafico {
         numeroToLettera = Map.of(1, "A", 2, "B", 3, "C", 4, "D", 5, "E", 6, "F", 7, "G", 8, "H");
         ultimoClic = 0;
         aggiuntoASchermo = false;
+        coloreBot = null;
         bot = null;
         idUtilizzati = new ArrayList<>();
         casellaSelezionata = null;
@@ -160,18 +162,19 @@ public class GestoreGrafico {
         btnTimer.addActionListener(_ -> new DialogTimer(timerBianco, timerNero, lunghezzaCasella));
 
         btnBotBianco.addActionListener(_ -> {
-            if (bot == null || !bot.getColore().equals(Color.white)) {
-                if (bot != null) {
+            if (!Color.white.equals(coloreBot)) {
+                if (coloreBot != null) {
                     nomeNero.setText("Giocatore 2");
                     btnBotNero.setText("<html><div style='text-align:center;'>Bot<br>Off</div></html>");
                 }
-                bot = new Bot(scacchiera, Color.white);
+                coloreBot = Color.white;
                 btnBotBianco.setText("<html><div style='text-align:center;'>Bot<br>On</div></html>");
                 nomeBianco.setText("Bot bianco");
                 btnRotazioneScacchiera.setText("<html><div style='text-align:center;'>Ruota<br>Off</div></html>");
                 btnRotazioneScacchiera.setEnabled(false);
             }
             else {
+                coloreBot = null;
                 bot = null;
                 btnBotBianco.setText("<html><div style='text-align:center;'>Bot<br>Off</div></html>");
                 nomeBianco.setText("Giocatore 1");
@@ -181,18 +184,19 @@ public class GestoreGrafico {
         });
 
         btnBotNero.addActionListener(_ -> {
-            if (bot == null || !bot.getColore().equals(Color.black)) {
-                if (bot != null) {
+            if (!Color.black.equals(coloreBot)) {
+                if (coloreBot != null) {
                     nomeBianco.setText("Giocatore 1");
                     btnBotBianco.setText("<html><div style='text-align:center;'>Bot<br>Off</div></html>");
                 }
-                bot = new Bot(scacchiera, Color.black);
+                coloreBot = Color.black;
                 btnBotNero.setText("<html><div style='text-align:center;'>Bot<br>On</div></html>");
                 nomeNero.setText("Bot nero");
                 btnRotazioneScacchiera.setText("<html><div style='text-align:center;'>Ruota<br>Off</div></html>");
                 btnRotazioneScacchiera.setEnabled(false);
             }
             else {
+                coloreBot = null;
                 bot = null;
                 btnBotNero.setText("<html><div style='text-align:center;'>Bot<br>Off</div></html>");
                 nomeNero.setText("Giocatore 2");
@@ -279,8 +283,8 @@ public class GestoreGrafico {
     private void gioca() {
         scacchiera.reset();
         aggiornaScacchiera(scacchiera.getStringaScacchiera());
-        if (bot != null && bot.getColore().equals(Color.white)) ruotaScacchiera(Color.black, true);
-        else if (bot != null && bot.getColore().equals(Color.black)) ruotaScacchiera(Color.white, true);
+        if (Color.white.equals(coloreBot)) ruotaScacchiera(Color.black, true);
+        else if (Color.black.equals(coloreBot)) ruotaScacchiera(Color.white, true);
         else ruotaScacchiera(scacchiera.getTurno(), true);
         casellaPosIniziale = null;
         casellaPosFinale = null;
@@ -314,7 +318,8 @@ public class GestoreGrafico {
         timerBianco.start();
         aggiornaLabelMateriale();
 
-        if (bot != null && bot.getColore().equals(Color.white)) {
+        if (Color.white.equals(coloreBot)) {
+            bot = new Bot(scacchiera, coloreBot);
             bot.muovi();
             aggiornaScacchiera(scacchiera.getStringaScacchiera());
             aggiornaInfoScacchiera();
@@ -427,8 +432,8 @@ public class GestoreGrafico {
                     casellaPosFinale = casellePanel[y][x].getId();
                     casellaPosIniziale = idCasellaSelOld;
                     promozione = true;
-                    posPromozione = pos;
-                    setImgCasellePromozione(scacchiera.getPedina(posPromozione).getColore());
+                    posPromozione = new int[][]{cs, pos};
+                    setImgCasellePromozione(scacchiera.getPedina(pos).getColore());
                     aggiornaBtnSpostamento();
                 }
 
@@ -436,7 +441,11 @@ public class GestoreGrafico {
                 else {
                     casellaPosFinale = casellePanel[y][x].getId();
                     casellaPosIniziale = idCasellaSelOld;
-                    mossaBot(cs, pos);
+                    if (bot == null && Color.black.equals(coloreBot)) {
+                        bot = new Bot(scacchiera, coloreBot);
+                        bot.muovi();
+                    }
+                    else mossaBot(cs, pos);
                     aggiornaInfoScacchiera();
                 }
 
@@ -487,16 +496,11 @@ public class GestoreGrafico {
         }
     }
 
-    private void mossaBot(int[] cs, int[] mossa) {
-        if (bot == null) return;
-        bot.mossaAvversario(cs, mossa);
-        bot.muovi();
-    }
-
     private void setListenerPromozione(int i) {
         casellePromozione[i].setListener(() -> {
             if (promozione && mossaMostrata == scacchiera.getMosse()) {
-                scacchiera.promuoviPedone(posPromozione, i + 1);
+                scacchiera.promuoviPedone(posPromozione[1], i + 1);
+                mossaBot(posPromozione[0], posPromozione[1]);
                 promozione = false;
                 posPromozione = null;
                 for (Casella c : casellePromozione) c.rimuoviImg();
@@ -507,6 +511,12 @@ public class GestoreGrafico {
                 disegna();
             }
         });
+    }
+
+    private void mossaBot(int[] cs, int[] mossa) {
+        if (bot == null) return;
+        bot.mossaAvversario(cs, mossa);
+        bot.muovi();
     }
 
     private void setListenerTimer(TimerGrafico t) {

@@ -33,6 +33,7 @@ public class Bot {
             }
             if (!colore.equals(turno)) vantaggio *= -1;
             statoPartita = scacchiera.simulaStatoPartita(caselle, turno);
+            //da sistemare
             if (statoPartita == StatoPartita.PROMOZIONE_IN_SOSPESO) {
                 aggiungiNodo(new Nodo(pedinePromosse(2), mossa, casellaSelezionata, turno), this);
                 aggiungiNodo(new Nodo(pedinePromosse(3), mossa, casellaSelezionata, turno), this);
@@ -99,6 +100,17 @@ public class Bot {
                             if (scacchiera.simulaSpostamento(copia, mosse, casellaSelezionata, mossa)) {
                                 Nodo n = new Nodo(copia, new int[]{i, j}, mossa, prossimoTurno);
                                 sottoNodi.add(n);
+//                                if (profondita == 3) {
+//                                    for (Pedina[] riga : n.caselle) {
+//                                        for (Pedina p : riga) {
+//                                            if (p == null) System.out.print("n");
+//                                            else System.out.print(p.getClass().getSimpleName().charAt(0));
+//                                            System.out.print("|");
+//                                        }
+//                                        System.out.println();
+//                                    }
+//                                    System.out.println("-----------------------------------");
+//                                }
                                 n.creaLayer(profondita - 1);
                             }
                         }
@@ -141,6 +153,14 @@ public class Bot {
         }
         scacchiera.selezionaPedina(scelta.casellaSelezionata);
         scacchiera.muoviPedina(scelta.mossa);
+//        for (Pedina[] riga : scelta.caselle) {
+//            for (Pedina p : riga) {
+//                if (p == null) System.out.print("n");
+//                else System.out.print(p.getClass().getSimpleName().charAt(0));
+//                System.out.print("|");
+//            }
+//            System.out.println();
+//        }
         System.out.println("nodo mossa trovato");
         root = scelta;
         root.creaLayer(PROFONDITA);
@@ -149,6 +169,15 @@ public class Bot {
     public void mossaAvversario(int[] casellaSelezionata, int[] mossa) {
         for (Nodo n : root.sottoNodi) {
             if (n.casellaSelezionata[0] == casellaSelezionata[0] && n.casellaSelezionata[1] == casellaSelezionata[1] && n.mossa[0] == mossa[0] && n.mossa[1] == mossa[1]) {
+                scacchiera.simulaSpostamento(n.caselle, scacchiera.simulaSelezionePedina(n.caselle, casellaSelezionata, n.turno), casellaSelezionata, mossa);
+//                for (Pedina[] riga : n.caselle) {
+//                    for (Pedina p : riga) {
+//                        if (p == null) System.out.print("n");
+//                        else System.out.print(p.getClass().getSimpleName().charAt(0));
+//                        System.out.print("|");
+//                    }
+//                    System.out.println();
+//                }
                 System.out.println("nodo avversario trovato");
                 root = n;
                 root.creaLayer(PROFONDITA);

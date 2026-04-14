@@ -314,12 +314,10 @@ public class GestoreGrafico {
         timerBianco.start();
         aggiornaLabelMateriale();
 
-        if (bot != null) {
-            mossaBot(null, null, scacchiera.getTurno());
-            if (bot.getColore().equals(Color.white)) {
-                aggiornaScacchiera(scacchiera.getStringaScacchiera());
-                aggiornaInfoScacchiera();
-            }
+        if (bot != null && bot.getColore().equals(Color.white)) {
+            bot.muovi();
+            aggiornaScacchiera(scacchiera.getStringaScacchiera());
+            aggiornaInfoScacchiera();
         }
     }
 
@@ -395,7 +393,6 @@ public class GestoreGrafico {
                     return;
                 }
 
-                System.out.println("listener chiamato, turno=" + scacchiera.getTurno());
                 Color turno = scacchiera.getTurno();
 
                 int[] pos = new int[]{y, x};
@@ -439,7 +436,7 @@ public class GestoreGrafico {
                 else {
                     casellaPosFinale = casellePanel[y][x].getId();
                     casellaPosIniziale = idCasellaSelOld;
-                    mossaBot(cs, pos, turno);
+                    mossaBot(cs, pos);
                     aggiornaInfoScacchiera();
                 }
 
@@ -490,12 +487,10 @@ public class GestoreGrafico {
         }
     }
 
-    private void mossaBot(int[] cs, int[] mossa, Color turno) {
+    private void mossaBot(int[] cs, int[] mossa) {
         if (bot == null) return;
-        System.out.println("mossaBot chiamato, turnoAllaChiamata=" + turno + " bot.colore=" + bot.getColore());
-        System.out.println("cs=" + java.util.Arrays.toString(cs) + " mossa=" + java.util.Arrays.toString(mossa));
-        if (turno.equals(bot.getColore())) bot.muovi();
-        else bot.mossaAvversario(cs, mossa);
+        bot.mossaAvversario(cs, mossa);
+        bot.muovi();
     }
 
     private void setListenerPromozione(int i) {

@@ -34,12 +34,12 @@ public class Bot {
             if (!colore.equals(turno)) vantaggio *= -1;
             statoPartita = scacchiera.simulaStatoPartita(caselle, turno);
             //da sistemare
-            if (statoPartita == StatoPartita.PROMOZIONE_IN_SOSPESO) {
-                aggiungiNodo(new Nodo(pedinePromosse(2), mossa, casellaSelezionata, turno), this);
-                aggiungiNodo(new Nodo(pedinePromosse(3), mossa, casellaSelezionata, turno), this);
-                aggiungiNodo(new Nodo(pedinePromosse(4), mossa, casellaSelezionata, turno), this);
-                caselle = pedinePromosse(1);
-            }
+//            if (statoPartita == StatoPartita.PROMOZIONE_IN_SOSPESO) {
+//                aggiungiNodo(new Nodo(pedinePromosse(2), mossa, casellaSelezionata, turno), this);
+//                aggiungiNodo(new Nodo(pedinePromosse(3), mossa, casellaSelezionata, turno), this);
+//                aggiungiNodo(new Nodo(pedinePromosse(4), mossa, casellaSelezionata, turno), this);
+//                caselle = pedinePromosse(1);
+//            }
         }
 
         private Pedina[][] pedinePromosse(int tipo) {
@@ -68,7 +68,7 @@ public class Bot {
             else for (Nodo nodo : sottoNodi) nodo.aggiungiNodo(n, padre);
         }
 
-        private Pedina[][] copiaCaselle() {
+        private Pedina[][] copiaCaselle(Pedina[][] caselle) {
             Pedina[][] copia = new Pedina[8][8];
             for (int i = 0; i < 8; i++) {
                 for (int j = 0; j < 8; j++) {
@@ -96,9 +96,17 @@ public class Bot {
                         List<int[]> mosse = scacchiera.simulaSelezionePedina(caselle, casellaSelezionata, turno);
                         if (mosse == null || mosse.isEmpty()) continue;
                         for (int[] mossa : mosse) {
-                            Pedina[][] copia = copiaCaselle();
+                            Pedina[][] copia = copiaCaselle(caselle);
                             if (scacchiera.simulaSpostamento(copia, mosse, casellaSelezionata, mossa)) {
-                                Nodo n = new Nodo(copia, new int[]{i, j}, mossa, prossimoTurno);
+                                Nodo n = new Nodo(copia, casellaSelezionata, mossa, prossimoTurno);
+                                if (n.statoPartita == StatoPartita.PROMOZIONE_IN_SOSPESO) {
+                                    for (int x = 2; x < 5; x++){
+                                        Pedina[][] copiaPromozione = copiaCaselle(copia);
+                                        scacchiera.simulaPromozionePedone(copiaPromozione, mossa, x);
+                                        sottoNodi.add(new Nodo(copiaPromozione, casellaSelezionata, mossa, prossimoTurno));
+                                    }
+                                    scacchiera.simulaPromozionePedone(copia, mossa, 1);
+                                }
                                 sottoNodi.add(n);
 //                                if (profondita == 3) {
 //                                    for (Pedina[] riga : n.caselle) {

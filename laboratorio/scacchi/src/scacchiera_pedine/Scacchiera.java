@@ -496,7 +496,7 @@ public class Scacchiera {
         if (turno == null) throw new IllegalArgumentException("Il turno non può essere un parametro null");
         if (!turno.equals(Color.black) && !turno.equals(Color.white)) throw new IllegalArgumentException("Il colore del turno può essere solo bianco o nero");
 
-        if (promozioneInSospeso() != null) return StatoPartita.PROMOZIONE_IN_SOSPESO;
+        if (promozioneInSospeso(caselle) != null) return StatoPartita.PROMOZIONE_IN_SOSPESO;
 
         //controlla se il giocatore del colore del turno scelto non ha più mosse disponibili
         boolean noMosse = true;

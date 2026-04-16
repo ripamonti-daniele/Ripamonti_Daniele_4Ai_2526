@@ -1,12 +1,11 @@
 package scacchiera_pedine;
 import java.awt.*;
-import java.io.*;
 import java.util.ArrayList;
 import java.util.List;
 
 public class Scacchiera {
     public static final int DIMENSIONE = Pedina.DIMENSIONE_SCACCHIERA;
-    private Pedina[][] caselle;
+    private final Pedina[][] caselle;
     private Color turno;
     private int mosse;
     private int mosseNeutre;
@@ -122,7 +121,7 @@ public class Scacchiera {
 
     // --- calcolo mosse valide ---
 
-    private List<int[]> filtraMossePedone(Pedina[][] caselle, int[] pos, List<int[]> mosseValide) {
+    private static List<int[]> filtraMossePedone(Pedina[][] caselle, int[] pos, List<int[]> mosseValide) {
         if (pos == null || mosseValide == null) throw new IllegalArgumentException("La posizione e le mosse valide non possono essere parametri null");
         if (caselle[pos[0]][pos[1]] == null || !(caselle[pos[0]][pos[1]] instanceof Pedone)) throw new IllegalArgumentException("Puoi fare questi controlli solo sui pedoni");
 
@@ -144,7 +143,7 @@ public class Scacchiera {
         return mosseFiltrate;
     }
 
-    private List<int[]> filtraMosseAlfiere(Pedina[][] caselle, int[] pos, List<int[]> mosseValide) {
+    private static List<int[]> filtraMosseAlfiere(Pedina[][] caselle, int[] pos, List<int[]> mosseValide) {
         if (pos == null || mosseValide == null) throw new IllegalArgumentException("La posizione e le mosse valide non possono essere parametri null");
         if (caselle[pos[0]][pos[1]] == null || !(caselle[pos[0]][pos[1]] instanceof Alfiere || caselle[pos[0]][pos[1]] instanceof Regina)) throw new IllegalArgumentException("Puoi fare questi controlli solo sugli alfieri o sulle regine");
 
@@ -180,7 +179,7 @@ public class Scacchiera {
         return mosseFiltrate;
     }
 
-    private List<int[]> filtraMosseTorre(Pedina[][] caselle, int[] pos, List<int[]> mosseValide) {
+    private static List<int[]> filtraMosseTorre(Pedina[][] caselle, int[] pos, List<int[]> mosseValide) {
         if (pos == null || mosseValide == null) throw new IllegalArgumentException("La posizione e le mosse valide non possono essere parametri null");
         if (caselle[pos[0]][pos[1]] == null || !(caselle[pos[0]][pos[1]] instanceof Torre || caselle[pos[0]][pos[1]] instanceof Regina)) throw new IllegalArgumentException("Puoi fare questi controlli solo sulle torri o sulle regine");
 
@@ -210,7 +209,7 @@ public class Scacchiera {
         return mosseFiltrate;
     }
 
-    private List<int[]> filtraMosseRe(Pedina[][] caselle, int[] pos, List<int[]> mosseValide, boolean controllaScacco) {
+    private static List<int[]> filtraMosseRe(Pedina[][] caselle, int[] pos, List<int[]> mosseValide, boolean controllaScacco) {
         if (pos == null || mosseValide == null) throw new IllegalArgumentException("La posizione e le mosse valide non possono essere parametri null");
         if (caselle[pos[0]][pos[1]] == null || !(caselle[pos[0]][pos[1]] instanceof Re)) throw new IllegalArgumentException("Puoi fare questi controlli solo sul re");
 
@@ -242,14 +241,14 @@ public class Scacchiera {
         return mosseFiltrate;
     }
 
-    private List<int[]> rimuoviMosseStessoColore(Pedina[][] caselle, List<int[]> mosseValide, Color colorePedina) {
+    private static List<int[]> rimuoviMosseStessoColore(Pedina[][] caselle, List<int[]> mosseValide, Color colorePedina) {
         if (colorePedina == null || mosseValide == null) throw new IllegalArgumentException("Il colore e le mosse valide non possono essere parametri null");
         List<int[]> mosseFiltrate = new ArrayList<>();
         for (int[] mossa : mosseValide) if (caselle[mossa[0]][mossa[1]] == null || !caselle[mossa[0]][mossa[1]].getColore().equals(colorePedina)) mosseFiltrate.add(mossa);
         return mosseFiltrate;
     }
 
-    private List<int[]> ottieniMosseFiltrate(Pedina[][] caselle, int[] pos, boolean controllaScacco) {
+    private static List<int[]> ottieniMosseFiltrate(Pedina[][] caselle, int[] pos, boolean controllaScacco) {
         if (pos == null) throw new IllegalArgumentException("La posizione non può essere un parametro null");
         Pedina p = caselle[pos[0]][pos[1]];
         if (p == null) throw new IllegalArgumentException("Non puoi inserire una posizione che corrisponde a null nella scacchiera");
@@ -266,11 +265,11 @@ public class Scacchiera {
         return mosseValide;
     }
 
-    private List<int[]> ottieniMosseFiltrate(Pedina[][] caselle, int[] pos) {
+    private static List<int[]> ottieniMosseFiltrate(Pedina[][] caselle, int[] pos) {
         return ottieniMosseFiltrate(caselle, pos, true);
     }
 
-    private int[] trovaPosRe(Pedina[][] caselle, Color c) {
+    private static int[] trovaPosRe(Pedina[][] caselle, Color c) {
         if (c == null) throw new IllegalArgumentException("Il colore non può essere un parametro null");
         for (Pedina[] riga : caselle) {
             for (Pedina p : riga) {
@@ -280,7 +279,7 @@ public class Scacchiera {
         return null;
     }
 
-    private boolean controllaScaccoRe(Pedina[][] caselle, int[] posRe, Color coloreRe) {
+    private static boolean controllaScaccoRe(Pedina[][] caselle, int[] posRe, Color coloreRe) {
         if (posRe == null) throw new IllegalArgumentException("La posizione del re non può essere un parametro null");
         if (coloreRe == null) {
             //se non viene fornito il colore del re e la casella nella posizione indicata non èun re lancia eccezione, altrimenti prende il colore della casella indicata
@@ -302,16 +301,16 @@ public class Scacchiera {
         return false;
     }
 
-    private boolean controllaScaccoRe(Pedina[][] caselle, Color coloreRe) {
+    private static boolean controllaScaccoRe(Pedina[][] caselle, Color coloreRe) {
         return controllaScaccoRe(caselle, trovaPosRe(caselle, coloreRe), coloreRe);
     }
 
-    private boolean controllaScaccoRe(Pedina[][] caselle, int[] posRe) {
+    private static boolean controllaScaccoRe(Pedina[][] caselle, int[] posRe) {
         if (posRe == null) throw new IllegalArgumentException("La posizione del re non può essere un parametro null");
         return controllaScaccoRe(caselle, posRe, caselle[posRe[0]][posRe[1]].getColore());
     }
 
-    private List<int[]> filtraMosseScacco(Pedina[][] caselle, int[] pos, List<int[]> mosseValide) {
+    private static List<int[]> filtraMosseScacco(Pedina[][] caselle, int[] pos, List<int[]> mosseValide) {
         if (pos == null || mosseValide == null) throw new IllegalArgumentException("La posizione e le mosse valide non possono essere parametri null");
         if (caselle[pos[0]][pos[1]] == null) throw new IllegalArgumentException("La posizione della pedina da controllare non può essere null nella scacchiera");
 
@@ -337,10 +336,20 @@ public class Scacchiera {
 
     // --- gestione gioco utente ---
 
-    private List<int[]> selezionaPedina(Pedina[][] caselle, int[] pos, Color turno) {
+    private static void controlliCaselle(Pedina[][] caselle) {
+        if (caselle == null) throw new IllegalArgumentException("Le caselle non possono essere null");
+        if (caselle.length != 8) throw new IllegalArgumentException("Caselle deve essere un array 8x8");
+        for (Pedina[] riga : caselle) {
+            if (riga == null) throw new IllegalArgumentException("I sotto array di caselle non possono essere null");
+            if (riga.length != 8) throw new IllegalArgumentException("Caselle deve essere un array 8x8");
+        }
+    }
+
+    private static List<int[]> selezionaPedina(Pedina[][] caselle, int[] pos, Color turno) {
+        controlliCaselle(caselle);
         if (turno == null) throw new IllegalArgumentException("Il turno non può essere un parametro null");
         if (!turno.equals(Color.white) && !turno.equals(Color.black)) throw new IllegalArgumentException("Il colore del turno può essere solo bianco o nero");
-        if (promozioneInSospeso() != null) throw new IllegalStateException("Impossibile selezionare una pedina: ci sono dei pedoni in fondo alla scacchiera non promossi");
+        if (promozioneInSospeso(caselle) != null) throw new IllegalStateException("Impossibile selezionare una pedina: ci sono dei pedoni in fondo alla scacchiera non promossi");
         if (pos == null) throw new IllegalArgumentException("La posizione non può essere un parametro null");
         if (pos[0] < 0 || pos[0] >= DIMENSIONE || pos[1] < 0 || pos[1] >= DIMENSIONE) throw new IllegalArgumentException("Posizione non valida");
         Pedina p = caselle[pos[0]][pos[1]];
@@ -379,7 +388,8 @@ public class Scacchiera {
         if (mosseValide != null) mosseValide.clear();
     }
 
-    private boolean muoviPedina(Pedina[][]caselle, List<int[]> mosseValide, int[] casellaSelezionata, int[] pos, boolean mossaSimulata) {
+    private static boolean muoviPedina(Pedina[][]caselle, List<int[]> mosseValide, int[] casellaSelezionata, int[] pos) {
+        controlliCaselle(caselle);
         if (pos == null) throw new IllegalArgumentException("La posizione non può essere un parametro null");
         if (pos[0] < 0 || pos[0] >= DIMENSIONE || pos[1] < 0 || pos[1] >= DIMENSIONE) throw new IllegalArgumentException("Posizione non valida");
         if (mosseValide == null) return false;
@@ -396,11 +406,6 @@ public class Scacchiera {
         if (valido) {
             Pedina p = caselle[casellaSelezionata[0]][casellaSelezionata[1]];
             Color c = p.getColore();
-
-            if (!mossaSimulata) {
-                if (!(mosseNeutre == 0 && c.equals(Color.black))) mosseNeutre++;
-                if (caselle[pos[0]][pos[1]] != null || p instanceof Pedone) mosseNeutre = 0;
-            }
 
             //en passant
             if (p instanceof Pedone && pos[1] != casellaSelezionata[1] && caselle[pos[0]][pos[1]] == null) {
@@ -427,26 +432,37 @@ public class Scacchiera {
             p.muovi(pos);
             caselle[pos[0]][pos[1]] = p;
             caselle[casellaSelezionata[0]][casellaSelezionata[1]] = null;
-
-            //se la mossa inizia una promozione la scacchiera verrà aggiornata solo quando verrà chiamato il metodo promuoviPedone
-            if (!(p instanceof Pedone && (pos[0] == DIMENSIONE - 1 || pos[0] == 0)) && !mossaSimulata) {
-                mosse++;
-                PartitaFileManager.scriviScacchiera(mosse, getStringaScacchiera(true));
-                cambiaTurno();
-            }
         }
         return valido;
     }
 
     public boolean muoviPedina(int[] pos) {
+        if (pos == null) throw new IllegalArgumentException("La posizione non può essere un parametro null");
+        if (pos[0] < 0 || pos[0] >= DIMENSIONE || pos[1] < 0 || pos[1] >= DIMENSIONE) throw new IllegalArgumentException("Posizione non valida");
         if (casellaSelezionata == null || caselle[casellaSelezionata[0]][casellaSelezionata[1]] == null) return false;
-        boolean temp = muoviPedina(caselle, mosseValide, casellaSelezionata, pos, false);
-        if (temp) mosseValide.clear();
+        Pedina pSel = caselle[casellaSelezionata[0]][casellaSelezionata[1]];
+        Pedina pPos = caselle[pos[0]][pos[1]];
+        boolean azzeraMosseNeutre = pPos != null;
+        Color c = pSel.getColore();
+
+        boolean temp = muoviPedina(caselle, mosseValide, casellaSelezionata, pos);
+        if (temp) {
+            if (!(mosseNeutre == 0 && c.equals(Color.black))) mosseNeutre++;
+            if (azzeraMosseNeutre || pSel instanceof Pedone) mosseNeutre = 0;
+            //se la mossa inizia una promozione la scacchiera verrà aggiornata solo quando verrà chiamato il metodo promuoviPedone
+            if (!(pSel instanceof Pedone && (pos[0] == DIMENSIONE - 1 || pos[0] == 0))) {
+                mosse++;
+                PartitaFileManager.scriviScacchiera(mosse, getStringaScacchiera(true));
+                cambiaTurno();
+            }
+            mosseValide.clear();
+        }
         casellaSelezionata = null;
         return temp;
     }
 
-    private Pedina promozioneInSospeso(Pedina[][] caselle) {
+    private static Pedina promozioneInSospeso(Pedina[][] caselle) {
+        controlliCaselle(caselle);
         for (Pedina ped : caselle[0]) if (ped instanceof Pedone) return ped.copy();
         for (Pedina ped : caselle[DIMENSIONE - 1]) if (ped instanceof Pedone) return ped.copy();
         return null;
@@ -456,7 +472,8 @@ public class Scacchiera {
         return promozioneInSospeso(caselle);
     }
 
-    private void promuoviPedone(Pedina[][] caselle, int[] pos, int numeroPedina, boolean mossaSimulata) {
+    private static void promuoviPedone(Pedina[][] caselle, int[] pos, int numeroPedina) {
+        controlliCaselle(caselle);
         if (pos == null) throw new IllegalArgumentException("La posizione non può essere un parametro null");
         if (!((pos[0] == 0 || pos[0] == DIMENSIONE - 1) && caselle[pos[0]][pos[1]] instanceof Pedone)) throw new IllegalArgumentException("La pedina che hai scelto non è un pedone in fondo alla scacchiera");
         Color c = caselle[pos[0]][pos[1]].getColore();
@@ -468,15 +485,14 @@ public class Scacchiera {
             case 4 -> caselle[pos[0]][pos[1]] = new Cavallo(c, pos);
             default -> caselle[pos[0]][pos[1]] = new Regina(c, pos);
         }
-        //aggiorna la scacchiera
-        if (mossaSimulata) return;
-        mosse++;
-        PartitaFileManager.scriviScacchiera(mosse, getStringaScacchiera(true));
-        cambiaTurno();
     }
 
     public void promuoviPedone(int[] pos, int numeroPedina) {
-        promuoviPedone(caselle, pos, numeroPedina, false);
+        promuoviPedone(caselle, pos, numeroPedina);
+        //aggiorna la scacchiera
+        mosse++;
+        PartitaFileManager.scriviScacchiera(mosse, getStringaScacchiera(true));
+        cambiaTurno();
     }
 
     public void promuoviPedone(Pedina p, int numeroPedina) {
@@ -492,7 +508,8 @@ public class Scacchiera {
 
     // --- condizioni di vittoria / pareggio ---
     
-    private StatoPartita getStatoPartita(Pedina[][] caselle, Color turno) {
+    private static StatoPartita getStatoPartita(Pedina[][] caselle, Color turno) {
+        controlliCaselle(caselle);
         if (turno == null) throw new IllegalArgumentException("Il turno non può essere un parametro null");
         if (!turno.equals(Color.black) && !turno.equals(Color.white)) throw new IllegalArgumentException("Il colore del turno può essere solo bianco o nero");
 
@@ -519,21 +536,25 @@ public class Scacchiera {
             }
             return StatoPartita.STALLO;
         }
-        if (materialeInsufficiente(Color.black) && materialeInsufficiente(Color.white)) return StatoPartita.MATERIALE_INSUFFICIENTE;
-        if (mosseNeutre >= 150) return StatoPartita.PAREGGIO_MOSSE_NEUTRE;
-        if (pareggioRipetizioni()) return StatoPartita.PAREGGIO_RIPETIZIONI;
+        if (materialeInsufficiente(caselle, Color.black) && materialeInsufficiente(caselle, Color.white)) return StatoPartita.MATERIALE_INSUFFICIENTE;
         return StatoPartita.IN_CORSO;
     }
 
     public StatoPartita getStatoPartita(Color turno) {
-        return getStatoPartita(caselle, turno);
+        StatoPartita sp = getStatoPartita(caselle, turno);
+        if (sp == StatoPartita.IN_CORSO) {
+            if (mosseNeutre >= 150) return StatoPartita.PAREGGIO_MOSSE_NEUTRE;
+            if (pareggioRipetizioni()) return StatoPartita.PAREGGIO_RIPETIZIONI;
+        }
+        return sp;
     }
 
     public StatoPartita getStatoPartita() {
         return getStatoPartita(turno);
     }
 
-    public int getMateriale(Color c) {
+    private static int getMateriale(Pedina[][] caselle, Color c) {
+        controlliCaselle(caselle);
         if (c == null) throw new IllegalArgumentException("Il colore non può essere un parametro null");
         if (!c.equals(Color.black) && !c.equals(Color.white)) throw new IllegalArgumentException("Il colore del giocatore scelto può essere solo bianco o nero");
         int materiale = 0;
@@ -541,6 +562,10 @@ public class Scacchiera {
             for (Pedina p : riga) if (p != null && p.getColore().equals(c)) materiale += p.getMateriale();
         }
         return materiale;
+    }
+
+    public int getMateriale(Color c) {
+        return getMateriale(caselle, c);
     }
 
     public int getMaterialeMossa(Color c, int mossa) {
@@ -568,6 +593,25 @@ public class Scacchiera {
         return materiale;
     }
 
+    private static boolean materialeInsufficiente(Pedina[][] caselle, Color c) {
+        controlliCaselle(caselle);
+        int materiale = 0;
+        int pedineRimaste = 0;
+        for (Pedina[] riga : caselle) {
+            for (Pedina p : riga) {
+                if (p != null && p.getColore().equals(c) && !(p instanceof Re)) {
+                    pedineRimaste++;
+                    materiale += p.getMateriale();
+                }
+            }
+        }
+        return pedineRimaste == 1 && materiale == 3;
+    }
+
+    public boolean materialeInsufficiente(Color c) {
+        return materialeInsufficiente(caselle, c);
+    }
+
     //se un giocatore oltre al re non ha pedine o ha solo un cavallo o solo un alfiere allora ha materiale insufficiente per vincere
     public boolean materialeInsufficienteMossa(Color c, int mossa) {
         if (c == null) throw new IllegalArgumentException("Il colore non può essere un parametro null");
@@ -589,10 +633,6 @@ public class Scacchiera {
         return false;
     }
 
-    public boolean materialeInsufficiente(Color c) {
-        return materialeInsufficienteMossa(c, mosse);
-    }
-
     //se una mossa del bianco seguita da una mossa del nero è identica per 5 volte allora è automaticamente pareggio
     public boolean pareggioRipetizioni() {
         if (mosse < 17) return false;
@@ -611,8 +651,7 @@ public class Scacchiera {
 
     // --- simulazione per bot ---
 
-
-    public List<int[]> simulaSelezionePedina(Pedina[][] caselle, int[] pos, Color turno) {
+    public static List<int[]> selezionaPedinaCaselle(Pedina[][] caselle, int[] pos, Color turno) {
         List<int[]> mosseValide = selezionaPedina(caselle, pos, turno);
         if (mosseValide == null) return null;
         List<int[]> copia = new ArrayList<>();
@@ -620,16 +659,28 @@ public class Scacchiera {
         return copia;
     }
 
-    public boolean simulaSpostamento(Pedina[][] caselle, List<int[]> mosseValide, int[] casellaSelezionata, int[] pos) {
-        return muoviPedina(caselle, mosseValide, casellaSelezionata, pos, true);
+    public static boolean muoviPedinaCaselle(Pedina[][] caselle, List<int[]> mosseValide, int[] casellaSelezionata, int[] pos) {
+        return muoviPedina(caselle, mosseValide, casellaSelezionata, pos);
     }
 
-    public void simulaPromozionePedone(Pedina[][] caselle, int[] pos, int numeroPedina) {
-        promuoviPedone(caselle, pos, numeroPedina, true);
+    public static void promozionePedoneCaselle(Pedina[][] caselle, int[] pos, int numeroPedina) {
+        promuoviPedone(caselle, pos, numeroPedina);
     }
 
-    public StatoPartita simulaStatoPartita(Pedina[][] caselle, Color turno) {
+    public static StatoPartita statoPartitaCaselle(Pedina[][] caselle, Color turno) {
         return getStatoPartita(caselle, turno);
+    }
+
+    public static Pedina promozioneInSospesoCaselle(Pedina[][] caselle) {
+        return promozioneInSospeso(caselle);
+    }
+
+    public static int getMaterialeCaselle(Pedina[][] caselle, Color c) {
+        return getMateriale(caselle, c);
+    }
+
+    public static boolean materialeInsufficienteCaselle(Pedina[][] caselle, Color c) {
+        return materialeInsufficiente(caselle, c);
     }
 
     // --- scrittura e lettera scacchiera su file ---

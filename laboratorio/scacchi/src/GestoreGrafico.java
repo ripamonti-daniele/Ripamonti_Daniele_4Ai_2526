@@ -318,11 +318,17 @@ public class GestoreGrafico {
         timerBianco.start();
         aggiornaLabelMateriale();
 
-        if (Color.white.equals(coloreBot)) {
-            bot = new Bot(scacchiera, coloreBot);
-            bot.muovi();
-            aggiornaScacchiera(scacchiera.getStringaScacchiera());
-            aggiornaInfoScacchiera();
+        if (coloreBot != null) {
+            bot = new Bot(scacchiera, coloreBot, scacchiera.getTurno());
+            if (Color.white.equals(coloreBot)) {
+                int[][] m = bot.muovi();
+                if (m != null) {
+                    casellaPosIniziale = numeroToLettera.get(m[0][1] + 1) + (DIMENSIONE - m[0][0]);
+                    casellaPosFinale = numeroToLettera.get(m[1][1] + 1) + (DIMENSIONE - m[1][0]);
+                }
+                aggiornaScacchiera(scacchiera.getStringaScacchiera());
+                aggiornaInfoScacchiera();
+            }
         }
     }
 
@@ -398,8 +404,6 @@ public class GestoreGrafico {
                     return;
                 }
 
-                Color turno = scacchiera.getTurno();
-
                 int[] pos = new int[]{y, x};
                 int[] cs = scacchiera.getCasellaSelezionata();
                 Pedina p = scacchiera.getPedina(pos);
@@ -441,11 +445,7 @@ public class GestoreGrafico {
                 else {
                     casellaPosFinale = casellePanel[y][x].getId();
                     casellaPosIniziale = idCasellaSelOld;
-                    if (bot == null && Color.black.equals(coloreBot)) {
-                        bot = new Bot(scacchiera, coloreBot);
-                        bot.muovi();
-                    }
-                    else mossaBot(cs, pos);
+                    mossaBot(cs, pos);
                     aggiornaInfoScacchiera();
                 }
 
@@ -516,7 +516,13 @@ public class GestoreGrafico {
     private void mossaBot(int[] cs, int[] mossa) {
         if (bot == null) return;
         bot.mossaAvversario(cs, mossa);
-        bot.muovi();
+
+        int[][] m = bot.muovi();
+        if (m != null) {
+            casellaPosIniziale = numeroToLettera.get(m[0][1] + 1) + (DIMENSIONE - m[0][0]);
+            casellaPosFinale = numeroToLettera.get(m[1][1] + 1) + (DIMENSIONE - m[1][0]);
+        }
+
     }
 
     private void setListenerTimer(TimerGrafico t) {

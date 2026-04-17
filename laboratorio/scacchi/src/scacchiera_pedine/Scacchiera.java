@@ -593,6 +593,7 @@ public class Scacchiera {
         return materiale;
     }
 
+    //se un giocatore oltre al re non ha pedine o ha solo un cavallo o solo un alfiere allora ha materiale insufficiente per vincere
     private static boolean materialeInsufficiente(Pedina[][] caselle, Color c) {
         controlliCaselle(caselle);
         int materiale = 0;
@@ -605,14 +606,13 @@ public class Scacchiera {
                 }
             }
         }
-        return pedineRimaste == 1 && materiale == 3;
+        return pedineRimaste == 1 && materiale == 3 || pedineRimaste == 0;
     }
 
     public boolean materialeInsufficiente(Color c) {
         return materialeInsufficiente(caselle, c);
     }
 
-    //se un giocatore oltre al re non ha pedine o ha solo un cavallo o solo un alfiere allora ha materiale insufficiente per vincere
     public boolean materialeInsufficienteMossa(Color c, int mossa) {
         if (c == null) throw new IllegalArgumentException("Il colore non può essere un parametro null");
         if (!c.equals(Color.black) && !c.equals(Color.white)) throw new IllegalArgumentException("Il colore del giocatore scelto può essere solo bianco o nero");
@@ -649,7 +649,7 @@ public class Scacchiera {
         return mosseRipetute >= 4;
     }
 
-    // --- simulazione per bot ---
+    // --- metodi con caselle come parametro (per bot) ---
 
     public static List<int[]> selezionaPedinaCaselle(Pedina[][] caselle, int[] pos, Color turno) {
         List<int[]> mosseValide = selezionaPedina(caselle, pos, turno);
@@ -683,9 +683,14 @@ public class Scacchiera {
         return materialeInsufficiente(caselle, c);
     }
 
+    public static String getStringaScacchieraCaselle(Pedina[][] caselle, boolean info) {
+        return getStringaScacchiera(caselle, info);
+    }
+
     // --- scrittura e lettera scacchiera su file ---
 
-    public String getStringaScacchiera(boolean info) {
+    private static String getStringaScacchiera(Pedina[][] caselle, boolean info) {
+        controlliCaselle(caselle);
         StringBuilder scacchiera;
         scacchiera = new StringBuilder();
         for (Pedina[] riga : caselle) {
@@ -728,6 +733,10 @@ public class Scacchiera {
             scacchiera.append(infoRipetizioni);
         }
         return scacchiera.toString();
+    }
+
+    public String getStringaScacchiera(boolean info) {
+        return getStringaScacchiera(caselle, info);
     }
 
     public String getStringaScacchiera() {

@@ -103,6 +103,32 @@ public class Bot {
                 }
             }
         }
+
+        public int minimax(int profondita, boolean massimizza) {
+            if (profondita == 0 || statoPartita != StatoPartita.IN_CORSO) {
+                return vantaggio;
+            }
+
+            int vantaggioTotale = vantaggio;
+
+            if (massimizza) {
+                int max = Integer.MIN_VALUE;
+                for (Nodo figlio : sottoNodi) {
+                    int val = figlio.minimax(profondita - 1, false);
+                    if (val > max) max = val;
+                }
+                vantaggioTotale += max;
+            }
+            else {
+                int min = Integer.MAX_VALUE;
+                for (Nodo figlio : sottoNodi) {
+                    int val = figlio.minimax(profondita - 1, true);
+                    if (val < min) min = val;
+                }
+                vantaggioTotale += min;
+            }
+            return vantaggioTotale;
+        }
     }
 
     private final Scacchiera scacchiera;
@@ -125,16 +151,17 @@ public class Bot {
     public int[][] muovi() {
         if (!scacchiera.getTurno().equals(colore)) throw new IllegalStateException("Il bot non può muovere se non è il suo turno");
         Nodo scelta = null;
+        int maxVal = Integer.MIN_VALUE;
         for (Nodo n : root.sottoNodi) {
             if (n.statoPartita == StatoPartita.VITTORIA_BIANCO && colore == Color.white || n.statoPartita == StatoPartita.VITTORIA_NERO && colore == Color.black) {
                 scelta = n;
                 break;
             }
-            if (scelta == null || n.vantaggio > scelta.vantaggio) scelta = n;
-        }
-        if (scelta == null) {
-            System.out.println("nodo mossa non trovato");
-            return null;
+            int val = n.minimax(PROFONDITA, false);
+            if (val > maxVal) {
+                maxVal = val;
+                scelta = n;
+            }
         }
         scacchiera.selezionaPedina(scelta.casellaSelezionata);
         scacchiera.muoviPedina(scelta.mossa);

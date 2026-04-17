@@ -522,6 +522,10 @@ public class GestoreGrafico {
             casellaPosIniziale = numeroToLettera.get(m[0][1] + 1) + (DIMENSIONE - m[0][0]);
             casellaPosFinale = numeroToLettera.get(m[1][1] + 1) + (DIMENSIONE - m[1][0]);
         }
+        if (!timerBianco.isOff()) {
+            timerBianco.invertiStato();
+            timerNero.invertiStato();
+        }
 
     }
 

@@ -518,15 +518,18 @@ public class GestoreGrafico {
         bot.mossaAvversario(cs, mossa);
 
         int[][] m = bot.muovi();
-        if (m != null) {
-            casellaPosIniziale = numeroToLettera.get(m[0][1] + 1) + (DIMENSIONE - m[0][0]);
-            casellaPosFinale = numeroToLettera.get(m[1][1] + 1) + (DIMENSIONE - m[1][0]);
-        }
         if (!timerBianco.isOff()) {
             timerBianco.invertiStato();
             timerNero.invertiStato();
         }
-
+        if (m != null) {
+            casellaPosIniziale = numeroToLettera.get(m[0][1] + 1) + (DIMENSIONE - m[0][0]);
+            casellaPosFinale = numeroToLettera.get(m[1][1] + 1) + (DIMENSIONE - m[1][0]);
+        }
+        else {
+            labelVittoria.setText("<html><div style='text-align:center;'>Partita interrotta:<br>Il bot non ha trovato mosse</div></html>");
+            finePartita();
+        }
     }
 
     private void setListenerTimer(TimerGrafico t) {

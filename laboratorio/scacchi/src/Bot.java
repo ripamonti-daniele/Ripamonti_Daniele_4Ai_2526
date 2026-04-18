@@ -24,36 +24,9 @@ public class Bot {
         }
 
         private void trovaVantaggio() {
-            vantaggio = Scacchiera.getMaterialeCaselle(caselle, colore);
-            if (colore.equals(Color.white)) vantaggio -= Scacchiera.getMaterialeCaselle(caselle, Color.black);
-            else vantaggio -= Scacchiera.getMaterialeCaselle(caselle, Color.white);
+            vantaggio = Scacchiera.getMaterialeCaselle(caselle, Color.white) - Scacchiera.getMaterialeCaselle(caselle, Color.black);
+            if (colore.equals(Color.black)) vantaggio *= -1;
             statoPartita = Scacchiera.statoPartitaCaselle(caselle, turno);
-        }
-
-        private Pedina[][] pedinePromosse(int tipo) {
-            Pedina[][] copia = new Pedina[8][8];
-            for (int i = 0; i < 8; i++) {
-                for (int j = 0; j < 8; j++) {
-                    if (caselle[i][j] == null) copia[i][j] = null;
-                    else {
-                        if ((i == 0 || i == 7) && caselle[i][j] instanceof Pedone) {
-                            switch (tipo) {
-                                case 2 -> copia[i][j] = new Torre(caselle[i][j].getColore(), caselle[i][j].getPosizione());
-                                case 3 -> copia[i][j] = new Alfiere(caselle[i][j].getColore(), caselle[i][j].getPosizione());
-                                case 4 -> copia[i][j] = new Cavallo(caselle[i][j].getColore(), caselle[i][j].getPosizione());
-                                default -> copia[i][j] = new Regina(caselle[i][j].getColore(), caselle[i][j].getPosizione());
-                            }
-                        }
-                        else copia[i][j] = caselle[i][j].copy();
-                    }
-                }
-            }
-            return copia;
-        }
-
-        public void aggiungiNodo(Nodo n, Nodo padre) {
-            if (this == padre) sottoNodi.add(n);
-            else for (Nodo nodo : sottoNodi) nodo.aggiungiNodo(n, padre);
         }
 
         private Pedina[][] copiaCaselle(Pedina[][] caselle) {
@@ -72,32 +45,33 @@ public class Bot {
             if (profondita <= 0) return;
             if (!sottoNodi.isEmpty()) {
                 for (Nodo n : sottoNodi) n.creaLayer(profondita - 1);
+                return;
             }
-            else {
-                Color prossimoTurno = Color.white;
-                if (prossimoTurno.equals(turno)) prossimoTurno = Color.black;
+            Color prossimoTurno = Color.white;
+            if (prossimoTurno.equals(turno)) prossimoTurno = Color.black;
 
-                for (int i = 0; i < 8; i++) {
-                    for (int j = 0; j < 8; j++) {
-                        if (caselle[i][j] == null || !caselle[i][j].getColore().equals(turno)) continue;
-                        int[] casellaSelezionata = new int[]{i, j};
-                        List<int[]> mosse = Scacchiera.selezionaPedinaCaselle(caselle, casellaSelezionata, turno);
-                        if (mosse == null || mosse.isEmpty()) continue;
-                        for (int[] mossa : mosse) {
-                            Pedina[][] copia = copiaCaselle(caselle);
-                            if (Scacchiera.muoviPedinaCaselle(copia, mosse, casellaSelezionata, mossa)) {
-                                Nodo n = new Nodo(copia, casellaSelezionata, mossa, prossimoTurno);
-                                if (n.statoPartita == StatoPartita.PROMOZIONE_IN_SOSPESO) {
-                                    for (int x = 2; x < 5; x++){
-                                        Pedina[][] copiaPromozione = copiaCaselle(copia);
-                                        Scacchiera.promozionePedoneCaselle(copiaPromozione, mossa, x);
-                                        sottoNodi.add(new Nodo(copiaPromozione, casellaSelezionata, mossa, prossimoTurno));
-                                    }
-                                    Scacchiera.promozionePedoneCaselle(copia, mossa, 1);
+            for (int i = 0; i < 8; i++) {
+                for (int j = 0; j < 8; j++) {
+                    if (caselle[i][j] == null || !caselle[i][j].getColore().equals(turno)) continue;
+                    int[] casellaSelezionata = new int[]{i, j};
+                    List<int[]> mosse = Scacchiera.selezionaPedinaCaselle(caselle, casellaSelezionata, turno);
+                    if (mosse == null || mosse.isEmpty()) continue;
+                    for (int[] mossa : mosse) {
+                        Pedina[][] copia = copiaCaselle(caselle);
+                        if (Scacchiera.muoviPedinaCaselle(copia, mosse, casellaSelezionata, mossa)) {
+                            Nodo n = new Nodo(copia, casellaSelezionata, mossa, prossimoTurno);
+                            if (n.statoPartita == StatoPartita.PROMOZIONE_IN_SOSPESO) {
+                                for (int x = 2; x < 5; x++){
+                                    Pedina[][] copiaPromozione = copiaCaselle(copia);
+                                    Scacchiera.promozionePedoneCaselle(copiaPromozione, mossa, x);
+                                    Nodo nPromozione = new Nodo(copiaPromozione, casellaSelezionata, mossa, prossimoTurno);
+                                    sottoNodi.add(nPromozione);
+                                    nPromozione.creaLayer(profondita - 1);
                                 }
-                                sottoNodi.add(n);
-                                n.creaLayer(profondita - 1);
+                                Scacchiera.promozionePedoneCaselle(copia, mossa, 1);
                             }
+                            sottoNodi.add(n);
+                            n.creaLayer(profondita - 1);
                         }
                     }
                 }
@@ -151,17 +125,21 @@ public class Bot {
     public int[][] muovi() {
         if (!scacchiera.getTurno().equals(colore)) throw new IllegalStateException("Il bot non può muovere se non è il suo turno");
         Nodo scelta = null;
-        int maxVal = Integer.MIN_VALUE;
+        int maxVal = 0;
         for (Nodo n : root.sottoNodi) {
             if (n.statoPartita == StatoPartita.VITTORIA_BIANCO && colore == Color.white || n.statoPartita == StatoPartita.VITTORIA_NERO && colore == Color.black) {
                 scelta = n;
                 break;
             }
             int val = n.minimax(PROFONDITA, false);
-            if (val > maxVal) {
+            if (scelta == null || val > maxVal) {
                 maxVal = val;
                 scelta = n;
             }
+        }
+        if (scelta == null) {
+            System.out.println("nodo mossa non trovato");
+            return null;
         }
         scacchiera.selezionaPedina(scelta.casellaSelezionata);
         scacchiera.muoviPedina(scelta.mossa);

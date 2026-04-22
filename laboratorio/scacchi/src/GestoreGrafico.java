@@ -16,7 +16,7 @@ public class GestoreGrafico {
     private int mossaMostrata;
     private boolean rotazioneScacchiera;
     private boolean promozione;
-    private int[][] posPromozione;
+    private int[] posPromozione;
     public final int lunghezzaScacchiera;
     public final int lunghezzaCasella;
     public static final int DIMENSIONE = Scacchiera.DIMENSIONE;
@@ -436,7 +436,7 @@ public class GestoreGrafico {
                     casellaPosFinale = casellePanel[y][x].getId();
                     casellaPosIniziale = idCasellaSelOld;
                     promozione = true;
-                    posPromozione = new int[][]{cs, pos};
+                    posPromozione = pos;
                     setImgCasellePromozione(scacchiera.getPedina(pos).getColore());
                     aggiornaBtnSpostamento();
                 }
@@ -445,7 +445,7 @@ public class GestoreGrafico {
                 else {
                     casellaPosFinale = casellePanel[y][x].getId();
                     casellaPosIniziale = idCasellaSelOld;
-                    mossaBot(cs, pos);
+                    mossaBot();
                     aggiornaInfoScacchiera();
                 }
 
@@ -499,8 +499,8 @@ public class GestoreGrafico {
     private void setListenerPromozione(int i) {
         casellePromozione[i].setListener(() -> {
             if (promozione && mossaMostrata == scacchiera.getMosse()) {
-                scacchiera.promuoviPedone(posPromozione[1], i + 1);
-                mossaBot(posPromozione[0], posPromozione[1]);
+                scacchiera.promuoviPedone(posPromozione, i + 1);
+                mossaBot();
                 promozione = false;
                 posPromozione = null;
                 for (Casella c : casellePromozione) c.rimuoviImg();
@@ -513,9 +513,8 @@ public class GestoreGrafico {
         });
     }
 
-    private void mossaBot(int[] cs, int[] mossa) {
+    private void mossaBot() {
         if (bot == null) return;
-        bot.mossaAvversario(cs, mossa);
 
         int[][] m = bot.muovi();
         if (!timerBianco.isOff()) {

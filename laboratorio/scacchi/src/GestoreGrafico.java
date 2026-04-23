@@ -319,7 +319,7 @@ public class GestoreGrafico {
         aggiornaLabelMateriale();
 
         if (coloreBot != null) {
-            bot = new Bot(scacchiera, coloreBot, scacchiera.getTurno());
+            bot = new Bot(scacchiera, coloreBot);
             if (Color.white.equals(coloreBot)) {
                 int[][] m = bot.muovi();
                 if (m != null) {

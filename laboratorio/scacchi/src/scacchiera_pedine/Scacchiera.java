@@ -173,7 +173,6 @@ public class Scacchiera {
             else if (vincoli[1] != null && mossa[0] > y && mossa[1] < x && mossa[0] <= vincoli[1][0] && mossa[1] >= vincoli[1][1]) mosseFiltrate.add(mossa);
             else if (vincoli[2] != null && mossa[0] < y && mossa[1] > x && mossa[0] >= vincoli[2][0] && mossa[1] <= vincoli[2][1]) mosseFiltrate.add(mossa);
             else if (vincoli[3] != null && mossa[0] < y && mossa[1] < x && mossa[0] >= vincoli[3][0] && mossa[1] >= vincoli[3][1]) mosseFiltrate.add(mossa);
-            else if (caselle[pos[0]][pos[1]] instanceof Regina && (mossa[0] == y || mossa[1] == x)) mosseFiltrate.add(mossa);
         }
 
         return mosseFiltrate;
@@ -203,7 +202,6 @@ public class Scacchiera {
             if (mossa[1] == pos[1] && mossa[0] > pos[0] && mossa[0] <= YBasso) mosseFiltrate.add(mossa);
             if (mossa[0] == pos[0] && mossa[1] < pos[1] && mossa[1] >= XSinistra) mosseFiltrate.add(mossa);
             if (mossa[0] == pos[0] && mossa[1] > pos[1] && mossa[1] <= XDestra) mosseFiltrate.add(mossa);
-            if (caselle[pos[0]][pos[1]] instanceof Regina && mossa[0] != pos[0] && mossa[1] != pos[1]) mosseFiltrate.add(mossa);
         }
 
         return mosseFiltrate;
@@ -257,7 +255,13 @@ public class Scacchiera {
             case Pedone _ -> mosseValide = filtraMossePedone(caselle, pos, mosseValide);
             case Alfiere _ -> mosseValide = filtraMosseAlfiere(caselle, pos, mosseValide);
             case Torre _ -> mosseValide = filtraMosseTorre(caselle, pos, mosseValide);
-            case Regina _ -> mosseValide = filtraMosseTorre(caselle, pos, filtraMosseAlfiere(caselle, pos, mosseValide));
+            case Regina _ -> {
+                List<int[]> mosseDiagonali = filtraMosseAlfiere(caselle, pos, mosseValide);
+                List<int[]> mosseLineari = filtraMosseTorre(caselle, pos, mosseValide);
+                mosseValide = new ArrayList<>();
+                mosseValide.addAll(mosseDiagonali);
+                mosseValide.addAll(mosseLineari);
+            }
             case Re _ -> mosseValide = filtraMosseRe(caselle, pos, mosseValide, controllaScacco);
             case Cavallo _ -> {}
             default -> throw new IllegalStateException("Tipo pedina non valido: " + p.getClass().getSimpleName());

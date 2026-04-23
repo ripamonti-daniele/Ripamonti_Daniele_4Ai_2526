@@ -7,7 +7,7 @@ public class Bot {
     private final Color colore;
     private static final int PROFONDITA = 3;
 
-    public Bot(Scacchiera scacchiera, Color colore, Color turno) {
+    public Bot(Scacchiera scacchiera, Color colore) {
         if (scacchiera == null) throw new IllegalArgumentException("La scacchiera non può essere null");
         this.scacchiera = scacchiera;
         this.colore = colore;
@@ -18,8 +18,7 @@ public class Bot {
     }
 
     public int[][] muovi() {
-        if (!scacchiera.getTurno().equals(colore))
-            throw new IllegalStateException("Il bot non può muovere se non è il suo turno");
+        if (!scacchiera.getTurno().equals(colore)) throw new IllegalStateException("Il bot non può muovere se non è il suo turno");
         int[][] mossaMigliore = trovaMossaMigliore(scacchiera.getCaselle());
         scacchiera.selezionaPedina(mossaMigliore[0]);
         scacchiera.muoviPedina(mossaMigliore[1]);
@@ -28,21 +27,28 @@ public class Bot {
 
     private int[][] trovaMossaMigliore(Pedina[][] caselle) {
         int[][] mossa = null;
-        int valoreMigliore = Integer.MIN_VALUE;;
+        int valoreMigliore = Integer.MIN_VALUE;
 
-        for (Pedina[] riga : caselle) {
-            for (Pedina p : riga) {
-                if (p == null || !p.getColore().equals(colore)) continue;
-                List<int[]> mosse = Scacchiera.selezionaPedinaCaselle(caselle, p.getPosizione(), p.getColore());
+        for (int i = 0; i < 8; i++) {
+            for (int j = 0; j < 8; j++) {
+                if (caselle[i][j] == null || !caselle[i][j].getColore().equals(colore)) continue;
+
+                int[] pos = new int[]{i, j};
+
+                List<int[]> mosse = Scacchiera.selezionaPedinaCaselle(caselle, pos, colore);
                 if (mosse == null) continue;
+
                 for (int[] m : mosse) {
                     Pedina[][] copia = copiaCaselle(caselle);
-                    Scacchiera.muoviPedinaCaselle(copia, mosse, p.getPosizione(), m);
+
+                    if (!Scacchiera.muoviPedinaCaselle(copia, mosse, pos, m)) continue;
+
                     if (Scacchiera.promozioneInSospesoCaselle(copia) != null) Scacchiera.promozionePedoneCaselle(copia, m, 1);
                     int val = miniMax(copia, PROFONDITA - 1, false, Integer.MIN_VALUE, Integer.MAX_VALUE);
+
                     if (val > valoreMigliore) {
                         valoreMigliore = val;
-                        mossa = new int[][]{p.getPosizione(), m};
+                        mossa = new int[][]{pos, m};
                     }
                 }
             }
@@ -54,12 +60,15 @@ public class Bot {
         Color coloreTurno = colore;
         if (!massimizza) coloreTurno = coloreAvversario();
 
-        if (profondita == 0 || Scacchiera.statoPartitaCaselle(caselle, coloreTurno) != StatoPartita.IN_CORSO) {
-            return trovaVantaggio(caselle);
+        StatoPartita sp = Scacchiera.statoPartitaCaselle(caselle, coloreTurno);
+
+        if (profondita == 0 || sp != StatoPartita.IN_CORSO) {
+            return trovaVantaggio(caselle, sp);
         }
 
         if (massimizza) {
             int max = Integer.MIN_VALUE;
+
             for (int i = 0; i < 8; i++) {
                 for (int j = 0; j < 8; j++) {
                     if (caselle[i][j] == null || !caselle[i][j].getColore().equals(coloreTurno)) continue;
@@ -70,7 +79,10 @@ public class Bot {
 
                     for (int[] m : mosse) {
                         Pedina[][] copia = copiaCaselle(caselle);
-                        Scacchiera.muoviPedinaCaselle(copia, mosse, pos, m);
+
+//                        if (copia[m[0]][m[1]] instanceof Re) System.out.println(Scacchiera.getStringaScacchieraCaselle(copia, false));
+
+                        if (!Scacchiera.muoviPedinaCaselle(copia, mosse, pos, m)) continue;
                         if (Scacchiera.promozioneInSospesoCaselle(copia) != null) Scacchiera.promozionePedoneCaselle(copia, m, 1);
 
                         int val = miniMax(copia, profondita - 1, false, alpha, beta);
@@ -94,7 +106,7 @@ public class Bot {
 
                     for (int[] m : mosse) {
                         Pedina[][] copia = copiaCaselle(caselle);
-                        Scacchiera.muoviPedinaCaselle(copia, mosse, pos, m);
+                        if (!Scacchiera.muoviPedinaCaselle(copia, mosse, pos, m)) continue;
                         if (Scacchiera.promozioneInSospesoCaselle(copia) != null) Scacchiera.promozionePedoneCaselle(copia, m, 1);
 
                         int val = miniMax(copia, profondita - 1, true, alpha, beta);
@@ -108,13 +120,22 @@ public class Bot {
         }
     }
 
-
     private Color coloreAvversario() {
         if (colore.equals(Color.white)) return Color.black;
         else return Color.white;
     }
 
-    private int trovaVantaggio(Pedina[][] caselle) {
+    private int trovaVantaggio(Pedina[][] caselle, StatoPartita statoPartita) {
+        if (statoPartita == StatoPartita.VITTORIA_BIANCO) {
+            if (colore.equals(Color.white)) return Integer.MAX_VALUE - 10;
+            else return Integer.MIN_VALUE + 10;
+        }
+        if (statoPartita == StatoPartita.VITTORIA_NERO) {
+            if (colore.equals(Color.black)) return Integer.MAX_VALUE - 10;
+            else return Integer.MIN_VALUE + 10;
+        }
+        if (statoPartita != StatoPartita.IN_CORSO) return 0;
+
         int diffMateriale = Scacchiera.getMaterialeCaselle(caselle, Color.white) - Scacchiera.getMaterialeCaselle(caselle, Color.black);
         if (colore.equals(Color.black)) diffMateriale *= - 1;
 
@@ -136,7 +157,9 @@ public class Bot {
         int pedoniDoppiBot = 0;
         int pedoniDoppiAvversario = 0;
 
-       int[] registroPedoni = new int[16];
+        int[] registroPedoni = new int[16];
+
+        Pedina[][] copia = copiaCaselle(caselle);
 
         for (int i = 0; i < 8; i++) {
             int pedoniBot = 0;
@@ -152,7 +175,6 @@ public class Bot {
                 List<int[]> m = Scacchiera.selezionaPedinaCaselle(caselle, new int[]{i, j}, caselle[i][j].getColore());
                 if (m != null) mosseDisponibili = m.size();
 
-                Pedina[][] copia = copiaCaselle(caselle);
                 Color c = Color.white;
                 if (caselle[i][j].getColore().equals(c)) c = Color.black;
                 for (int y = 0; y < 8; y++) {

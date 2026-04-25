@@ -318,18 +318,49 @@ public class GestoreGrafico {
         timerBianco.start();
         aggiornaLabelMateriale();
 
-        if (coloreBot != null) {
-            bot = new Bot(scacchiera, coloreBot);
-            if (Color.white.equals(coloreBot)) {
-                int[][] m = bot.muovi();
-                if (m != null) {
-                    casellaPosIniziale = numeroToLettera.get(m[0][1] + 1) + (DIMENSIONE - m[0][0]);
-                    casellaPosFinale = numeroToLettera.get(m[1][1] + 1) + (DIMENSIONE - m[1][0]);
+//        if (coloreBot != null) {
+//            bot = new Bot(scacchiera, coloreBot);
+//            if (Color.white.equals(coloreBot)) {
+//                int[][] m = bot.muovi();
+//                if (m != null) {
+//                    casellaPosIniziale = numeroToLettera.get(m[0][1] + 1) + (DIMENSIONE - m[0][0]);
+//                    casellaPosFinale = numeroToLettera.get(m[1][1] + 1) + (DIMENSIONE - m[1][0]);
+//                }
+//                aggiornaScacchiera(scacchiera.getStringaScacchiera());
+//                aggiornaInfoScacchiera();
+//            }
+//        }
+        Bot botBianco = new Bot(scacchiera, Color.white, 4);
+        Bot botNero = new Bot(scacchiera, Color.black);
+        rotazioneScacchiera = false;
+
+        //bianco prof 3 nero prof 4 --> vince nero
+        //bianco prof 4 nero prof 3 --> vince bianco
+        //profondità > calcoli accurati
+
+
+        new SwingWorker<Void, Void>() {
+            @Override
+            protected Void doInBackground() throws Exception {
+                while (scacchiera.getStatoPartita() == StatoPartita.IN_CORSO) {
+                    mossaBot(botBianco);
+                    SwingUtilities.invokeAndWait(() -> {
+                        aggiornaInfoScacchiera();
+                        disegna();
+                    });
+                    if (scacchiera.getStatoPartita() != StatoPartita.IN_CORSO) break;
+
+
+                    mossaBot(botNero);
+                    SwingUtilities.invokeAndWait(() -> {
+                        aggiornaInfoScacchiera();
+                        disegna();
+                    });
+
                 }
-                aggiornaScacchiera(scacchiera.getStringaScacchiera());
-                aggiornaInfoScacchiera();
+                return null;
             }
-        }
+        }.execute();
     }
 
     private void finePartita() {
@@ -513,7 +544,7 @@ public class GestoreGrafico {
         });
     }
 
-    private void mossaBot() {
+    private void mossaBot(Bot bot) {
         if (bot == null) return;
 
         int[][] m = bot.muovi();
@@ -529,6 +560,10 @@ public class GestoreGrafico {
             labelVittoria.setText("<html><div style='text-align:center;'>Partita interrotta:<br>Il bot non ha trovato mosse</div></html>");
             finePartita();
         }
+    }
+
+    private void mossaBot() {
+        mossaBot(bot);
     }
 
     private void setListenerTimer(TimerGrafico t) {

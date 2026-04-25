@@ -71,7 +71,7 @@ public class Scacchiera {
         return mosseNeutre;
     }
 
-    public Pedina[][] getCaselle() {
+    public static Pedina[][] getCopiaCaselle(Pedina[][] caselle) {
         Pedina[][] copia = new Pedina[DIMENSIONE][DIMENSIONE];
         for (int i = 0; i < caselle.length; i++) {
             for (int j = 0; j < caselle[i].length; j++) {
@@ -80,6 +80,10 @@ public class Scacchiera {
             }
         }
         return copia;
+    }
+
+    public Pedina[][] getCaselle() {
+        return getCopiaCaselle(caselle);
     }
 
     public Pedina getPedina(int[] pos) {
@@ -212,12 +216,12 @@ public class Scacchiera {
         if (caselle[pos[0]][pos[1]] == null || !(caselle[pos[0]][pos[1]] instanceof Re)) throw new IllegalArgumentException("Puoi fare questi controlli solo sul re");
 
         List<int[]> mosseFiltrate = new ArrayList<>();
-        boolean annullaArroccoSx = controllaScacco && controllaScaccoRe(caselle, pos);
+        boolean annullaArroccoSx = controllaScacco && isScaccoRe(caselle, pos);
         boolean annullaArroccoDx = annullaArroccoSx;
 
         for (int[] mossa : mosseValide) {
             //se il re sarebbe sotto scacco rimuove la mossa
-            if (controllaScacco && controllaScaccoRe(caselle, mossa, caselle[pos[0]][pos[1]].getColore())) {
+            if (controllaScacco && isScaccoRe(caselle, mossa, caselle[pos[0]][pos[1]].getColore())) {
                 //rimuove l'arrocco se la mossa intermedia comporterebbe uno scacco
                 if ((mossa[0] == 0 || mossa[0] == DIMENSIONE - 1) && mossa[1] == pos[1] + 1) annullaArroccoDx = true;
                 else if ((mossa[0] == 0 || mossa[0] == DIMENSIONE - 1) && mossa[1] == pos[1] - 1) annullaArroccoSx = true;
@@ -283,7 +287,7 @@ public class Scacchiera {
         return null;
     }
 
-    private static boolean controllaScaccoRe(Pedina[][] caselle, int[] posRe, Color coloreRe) {
+    private static boolean isScaccoRe(Pedina[][] caselle, int[] posRe, Color coloreRe) {
         if (posRe == null) throw new IllegalArgumentException("La posizione del re non può essere un parametro null");
         if (coloreRe == null) {
             //se non viene fornito il colore del re e la casella nella posizione indicata non èun re lancia eccezione, altrimenti prende il colore della casella indicata
@@ -305,13 +309,25 @@ public class Scacchiera {
         return false;
     }
 
-    private static boolean controllaScaccoRe(Pedina[][] caselle, Color coloreRe) {
-        return controllaScaccoRe(caselle, trovaPosRe(caselle, coloreRe), coloreRe);
+    private static boolean isScaccoRe(Pedina[][] caselle, Color coloreRe) {
+        return isScaccoRe(caselle, trovaPosRe(caselle, coloreRe), coloreRe);
     }
 
-    private static boolean controllaScaccoRe(Pedina[][] caselle, int[] posRe) {
+    private static boolean isScaccoRe(Pedina[][] caselle, int[] posRe) {
         if (posRe == null) throw new IllegalArgumentException("La posizione del re non può essere un parametro null");
-        return controllaScaccoRe(caselle, posRe, caselle[posRe[0]][posRe[1]].getColore());
+        return isScaccoRe(caselle, posRe, caselle[posRe[0]][posRe[1]].getColore());
+    }
+
+    public boolean isScaccoRe(int[] posRe, Color coloreRe) {
+        return isScaccoRe(caselle, posRe, coloreRe);
+    }
+
+    public boolean isScaccoRe(Color coloreRe) {
+        return isScaccoRe(caselle, coloreRe);
+    }
+
+    public boolean isScaccoRe(int[] posRe) {
+        return isScaccoRe(caselle, posRe);
     }
 
     private static List<int[]> filtraMosseScacco(Pedina[][] caselle, int[] pos, List<int[]> mosseValide) {
@@ -329,7 +345,7 @@ public class Scacchiera {
             caselle[mossa[0]][mossa[1]] = temp1;
             caselle[pos[0]][pos[1]] = null;
 
-            if (!(temp1 instanceof Re) && !controllaScaccoRe(caselle, c) || temp1 instanceof Re && !controllaScaccoRe(caselle, mossa, c)) mosseFiltrate.add(mossa);
+            if (!(temp1 instanceof Re) && !isScaccoRe(caselle, c) || temp1 instanceof Re && !isScaccoRe(caselle, mossa, c)) mosseFiltrate.add(mossa);
 
             caselle[pos[0]][pos[1]] = temp1;
             caselle[mossa[0]][mossa[1]] = temp2;
@@ -534,7 +550,7 @@ public class Scacchiera {
 
         //se non ci sono mosse disponibili e il re indica il vincitore, altrimenti è stallo
         if (noMosse) {
-            if (controllaScaccoRe(caselle, turno)) {
+            if (isScaccoRe(caselle, turno)) {
                 if (turno.equals(Color.white)) return StatoPartita.VITTORIA_NERO;
                 else return StatoPartita.VITTORIA_BIANCO;
             }
@@ -689,6 +705,18 @@ public class Scacchiera {
 
     public static String getStringaScacchieraCaselle(Pedina[][] caselle, boolean info) {
         return getStringaScacchiera(caselle, info);
+    }
+
+    public static boolean isScaccoReCaselle(Pedina[][] caselle, int[] posRe, Color coloreRe) {
+        return isScaccoRe(caselle, posRe, coloreRe);
+    }
+
+    public static boolean isScaccoReCaselle(Pedina[][] caselle, Color coloreRe) {
+        return isScaccoRe(caselle, coloreRe);
+    }
+
+    public static boolean isScaccoReCaselle(Pedina[][] caselle, int[] posRe) {
+        return isScaccoRe(caselle, posRe);
     }
 
     // --- scrittura e lettera scacchiera su file ---

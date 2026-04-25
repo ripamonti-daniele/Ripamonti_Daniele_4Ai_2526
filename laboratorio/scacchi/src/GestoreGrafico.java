@@ -330,6 +330,8 @@ public class GestoreGrafico {
 //                aggiornaInfoScacchiera();
 //            }
 //        }
+
+
         Bot botBianco = new Bot(scacchiera, Color.white, 4);
         Bot botNero = new Bot(scacchiera, Color.black);
         rotazioneScacchiera = false;
@@ -337,7 +339,6 @@ public class GestoreGrafico {
         //bianco prof 3 nero prof 4 --> vince nero
         //bianco prof 4 nero prof 3 --> vince bianco
         //profondità > calcoli accurati
-
 
         new SwingWorker<Void, Void>() {
             @Override
@@ -348,6 +349,8 @@ public class GestoreGrafico {
                         aggiornaInfoScacchiera();
                         disegna();
                     });
+                    timerBianco.invertiStato();
+                    timerNero.invertiStato();
                     if (scacchiera.getStatoPartita() != StatoPartita.IN_CORSO) break;
 
 
@@ -356,8 +359,11 @@ public class GestoreGrafico {
                         aggiornaInfoScacchiera();
                         disegna();
                     });
-
+                    timerBianco.invertiStato();
+                    timerNero.invertiStato();
                 }
+                timerBianco.pause();
+                timerNero.pause();
                 return null;
             }
         }.execute();

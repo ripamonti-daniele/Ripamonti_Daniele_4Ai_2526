@@ -331,20 +331,17 @@ public class GestoreGrafico {
 //            }
 //        }
 
-
-        Bot botBianco = new Bot(scacchiera, Color.white, 4);
+        Bot botBianco = new Bot(scacchiera, Color.white);
         Bot botNero = new Bot(scacchiera, Color.black);
         rotazioneScacchiera = false;
-
-        //bianco prof 3 nero prof 4 --> vince nero
-        //bianco prof 4 nero prof 3 --> vince bianco
-        //profondità > calcoli accurati
 
         new SwingWorker<Void, Void>() {
             @Override
             protected Void doInBackground() throws Exception {
                 while (scacchiera.getStatoPartita() == StatoPartita.IN_CORSO) {
                     mossaBot(botBianco);
+                    timerBianco.invertiStato();
+                    timerNero.invertiStato();
                     SwingUtilities.invokeAndWait(() -> {
                         aggiornaInfoScacchiera();
                         disegna();
@@ -353,8 +350,9 @@ public class GestoreGrafico {
                     timerNero.invertiStato();
                     if (scacchiera.getStatoPartita() != StatoPartita.IN_CORSO) break;
 
-
                     mossaBot(botNero);
+                    timerBianco.invertiStato();
+                    timerNero.invertiStato();
                     SwingUtilities.invokeAndWait(() -> {
                         aggiornaInfoScacchiera();
                         disegna();
@@ -482,8 +480,30 @@ public class GestoreGrafico {
                 else {
                     casellaPosFinale = casellePanel[y][x].getId();
                     casellaPosIniziale = idCasellaSelOld;
-                    mossaBot();
                     aggiornaInfoScacchiera();
+                    disegna();
+
+                    if (bot != null) {
+                        new SwingWorker<Void, Void>() {
+                            @Override
+                            protected Void doInBackground() throws Exception {
+                                Thread.sleep(100);
+                                mossaBot();
+                                return null;
+                            }
+
+                            @Override
+                            protected void done() {
+                                if (!timerBianco.isOff()) {
+                                    timerBianco.invertiStato();
+                                    timerNero.invertiStato();
+                                }
+                                aggiornaInfoScacchiera();
+                                disegna();
+                            }
+                        }.execute();
+                    }
+                    return;
                 }
 
                 disegna();
@@ -537,15 +557,32 @@ public class GestoreGrafico {
         casellePromozione[i].setListener(() -> {
             if (promozione && mossaMostrata == scacchiera.getMosse()) {
                 scacchiera.promuoviPedone(posPromozione, i + 1);
-                mossaBot();
                 promozione = false;
                 posPromozione = null;
                 for (Casella c : casellePromozione) c.rimuoviImg();
                 aggiornaInfoScacchiera();
-                aggiornaScacchiera(scacchiera.getStringaScacchiera());
-                mossaMostrata = scacchiera.getMosse();
-                aggiornaBtnSpostamento();
                 disegna();
+
+                if (bot != null) {
+                    new SwingWorker<Void, Void>() {
+                        @Override
+                        protected Void doInBackground() throws Exception {
+                            Thread.sleep(100);
+                            mossaBot();
+                            return null;
+                        }
+
+                        @Override
+                        protected void done() {
+                            if (!timerBianco.isOff()) {
+                                timerBianco.invertiStato();
+                                timerNero.invertiStato();
+                            }
+                            aggiornaInfoScacchiera();
+                            disegna();
+                        }
+                    }.execute();
+                }
             }
         });
     }
@@ -553,10 +590,13 @@ public class GestoreGrafico {
     private void mossaBot(Bot bot) {
         if (bot == null) return;
 
-        int[][] m = bot.muovi();
-        if (!timerBianco.isOff()) {
-            timerBianco.invertiStato();
-            timerNero.invertiStato();
+        int[][] m = null;
+        try {
+            m = bot.muovi();
+        }
+        catch (IllegalStateException _) {
+            labelVittoria.setText("<html><div style='text-align:center;'>Partita interrotta:<br>Il bot non ha trovato mosse</div></html>");
+            finePartita();
         }
         if (m != null) {
             casellaPosIniziale = numeroToLettera.get(m[0][1] + 1) + (DIMENSIONE - m[0][0]);

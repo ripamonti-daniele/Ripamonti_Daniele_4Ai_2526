@@ -1,16 +1,95 @@
 import scacchiera_pedine.*;
 import java.awt.*;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 public class Bot {
     private final Scacchiera scacchiera;
     private final Color colore;
-    private static final int PROFONDITA = 4;
+    private final int PROFONDITA;
+    public static final Map<String, int[][]> vantaggioCasella;
 
-    public Bot(Scacchiera scacchiera, Color colore) {
+    static {
+        vantaggioCasella = new HashMap<>();
+
+        vantaggioCasella.put("P", new int[][] {
+                {  0,   0,   0,   0,   0,   0,   0,   0},
+                { 78,  83,  86,  73, 102,  82,  85,  90},
+                {  7,  29,  21,  44,  40,  31,  44,   7},
+                {-17,  16,  18,  30,  28,   0,  15, -13},
+                {-26,   3,  10,  22,  21,   1,   0, -23},
+                {-22,   9,   5, -11, -10,  -2,   3, -19},
+                {-31,   8,  -7, -37, -36,   7,   3, -31},
+                {  0,   0,   0,   0,   0,   0,   0,   0}
+        });
+
+        vantaggioCasella.put("C", new int[][] {
+                {-66, -53, -75, -75, -10, -55, -58, -70},
+                { -3,  -6, 100, -36,   4,  62,  -4, -14},
+                { 10,  67,   1,  74,  73,  27,  62,  -2},
+                { 24,  24,  45,  37,  33,  41,  25,  17},
+                { -1,   5,  31,  21,  22,  35,   2,   0},
+                {-18,  10,  13,  22,  18,  15,  11, -14},
+                {-23, -15,   2,   0,   2,   0, -23, -20},
+                {-74, -23, -26, -24, -19, -35, -22, -69}
+        });
+
+        vantaggioCasella.put("A", new int[][] {
+                {-59, -78, -82, -76, -23,-107, -37, -50},
+                {-11,  20,  35, -42, -39,  31,   2, -22},
+                { -9,  39, -32,  41,  52, -10,  28, -14},
+                { 25,  17,  20,  34,  26,  25,  15,  10},
+                { 13,  10,  17,  23,  17,  16,   0,   7},
+                { 14,  25,  24,  15,   8,  25,  20,  15},
+                { 19,  20,  11,   6,   7,   6,  20,  16},
+                { -7,   2, -15, -12, -14, -15, -10, -10}
+        });
+
+        vantaggioCasella.put("T", new int[][] {
+                { 35,  29,  33,   4,  37,  33,  56,  50},
+                { 55,  29,  56,  67,  55,  62,  34,  60},
+                { 19,  35,  28,  33,  45,  27,  25,  15},
+                {  0,   5,  16,  13,  18,  -4,  -9,  -6},
+                {-28, -35, -16,  -1, -12, -26, -22, -31},
+                {-33, -28, -22,  -6,  -1, -20, -31, -41},
+                {-36, -26, -12,  -1,   9,  -7,   6, -23},
+                {-24, -11,   7,  26,  24,  20,   1,  -7}
+        });
+
+        vantaggioCasella.put("Q", new int[][] {
+                {  6,   1,  -8,-104,  69,  24,  88,  26},
+                { 14,  32,  60, -10,  20,  76,  57,  24},
+                { -2,  43,  32,  60,  72,  63,  43,   2},
+                {  1, -16,  22,  17,  25,  20, -13,  -6},
+                {-14, -15,  -4,   5,   6,  -8, -15, -18},
+                {-20,  -6,   0,  -5,  -6,  -6, -11, -21},
+                {-16, -21, -18, -21, -21, -21, -25, -15},
+                {-36, -18,   0, -19, -15, -15, -21, -38}
+        });
+
+        vantaggioCasella.put("R", new int[][] {
+                {-73, -57, -72, -46, -44, -22, -65, -75},
+                {-62, -47, -47, -48, -43, -26, -44, -67},
+                {-62, -49, -50, -47, -51, -37, -47, -63},
+                {-56, -49, -52, -55, -55, -52, -49, -56},
+                {-36, -32, -42, -47, -46, -40, -31, -35},
+                {-13, -12, -25, -31, -30, -24, -12, -12},
+                { 27,  13,  -8, -10, -10,  -8,  14,  24},
+                { 29,  47,  26,  10,  17,  19,  47,  29}
+        });
+    }
+
+    public Bot(Scacchiera scacchiera, Color colore, int profondita) {
         if (scacchiera == null) throw new IllegalArgumentException("La scacchiera non può essere null");
         this.scacchiera = scacchiera;
         this.colore = colore;
+        if (profondita < 1 || profondita > 7) throw new IllegalArgumentException("Profondità non valida: max 7 min 1");
+        PROFONDITA = profondita;
+    }
+
+    public Bot(Scacchiera scacchiera, Color colore) {
+        this(scacchiera, colore, 4);
     }
 
     public Color getColore() {
@@ -27,9 +106,28 @@ public class Bot {
         return mossaMigliore;
     }
 
+    private int mosseTotali(Pedina[][] caselle) {
+        int tot = 0;
+        for (Pedina[] riga : caselle) {
+            for (Pedina p : riga) {
+                if (p != null && p.getColore().equals(colore)) {
+                    List<int[]> mosse = Scacchiera.selezionaPedinaCaselle(caselle, p.getPosizione(), colore);
+                    if (mosse == null) continue;
+                    tot += mosse.size();
+                }
+            }
+        }
+        return tot;
+    }
+
     private int[][] trovaMossaMigliore(Pedina[][] caselle) {
         int[][] mossa = null;
         int valoreMigliore = Integer.MIN_VALUE;
+
+        int profondita = PROFONDITA - 1;
+        int tot = mosseTotali(caselle);
+        if (tot <= 20) profondita++;
+        if (tot <= 5) profondita++;
 
         for (int i = 0; i < 8; i++) {
             for (int j = 0; j < 8; j++) {
@@ -58,12 +156,13 @@ public class Bot {
                     if (!Scacchiera.muoviPedinaCaselle(caselle, mosse, pos, m)) continue;
 
                     if (Scacchiera.promozioneInSospesoCaselle(caselle) != null) Scacchiera.promozionePedoneCaselle(caselle, m, 1);
-                    int val = miniMax(caselle, PROFONDITA - 1, false, Integer.MIN_VALUE, Integer.MAX_VALUE);
+                    int val = miniMax(caselle, profondita, false, Integer.MIN_VALUE, Integer.MAX_VALUE);
 
                     caselle[pos[0]][pos[1]] = pezzoMosso;
                     caselle[m[0]][m[1]] = pezzoMangiato;
                     if (torreSalvata != null) {
                         if (pos[1] - m[1] > 0) caselle[pos[0]][pos[1] - 1] = null;
+                        else caselle[pos[0]][pos[1] + 1] = null;
                         caselle[torreSalvata.getPosizione()[0]][torreSalvata.getPosizione()[1]] = torreSalvata;
                     }
                     if (enPassant != 0) {
@@ -74,7 +173,7 @@ public class Bot {
 
                     if (val > valoreMigliore) {
                         valoreMigliore = val;
-                        mossa = new int[][]{pos, m};
+                        mossa = new int[][]{{pos[0], pos[1]}, {m[0], m[1]}};
                     }
                 }
             }
@@ -88,7 +187,7 @@ public class Bot {
 
         StatoPartita sp = Scacchiera.statoPartitaCaselle(caselle, coloreTurno);
 
-        if (profondita == 0 || sp != StatoPartita.IN_CORSO) return trovaVantaggioSemplice(caselle, sp);
+        if (profondita == 0 || sp != StatoPartita.IN_CORSO) return evaluation(caselle, sp);
 
         if (massimizza) {
             int max = Integer.MIN_VALUE;
@@ -127,6 +226,7 @@ public class Bot {
                         caselle[m[0]][m[1]] = pezzoMangiato;
                         if (torreSalvata != null) {
                             if (pos[1] - m[1] > 0) caselle[pos[0]][pos[1] - 1] = null;
+                            else caselle[pos[0]][pos[1] + 1] = null;
                             caselle[torreSalvata.getPosizione()[0]][torreSalvata.getPosizione()[1]] = torreSalvata;
                         }
                         if (enPassant != 0) {
@@ -178,6 +278,7 @@ public class Bot {
                         caselle[m[0]][m[1]] = pezzoMangiato;
                         if (torreSalvata != null) {
                             if (pos[1] - m[1] > 0) caselle[pos[0]][pos[1] - 1] = null;
+                            else caselle[pos[0]][pos[1] + 1] = null;
                             caselle[torreSalvata.getPosizione()[0]][torreSalvata.getPosizione()[1]] = torreSalvata;
                         }
                         if (enPassant != 0) {
@@ -198,211 +299,52 @@ public class Bot {
         if (colore.equals(Color.white)) return Color.black;
         else return Color.white;
     }
-    
-    private int trovaVantaggio(Pedina[][] caselle, StatoPartita statoPartita) {
-        if (statoPartita == StatoPartita.VITTORIA_BIANCO) {
-            if (colore.equals(Color.white)) return Integer.MAX_VALUE - 10;
-            else return Integer.MIN_VALUE + 10;
-        }
-        if (statoPartita == StatoPartita.VITTORIA_NERO) {
-            if (colore.equals(Color.black)) return Integer.MAX_VALUE - 10;
-            else return Integer.MIN_VALUE + 10;
-        }
-        if (statoPartita != StatoPartita.IN_CORSO) return 0;
 
-        int diffMateriale = Scacchiera.getMaterialeCaselle(caselle, Color.white) - Scacchiera.getMaterialeCaselle(caselle, Color.black);
-        if (colore.equals(Color.black)) diffMateriale *= -1;
-
-        Pedina[][] copiaBot = Scacchiera.getCopiaCaselle(caselle);
-        Pedina[][] copiaAvversario = Scacchiera.getCopiaCaselle(caselle);
-        for (int y = 0; y < 8; y++) {
-            for (int x = 0; x < 8; x++) {
-                if (copiaBot[y][x] != null && !(copiaBot[y][x] instanceof Re) && copiaBot[y][x].getColore().equals(colore)) copiaBot[y][x] = new Alfiere(coloreAvversario(), new int[]{y, x});
-                if (copiaAvversario[y][x] != null && !(copiaAvversario[y][x] instanceof Re) && copiaAvversario[y][x].getColore().equals(coloreAvversario())) copiaAvversario[y][x] = new Alfiere(colore, new int[]{y, x});
-            }
-        }
-
-        int[] registroPedoni = new int[16];
-        int pedoniDoppiBot = 0, pedoniDoppiAvversario = 0;
-
-        int pedoniIsolatiBot = 0;
-        int pedoniIsolatiAvversario = 0;
-
-        for (int col = 0; col < 8; col++) {
-            if (registroPedoni[col] > 0) {
-                boolean isolato = (col == 0 || registroPedoni[col - 1] == 0) && (col == 7 || registroPedoni[col + 1] == 0);
-                if (isolato) pedoniIsolatiBot += registroPedoni[col];
-            }
-            if (registroPedoni[8 + col] > 0) {
-                boolean isolato = (col == 0 || registroPedoni[8 + col - 1] == 0) && (col == 7 || registroPedoni[8 + col + 1] == 0);
-                if (isolato) pedoniIsolatiAvversario += registroPedoni[8 + col];
-            }
-
-            int pedoniBot = 0;
-            int pedoniAvversario = 0;
-
-            for (int row = 0; row < 8; row++) {
-                if (!(caselle[row][col] instanceof Pedone)) continue;
-                if (caselle[row][col].getColore().equals(colore)) pedoniBot++;
-                else pedoniAvversario++;
-            }
-
-            if (pedoniBot > 1) {
-                pedoniDoppiBot += pedoniBot - 1;
-                registroPedoni[col] = pedoniBot;
-            }
-
-            if (pedoniAvversario > 1) {
-                pedoniDoppiAvversario += pedoniAvversario - 1;
-                registroPedoni[8 + col] = pedoniAvversario;
-            }
-        }
-
-        int scaccoBot = 0;
-        int scaccoAvversario = 0;
-        if (Scacchiera.isScaccoReCaselle(caselle, colore)) scaccoBot = 1;
-        if (Scacchiera.isScaccoReCaselle(caselle, coloreAvversario())) scaccoAvversario = 1;
-
-        int vantaggioPosizioneBot = 0;
-        int vantaggioPosizioneAvversario = 0;
-        int pedineProtetteBot = 0;
-        int pedineProtetteAvversario = 0;
-        int mosseDisponibiliBot = 0;
-        int mosseDisponibiliAvversario = 0;
-        int pedineMinacciateBot = 0;
-        int pedineMinacciateAvversario = 0;
-
-        for (int i = 0; i < 8; i++) {
-            for (int j = 0; j < 8; j++) {
-                if (caselle[i][j] == null) continue;
-
-                int[] pos = new int[]{i, j};
-                boolean isBot = caselle[i][j].getColore().equals(colore);
-
-                int vantaggioPosizione = 0;
-                int ri = i + 1;
-                int rj = j + 1;
-                if (ri > 4) ri = 9 - ri;
-                if (rj > 4) rj = 9 - rj;
-                vantaggioPosizione += ri * rj;
-
-                if (caselle[i][j] instanceof Re) {
-                    int col = j;
-                    if (j > 3) col = 7 - j;
-                    vantaggioPosizione = (col - 4) * 15;
-                }
-
-                List<int[]> mosseReali = Scacchiera.selezionaPedinaCaselle(caselle, pos, caselle[i][j].getColore());
-                int mosseDisponibili = 0;
-                if (mosseReali != null) mosseDisponibili = mosseReali.size();
-
-                Pedina[][] copiaGiusta = copiaAvversario;
-                if (isBot) copiaGiusta = copiaBot;
-
-                List<int[]> mosseProtezione = Scacchiera.selezionaPedinaCaselle(copiaGiusta, pos, caselle[i][j].getColore());
-                int pedineProtette = 0;
-                int pedineMinacciate = 0;
-                if (mosseProtezione != null) {
-                    for (int[] m : mosseProtezione) {
-                        Pedina occupante = copiaGiusta[m[0]][m[1]];
-                        if (occupante == null) continue;
-                        if (occupante.getColore().equals(caselle[i][j].getColore())) pedineProtette += occupante.getMateriale();
-                        else pedineMinacciate += occupante.getMateriale();
-                    }
-                }
-
-                if (isBot) {
-                    vantaggioPosizioneBot += vantaggioPosizione;
-                    mosseDisponibiliBot += mosseDisponibili;
-                    pedineProtetteBot += pedineProtette;
-                    pedineMinacciateBot += pedineMinacciate;
-                } else {
-                    vantaggioPosizioneAvversario += vantaggioPosizione;
-                    mosseDisponibiliAvversario += mosseDisponibili;
-                    pedineProtetteAvversario += pedineProtette;
-                    pedineMinacciateAvversario += pedineMinacciate;
-                }
-            }
-        }
-
-        return diffMateriale * 155
-                + (vantaggioPosizioneBot - vantaggioPosizioneAvversario) * 25
-                + (mosseDisponibiliBot - mosseDisponibiliAvversario) * 10
-                + (pedineProtetteBot - pedineProtetteAvversario) * 10
-                + (pedineMinacciateBot - pedineMinacciateAvversario) * 10
-                - (pedoniIsolatiBot - pedoniIsolatiAvversario) * 12
-                - (pedoniDoppiBot - pedoniDoppiAvversario) * 8
-                - scaccoBot * 30
-                + scaccoAvversario * 30;
-    }
-
-    private int trovaVantaggioSemplice(Pedina[][] caselle, StatoPartita statoPartita) {
+    private int evaluation(Pedina[][] caselle, StatoPartita statoPartita) {
         if (statoPartita == StatoPartita.VITTORIA_BIANCO) return colore.equals(Color.white) ? Integer.MAX_VALUE - 10 : Integer.MIN_VALUE + 10;
         if (statoPartita == StatoPartita.VITTORIA_NERO) return colore.equals(Color.black) ? Integer.MAX_VALUE - 10 : Integer.MIN_VALUE + 10;
         if (statoPartita != StatoPartita.IN_CORSO) return 0;
 
-        int diffMateriale = Scacchiera.getMaterialeCaselle(caselle, Color.white) - Scacchiera.getMaterialeCaselle(caselle, Color.black);
-        if (colore.equals(Color.black)) diffMateriale *= -1;
-
-        int vantaggioPosizioneBot = 0;
-        int vantaggioPosizioneAvversario = 0;
-        int pedoniDoppiBot = 0;
-        int pedoniDoppiAvversario = 0;
-        int pedoniIsolatiBot = 0;
-        int pedoniIsolatiAvversario = 0;
-        int scaccoBot = 0;
-        int scaccoAvversario = 0;
-        if (Scacchiera.isScaccoReCaselle(caselle, colore)) scaccoBot = 1;
-        if (Scacchiera.isScaccoReCaselle(caselle, coloreAvversario())) scaccoAvversario = 1;
-        int[] registroPedoni = new int[16];
+        int evalTotale = 0;
 
         for (int i = 0; i < 8; i++) {
             for (int j = 0; j < 8; j++) {
                 if (caselle[i][j] == null) continue;
-
-                int vantaggioPosizione = 0;
-                int ri = i + 1;
-                int rj = j + 1;
-                if (ri > 4) ri = 9 - ri;
-                if (rj > 4) rj = 9 - rj;
-                vantaggioPosizione += ri * rj;
-
-                if (caselle[i][j] instanceof Re) {
-                    int col = j;
-                    if (j > 3) col = 7 - j;
-                    vantaggioPosizione = (col - 4) * 15;
-                }
-
-                boolean isBot = caselle[i][j].getColore().equals(colore);
-                if (isBot) vantaggioPosizioneBot += vantaggioPosizione;
-                else vantaggioPosizioneAvversario += vantaggioPosizione;
-
-                if (caselle[i][j] instanceof Pedone) {
-                    if (isBot) registroPedoni[j]++;
-                    else registroPedoni[8 + j]++;
-                }
+                int evalPedina = evaluationCasella(caselle, i, j);
+                if (caselle[i][j].getColore().equals(colore)) evalTotale += evalPedina;
+                else evalTotale -= evalPedina;
             }
         }
 
-        for (int col = 0; col < 8; col++) {
-            if (registroPedoni[col] > 1) pedoniDoppiBot += registroPedoni[col] - 1;
-            if (registroPedoni[8 + col] > 1) pedoniDoppiAvversario += registroPedoni[8 + col] - 1;
+        return evalTotale;
+    }
 
-            if (registroPedoni[col] > 0) {
-                boolean isolato = (col == 0 || registroPedoni[col - 1] == 0) && (col == 7 || registroPedoni[col + 1] == 0);
-                if (isolato) pedoniIsolatiBot += registroPedoni[col];
+    private int evaluationCasella (Pedina[][]caselle, int i, int j){
+        if (caselle[i][j] == null) return 0;
+        Pedina p = caselle[i][j];
+        int materiale = p.getMateriale();
+        int vantaggioPosizione;
+        String nomePedina = p.getClass().getSimpleName().substring(0, 1);
+        if (p instanceof Regina) nomePedina = "Q";
+        if (p.getColore().equals(Color.white)) vantaggioPosizione = vantaggioCasella.get(nomePedina)[i][j];
+        else vantaggioPosizione = vantaggioCasella.get(nomePedina)[7 - i][7 - j];
+        vantaggioPosizione *= materiale;
+
+        int pedoneDoppio = 0;
+        int pedoneIsolato = 0;
+
+        if (p instanceof Pedone) {
+            vantaggioPosizione *= 2;
+            boolean pedoneSx = false;
+            boolean pedoneDx = false;
+            for (int vert = 0; vert < 8; vert++) {
+                if (!pedoneSx && j > 0 && caselle[vert][j - 1] instanceof Pedone ped && ped.getColore().equals(p.getColore())) pedoneSx = true;
+                if (!pedoneDx && j < 7 && caselle[vert][j + 1] instanceof Pedone ped && ped.getColore().equals(p.getColore())) pedoneDx = true;
+                if (vert != i && caselle[vert][j] instanceof Pedone ped && ped.getColore().equals(p.getColore())) pedoneIsolato += 20 * materiale;
             }
-            if (registroPedoni[8 + col] > 0) {
-                boolean isolato = (col == 0 || registroPedoni[8 + col - 1] == 0) && (col == 7 || registroPedoni[8 + col + 1] == 0);
-                if (isolato) pedoniIsolatiAvversario += registroPedoni[8 + col];
-            }
+            if (!pedoneSx && !pedoneDx) pedoneIsolato = 25 * materiale;
         }
 
-        return diffMateriale  * 100
-                + (vantaggioPosizioneBot - vantaggioPosizioneAvversario) * 25
-                - (pedoniIsolatiBot - pedoniIsolatiAvversario) * 12
-                - (pedoniDoppiBot - pedoniDoppiAvversario) * 8
-                - scaccoBot * 20
-                + scaccoAvversario * 20;
+        return materiale * 150 + vantaggioPosizione - pedoneDoppio - pedoneIsolato;
     }
 }

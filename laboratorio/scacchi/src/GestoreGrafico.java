@@ -590,11 +590,14 @@ public class GestoreGrafico {
     private void mossaBot(Bot bot) {
         if (bot == null) return;
 
-        int[][] m = null;
+        int[][] m = bot.getMossa();
         try {
-            m = bot.muovi();
+            System.out.println(m);
+            scacchiera.selezionaPedina(m[0]);
+            scacchiera.muoviPedina(m[1]);
         }
-        catch (IllegalStateException _) {
+        catch (IllegalStateException e) {
+            System.out.println(e.getMessage());
             labelVittoria.setText("<html><div style='text-align:center;'>Partita interrotta:<br>Il bot non ha trovato mosse</div></html>");
             finePartita();
         }

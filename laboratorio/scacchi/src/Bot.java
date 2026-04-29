@@ -96,14 +96,14 @@ public class Bot {
         return colore;
     }
 
-    public int[][] muovi() {
+    public int[][] getMossa() {
         if (!scacchiera.getTurno().equals(colore)) throw new IllegalStateException("Il bot non può muovere se non è il suo turno");
-        int[][] mossaMigliore = trovaMossaMigliore(scacchiera.getCaselle());
-        if (mossaMigliore != null) {
-            scacchiera.selezionaPedina(mossaMigliore[0]);
-            if (!scacchiera.muoviPedina(mossaMigliore[1])) throw new IllegalStateException("Mossa trovata non valida");
-        }
-        return mossaMigliore;
+//        int[][] mossaMigliore = trovaMossaMigliore(scacchiera.getCaselle());
+//        if (mossaMigliore != null) {
+//            scacchiera.selezionaPedina(mossaMigliore[0]);
+//            if (!scacchiera.muoviPedina(mossaMigliore[1])) throw new IllegalStateException("Mossa trovata non valida");
+//        }
+        return trovaMossaMigliore(scacchiera.getCaselle());
     }
 
     private int mosseTotali(Pedina[][] caselle) {
@@ -156,7 +156,7 @@ public class Bot {
                     if (!Scacchiera.muoviPedinaCaselle(caselle, mosse, pos, m)) continue;
 
                     if (Scacchiera.promozioneInSospesoCaselle(caselle) != null) Scacchiera.promozionePedoneCaselle(caselle, m, 1);
-                    int val = miniMax(caselle, profondita, false, Integer.MIN_VALUE, Integer.MAX_VALUE);
+                    int val = miniMax(caselle, profondita, false, Integer.MIN_VALUE, Integer.MAX_VALUE, coloreAvversario());
 
                     caselle[pos[0]][pos[1]] = pezzoMosso;
                     caselle[m[0]][m[1]] = pezzoMangiato;
@@ -178,26 +178,33 @@ public class Bot {
                 }
             }
         }
+//        if (colore.equals(Color.white)) System.out.print("bianco: ");
+//        else System.out.print("nero: ");
+//        System.out.println(valoreMigliore);
         return mossa;
     }
 
-    private int miniMax(Pedina[][] caselle, int profondita, boolean massimizza, int alpha, int beta) {
-        Color coloreTurno = colore;
-        if (!massimizza) coloreTurno = coloreAvversario();
+    private int miniMax(Pedina[][] caselle, int profondita, boolean massimizza, int alpha, int beta, Color turno) {
+        Color prossimoTurno = Color.white;
+        if (turno.equals(Color.white)) prossimoTurno = Color.black;
 
-        StatoPartita sp = Scacchiera.statoPartitaCaselle(caselle, coloreTurno);
+        StatoPartita sp = Scacchiera.statoPartitaCaselle(caselle, turno);
 
-        if (profondita == 0 || sp != StatoPartita.IN_CORSO) return evaluation(caselle, sp);
+        if (profondita == 0 || sp != StatoPartita.IN_CORSO) {
+            int ev = evaluation(caselle, sp);
+//            System.out.println(ev);
+            return ev;
+        }
 
         if (massimizza) {
             int max = Integer.MIN_VALUE;
 
             for (int i = 0; i < 8; i++) {
                 for (int j = 0; j < 8; j++) {
-                    if (caselle[i][j] == null || !caselle[i][j].getColore().equals(coloreTurno)) continue;
+                    if (caselle[i][j] == null || !caselle[i][j].getColore().equals(turno)) continue;
 
                     int[] pos = new int[]{i, j};
-                    List<int[]> mosse = Scacchiera.selezionaPedinaCaselle(caselle, pos, coloreTurno);
+                    List<int[]> mosse = Scacchiera.selezionaPedinaCaselle(caselle, pos, prossimoTurno);
                     if (mosse == null) continue;
 
                     for (int[] m : mosse) {
@@ -218,7 +225,7 @@ public class Bot {
                         if (!Scacchiera.muoviPedinaCaselle(caselle, mosse, pos, m)) continue;
                         if (Scacchiera.promozioneInSospesoCaselle(caselle) != null) Scacchiera.promozionePedoneCaselle(caselle, m, 1);
 
-                        int val = miniMax(caselle, profondita - 1, false, alpha, beta);
+                        int val = miniMax(caselle, profondita - 1, false, alpha, beta, turno);
                         if (val > max) max = val;
                         if (max > alpha) alpha = max;
 
@@ -246,10 +253,10 @@ public class Bot {
             int min = Integer.MAX_VALUE;
             for (int i = 0; i < 8; i++) {
                 for (int j = 0; j < 8; j++) {
-                    if (caselle[i][j] == null || !caselle[i][j].getColore().equals(coloreTurno)) continue;
+                    if (caselle[i][j] == null || !caselle[i][j].getColore().equals(turno)) continue;
 
                     int[] pos = new int[]{i, j};
-                    List<int[]> mosse = Scacchiera.selezionaPedinaCaselle(caselle, pos, coloreTurno);
+                    List<int[]> mosse = Scacchiera.selezionaPedinaCaselle(caselle, pos, turno);
                     if (mosse == null) continue;
 
                     for (int[] m : mosse) {
@@ -270,7 +277,7 @@ public class Bot {
                         if (!Scacchiera.muoviPedinaCaselle(caselle, mosse, pos, m)) continue;
                         if (Scacchiera.promozioneInSospesoCaselle(caselle) != null) Scacchiera.promozionePedoneCaselle(caselle, m, 1);
 
-                        int val = miniMax(caselle, profondita - 1, true, alpha, beta);
+                        int val = miniMax(caselle, profondita - 1, true, alpha, beta, prossimoTurno);
                         if (val < min) min = val;
                         if (min < beta) beta = min;
 
@@ -301,9 +308,25 @@ public class Bot {
     }
 
     private int evaluation(Pedina[][] caselle, StatoPartita statoPartita) {
-        if (statoPartita == StatoPartita.VITTORIA_BIANCO) return colore.equals(Color.white) ? Integer.MAX_VALUE - 10 : Integer.MIN_VALUE + 10;
-        if (statoPartita == StatoPartita.VITTORIA_NERO) return colore.equals(Color.black) ? Integer.MAX_VALUE - 10 : Integer.MIN_VALUE + 10;
-        if (statoPartita != StatoPartita.IN_CORSO) return 0;
+        if (statoPartita == StatoPartita.VITTORIA_BIANCO) {
+            if (colore.equals(Color.white)) {
+                return Integer.MAX_VALUE - 10;
+            }
+            else {
+                return Integer.MIN_VALUE + 10;
+            }
+        }
+        if (statoPartita == StatoPartita.VITTORIA_NERO) {
+            if (colore.equals(Color.black)) {
+                return Integer.MAX_VALUE - 10;
+            }
+            else {
+                return Integer.MIN_VALUE + 10;
+            }
+        }
+        if (statoPartita != StatoPartita.IN_CORSO) {
+            return 0;
+        }
 
         int evalTotale = 0;
 
@@ -345,6 +368,6 @@ public class Bot {
             if (!pedoneSx && !pedoneDx) pedoneIsolato = 25 * materiale;
         }
 
-        return materiale * 150 + vantaggioPosizione - pedoneDoppio - pedoneIsolato;
+        return materiale * 100 + vantaggioPosizione - pedoneDoppio - pedoneIsolato;
     }
 }

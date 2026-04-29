@@ -522,7 +522,7 @@ public class Scacchiera {
 
     private void cambiaTurno() {
         if (!autoCambioTurno) return;
-        if (turno == Color.white) turno = Color.black;
+        if (turno.equals(Color.white)) turno = Color.black;
         else turno = Color.white;
     }
 

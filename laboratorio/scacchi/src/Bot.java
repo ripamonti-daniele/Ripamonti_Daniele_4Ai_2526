@@ -96,14 +96,14 @@ public class Bot {
         return colore;
     }
 
-    public int[][] getMossa() {
+    public int[][] muovi() {
         if (!scacchiera.getTurno().equals(colore)) throw new IllegalStateException("Il bot non può muovere se non è il suo turno");
-//        int[][] mossaMigliore = trovaMossaMigliore(scacchiera.getCaselle());
-//        if (mossaMigliore != null) {
-//            scacchiera.selezionaPedina(mossaMigliore[0]);
-//            if (!scacchiera.muoviPedina(mossaMigliore[1])) throw new IllegalStateException("Mossa trovata non valida");
-//        }
-        return trovaMossaMigliore(scacchiera.getCaselle());
+        int[][] mossaMigliore = getMossa(scacchiera.getCaselle());
+        if (mossaMigliore != null) {
+            scacchiera.selezionaPedina(mossaMigliore[0]);
+            if (!scacchiera.muoviPedina(mossaMigliore[1])) throw new IllegalStateException("Mossa trovata non valida");
+        }
+        return mossaMigliore;
     }
 
     private int mosseTotali(Pedina[][] caselle) {
@@ -120,13 +120,13 @@ public class Bot {
         return tot;
     }
 
-    private int[][] trovaMossaMigliore(Pedina[][] caselle) {
+    public int[][] getMossa(Pedina[][] caselle) {
         int[][] mossa = null;
         int valoreMigliore = Integer.MIN_VALUE;
 
         int profondita = PROFONDITA - 1;
         int tot = mosseTotali(caselle);
-        if (tot <= 20) profondita++;
+        if (tot <= 20 && !Scacchiera.isScaccoReCaselle(caselle, colore)) profondita++;
         if (tot <= 5) profondita++;
 
         for (int i = 0; i < 8; i++) {
@@ -178,9 +178,6 @@ public class Bot {
                 }
             }
         }
-//        if (colore.equals(Color.white)) System.out.print("bianco: ");
-//        else System.out.print("nero: ");
-//        System.out.println(valoreMigliore);
         return mossa;
     }
 
@@ -190,11 +187,7 @@ public class Bot {
 
         StatoPartita sp = Scacchiera.statoPartitaCaselle(caselle, turno);
 
-        if (profondita == 0 || sp != StatoPartita.IN_CORSO) {
-            int ev = evaluation(caselle, sp);
-//            System.out.println(ev);
-            return ev;
-        }
+        if (profondita == 0 || sp != StatoPartita.IN_CORSO) return evaluation(caselle, sp);
 
         if (massimizza) {
             int max = Integer.MIN_VALUE;
@@ -204,7 +197,7 @@ public class Bot {
                     if (caselle[i][j] == null || !caselle[i][j].getColore().equals(turno)) continue;
 
                     int[] pos = new int[]{i, j};
-                    List<int[]> mosse = Scacchiera.selezionaPedinaCaselle(caselle, pos, prossimoTurno);
+                    List<int[]> mosse = Scacchiera.selezionaPedinaCaselle(caselle, pos, turno);
                     if (mosse == null) continue;
 
                     for (int[] m : mosse) {
@@ -225,7 +218,7 @@ public class Bot {
                         if (!Scacchiera.muoviPedinaCaselle(caselle, mosse, pos, m)) continue;
                         if (Scacchiera.promozioneInSospesoCaselle(caselle) != null) Scacchiera.promozionePedoneCaselle(caselle, m, 1);
 
-                        int val = miniMax(caselle, profondita - 1, false, alpha, beta, turno);
+                        int val = miniMax(caselle, profondita - 1, false, alpha, beta, prossimoTurno);
                         if (val > max) max = val;
                         if (max > alpha) alpha = max;
 

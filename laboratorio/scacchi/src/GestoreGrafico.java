@@ -590,11 +590,10 @@ public class GestoreGrafico {
     private void mossaBot(Bot bot) {
         if (bot == null) return;
 
-        int[][] m = bot.getMossa();
+        int[][] m = null;
         try {
-            System.out.println(m);
-            scacchiera.selezionaPedina(m[0]);
-            scacchiera.muoviPedina(m[1]);
+            m = bot.muovi();
+            if (m == null) System.out.println("mossa non trovata");
         }
         catch (IllegalStateException e) {
             System.out.println(e.getMessage());

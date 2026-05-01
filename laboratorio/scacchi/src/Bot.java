@@ -9,6 +9,7 @@ public class Bot {
     private final Color colore;
     private final int PROFONDITA;
     public static final Map<String, int[][]> vantaggioCasella;
+    private final String[] mossePrecedenti;
 
     static {
         vantaggioCasella = new HashMap<>();
@@ -78,6 +79,17 @@ public class Bot {
                 { 20, 20,  0,  0,  0,  0, 20, 20},
                 { 20, 30, 10,  0,  0, 10, 30, 20}
         });
+
+        vantaggioCasella.put("Rend", new int[][] {
+                {-50,-40,-30,-20,-20,-30,-40,-50},
+                {-30,-20,-10,  0,  0,-10,-20,-30},
+                {-30,-10, 20, 30, 30, 20,-10,-30},
+                {-30,-10, 30, 40, 40, 30,-10,-30},
+                {-30,-10, 30, 40, 40, 30,-10,-30},
+                {-30,-10, 20, 30, 30, 20,-10,-30},
+                {-30,-30,  0,  0,  0,  0,-30,-30},
+                {-50,-30,-30,-30,-30,-30,-30,-50}
+        });
     }
 
     public Bot(Scacchiera scacchiera, Color colore, int profondita) {
@@ -86,6 +98,7 @@ public class Bot {
         this.colore = colore;
         if (profondita < 1 || profondita > 7) throw new IllegalArgumentException("Profondità non valida: max 7 min 1");
         PROFONDITA = profondita;
+        mossePrecedenti = new String[4];
     }
 
     public Bot(Scacchiera scacchiera, Color colore) {
@@ -120,6 +133,13 @@ public class Bot {
         return tot;
     }
 
+    private void aggiungiMossa(String mossa) {
+        for (int i = mossePrecedenti.length - 1; i > 0; i--) {
+            mossePrecedenti[i] = mossePrecedenti[i - 1];
+        }
+        mossePrecedenti[0] = mossa;
+    }
+
     public int[][] getMossa(Pedina[][] caselle) {
         int[][] mossa = null;
         int valoreMigliore = Integer.MIN_VALUE;
@@ -128,6 +148,8 @@ public class Bot {
         int tot = mosseTotali(caselle);
         if (tot <= 20 && !Scacchiera.isScaccoReCaselle(caselle, colore)) profondita++;
         if (tot <= 5) profondita++;
+
+        String stringaMossaMigliore = "";
 
         for (int i = 0; i < 8; i++) {
             for (int j = 0; j < 8; j++) {
@@ -156,7 +178,12 @@ public class Bot {
                     if (!Scacchiera.muoviPedinaCaselle(caselle, mosse, pos, m)) continue;
 
                     if (Scacchiera.promozioneInSospesoCaselle(caselle) != null) Scacchiera.promozionePedoneCaselle(caselle, m, 1);
-                    int val = miniMax(caselle, profondita, false, Integer.MIN_VALUE, Integer.MAX_VALUE, coloreAvversario());
+
+                    String stringaScacchiera = Scacchiera.getStringaScacchieraCaselle(caselle, true);
+                    int val = 0;
+                    if (!(stringaScacchiera.equals(mossePrecedenti[1]) && stringaScacchiera.equals(mossePrecedenti[3]) && mossePrecedenti[0].equals(mossePrecedenti[2]))) {
+                        val = miniMax(caselle, profondita, false, Integer.MIN_VALUE, Integer.MAX_VALUE, coloreAvversario());
+                    }
 
                     caselle[pos[0]][pos[1]] = pezzoMosso;
                     caselle[m[0]][m[1]] = pezzoMangiato;
@@ -174,10 +201,12 @@ public class Bot {
                     if (val > valoreMigliore) {
                         valoreMigliore = val;
                         mossa = new int[][]{{pos[0], pos[1]}, {m[0], m[1]}};
+                        stringaMossaMigliore = stringaScacchiera;
                     }
                 }
             }
         }
+        aggiungiMossa(stringaMossaMigliore);
         return mossa;
     }
 
@@ -187,7 +216,7 @@ public class Bot {
 
         StatoPartita sp = Scacchiera.statoPartitaCaselle(caselle, turno);
 
-        if (profondita == 0 || sp != StatoPartita.IN_CORSO) return evaluation(caselle, sp);
+        if (profondita == 0 || sp != StatoPartita.IN_CORSO) return evaluation(caselle, sp, profondita);
 
         if (massimizza) {
             int max = Integer.MIN_VALUE;
@@ -300,33 +329,26 @@ public class Bot {
         else return Color.white;
     }
 
-    private int evaluation(Pedina[][] caselle, StatoPartita statoPartita) {
+    private int evaluation(Pedina[][] caselle, StatoPartita statoPartita, int profondita) {
         if (statoPartita == StatoPartita.VITTORIA_BIANCO) {
-            if (colore.equals(Color.white)) {
-                return Integer.MAX_VALUE - 10;
-            }
-            else {
-                return Integer.MIN_VALUE + 10;
-            }
+            if (colore.equals(Color.white)) return Integer.MAX_VALUE - 10000 + 10 * profondita;
+            else return Integer.MIN_VALUE + 10000 - 10 * profondita;
         }
         if (statoPartita == StatoPartita.VITTORIA_NERO) {
-            if (colore.equals(Color.black)) {
-                return Integer.MAX_VALUE - 10;
-            }
-            else {
-                return Integer.MIN_VALUE + 10;
-            }
+            if (colore.equals(Color.black)) return Integer.MAX_VALUE - 10000 + 10 * profondita;
+            else return Integer.MIN_VALUE + 10000 - 10 * profondita;
         }
-        if (statoPartita != StatoPartita.IN_CORSO) {
-            return 0;
-        }
+        if (statoPartita != StatoPartita.IN_CORSO) return 0;
 
         int evalTotale = 0;
+        boolean endgame = Scacchiera.getMaterialeCaselle(caselle, colore) <= 13 && Scacchiera.getMaterialeCaselle(caselle, coloreAvversario()) <= 13;
+        if (endgame && Scacchiera.isScaccoReCaselle(caselle, coloreAvversario())) evalTotale += 30;
+        if (endgame && Scacchiera.isScaccoReCaselle(caselle, colore)) evalTotale -= 30;
 
         for (int i = 0; i < 8; i++) {
             for (int j = 0; j < 8; j++) {
                 if (caselle[i][j] == null) continue;
-                int evalPedina = evaluationCasella(caselle, i, j);
+                int evalPedina = evaluationCasella(caselle, i, j, endgame);
                 if (caselle[i][j].getColore().equals(colore)) evalTotale += evalPedina;
                 else evalTotale -= evalPedina;
             }
@@ -335,13 +357,14 @@ public class Bot {
         return evalTotale;
     }
 
-    private int evaluationCasella (Pedina[][]caselle, int i, int j){
+    private int evaluationCasella (Pedina[][]caselle, int i, int j, boolean endgame){
         if (caselle[i][j] == null) return 0;
         Pedina p = caselle[i][j];
         int materiale = p.getMateriale();
         int vantaggioPosizione;
         String nomePedina = p.getClass().getSimpleName().substring(0, 1);
         if (p instanceof Regina) nomePedina = "Q";
+        else if (p instanceof Re && endgame) nomePedina += "end";
         if (p.getColore().equals(Color.white)) vantaggioPosizione = vantaggioCasella.get(nomePedina)[i][j];
         else vantaggioPosizione = vantaggioCasella.get(nomePedina)[7 - i][j];
         vantaggioPosizione *= materiale;

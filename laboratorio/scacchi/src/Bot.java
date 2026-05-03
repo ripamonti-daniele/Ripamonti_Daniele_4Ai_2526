@@ -10,6 +10,7 @@ public class Bot {
     private final int PROFONDITA;
     public static final Map<String, int[][]> vantaggioCasella;
     private final String[] mossePrecedenti;
+    private boolean ricercaAvanzata;
 
     static {
         vantaggioCasella = new HashMap<>();
@@ -92,21 +93,26 @@ public class Bot {
         });
     }
 
-    public Bot(Scacchiera scacchiera, Color colore, int profondita) {
+    public Bot(Scacchiera scacchiera, Color colore, int profondita, boolean ricercaAvanzata) {
         if (scacchiera == null) throw new IllegalArgumentException("La scacchiera non può essere null");
         this.scacchiera = scacchiera;
         this.colore = colore;
         if (profondita < 1 || profondita > 7) throw new IllegalArgumentException("Profondità non valida: max 7 min 1");
         PROFONDITA = profondita;
         mossePrecedenti = new String[4];
-    }
-
-    public Bot(Scacchiera scacchiera, Color colore) {
-        this(scacchiera, colore, 4);
+        this.ricercaAvanzata = ricercaAvanzata;
     }
 
     public Color getColore() {
         return colore;
+    }
+
+    public boolean isRicercaAvanzata() {
+        return ricercaAvanzata;
+    }
+
+    public void setRicercaAvanzata(boolean ricercaAvanzata) {
+        this.ricercaAvanzata = ricercaAvanzata;
     }
 
     public int[][] muovi() {
@@ -145,9 +151,11 @@ public class Bot {
         int valoreMigliore = Integer.MIN_VALUE;
 
         int profondita = PROFONDITA - 1;
-        int tot = mosseTotali(caselle);
-        if (tot <= 20 && !Scacchiera.isScaccoReCaselle(caselle, colore)) profondita++;
-        if (tot <= 5) profondita++;
+        if (ricercaAvanzata) {
+            int tot = mosseTotali(caselle);
+            if (tot <= 20 && !Scacchiera.isScaccoReCaselle(caselle, colore)) profondita++;
+            if (tot <= 5) profondita++;
+        }
 
         String stringaMossaMigliore = "";
 
@@ -384,6 +392,6 @@ public class Bot {
             if (!pedoneSx && !pedoneDx) pedoneIsolato = 25 * materiale;
         }
 
-        return materiale * 100 + vantaggioPosizione - pedoneDoppio - pedoneIsolato;
+        return materiale * 150 + vantaggioPosizione - pedoneDoppio - pedoneIsolato;
     }
 }

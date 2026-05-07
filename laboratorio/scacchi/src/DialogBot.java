@@ -10,22 +10,6 @@ public class DialogBot extends JDialog {
     private boolean ricercaAvanzata;
     private boolean confermato;
 
-    private final Color BLU_NORMALE = new Color(66, 133, 244);
-    private final Color BLU_HOVER = new Color(90, 160, 255);
-    private final Color BLU_DISAB = new Color(150, 180, 230);
-    private final Color ROSSO_NORMALE = new Color(180, 40, 40);
-    private final Color ROSSO_HOVER = new Color(210, 55, 55);
-    private final Color GRIGIO_NORMALE = new Color(60, 60, 60);
-    private final Color GRIGIO_HOVER = new Color(80, 80, 80);
-    private final Color[] DIFF_NORMALE = { new Color(34, 139, 60), new Color(210, 160, 10), new Color(180, 40, 40) };
-    private final Color[] DIFF_HOVER = { new Color(50, 170, 80), new Color(240, 190, 40), new Color(210, 55,55) };
-    private final Color BIANCO_NORMALE = new Color(200, 200, 210);
-    private final Color BIANCO_HOVER = new Color(225, 225,235);
-    private final Color NERO_NORMALE = new Color(50, 50, 55);
-    private final Color NERO_HOVER = new Color(75, 75, 85);
-    private final Color RANDOM_NORMALE = new Color(110, 50, 190);
-    private final Color RANDOM_HOVER = new Color(140, 80, 220);
-
     public DialogBot(int lunghezzaCasella) {
         super();
         difficoltaScelta = -1;
@@ -51,14 +35,14 @@ public class DialogBot extends JDialog {
         btnConferma.setBorderPainted(false);
         btnConferma.setCursor(Cursor.getPredefinedCursor(Cursor.HAND_CURSOR));
         btnConferma.setEnabled(false);
-        btnConferma.setBackground(BLU_DISAB);
+        btnConferma.setBackground(new Color(150, 180, 230));
         btnConferma.setForeground(Color.white);
         btnConferma.addMouseListener(new MouseAdapter() {
             public void mouseEntered(MouseEvent e) {
-                if (btnConferma.isEnabled()) btnConferma.setBackground(BLU_HOVER);
+                if (btnConferma.isEnabled()) btnConferma.setBackground(new Color(90, 160, 255));
             }
             public void mouseExited (MouseEvent e) {
-                if (btnConferma.isEnabled()) btnConferma.setBackground(BLU_NORMALE);
+                if (btnConferma.isEnabled()) btnConferma.setBackground(new Color(66, 133, 244));
             }
         });
         btnConferma.addActionListener(_ -> {
@@ -78,6 +62,8 @@ public class DialogBot extends JDialog {
         panelDiff.setMaximumSize(new Dimension(Integer.MAX_VALUE, 38));
         panelDiff.setAlignmentX(Component.LEFT_ALIGNMENT);
 
+        Color[] DIFF_NORMALE = { new Color(34, 139, 60), new Color(210, 160, 10), new Color(180, 40, 40) };
+        Color[] DIFF_HOVER = { new Color(50, 170, 80), new Color(240, 190, 40), new Color(210, 55,55) };
         for (int i = 0; i < 3; i++) {
             final int idx = i;
             btnDiff[i] = creaToggleBtn(nomiDiff[i], grassetto, DIFF_NORMALE[i], DIFF_HOVER[i], Color.white);
@@ -98,8 +84,8 @@ public class DialogBot extends JDialog {
         centro.add(Box.createVerticalStrut(8));
 
         String[] nomiColore = { "Bianco", "Nero", "Random" };
-        Color[] colNorm = { BIANCO_NORMALE, NERO_NORMALE, RANDOM_NORMALE };
-        Color[] colHov = { BIANCO_HOVER, NERO_HOVER, RANDOM_HOVER };
+        Color[] colNorm = { new Color(200, 200, 210), new Color(50, 50, 55), new Color(110, 50, 190) };
+        Color[] colHov = { new Color(225, 225,235), new Color(75, 75, 85), new Color(140, 80, 220) };
         Color[] colTesto = { new Color(30, 30, 40), Color.white, Color.white };
         JButton[] btnColore = new JButton[3];
 
@@ -147,7 +133,7 @@ public class DialogBot extends JDialog {
         toggleRicerca.setBorderPainted(false);
         toggleRicerca.setContentAreaFilled(false);
         toggleRicerca.setOpaque(true);
-        toggleRicerca.setBackground(GRIGIO_NORMALE);
+        toggleRicerca.setBackground(new Color(60, 60, 60));
         toggleRicerca.setForeground(Color.white);
         toggleRicerca.setCursor(Cursor.getPredefinedCursor(Cursor.HAND_CURSOR));
         toggleRicerca.setPreferredSize(new Dimension(90, 32));
@@ -159,10 +145,10 @@ public class DialogBot extends JDialog {
         });
         toggleRicerca.addMouseListener(new MouseAdapter() {
             public void mouseEntered(MouseEvent e) {
-                toggleRicerca.setBackground(GRIGIO_HOVER);
+                toggleRicerca.setBackground(new Color(80, 80, 80));
             }
             public void mouseExited(MouseEvent e) {
-                toggleRicerca.setBackground(GRIGIO_NORMALE);
+                toggleRicerca.setBackground(new Color(60, 60, 60));
             }
         });
         centro.add(toggleRicerca);
@@ -180,22 +166,22 @@ public class DialogBot extends JDialog {
 
         add(centro, BorderLayout.CENTER);
 
-        JButton btnAnnulla = creaToggleBtn("Annulla", grassetto, ROSSO_NORMALE, ROSSO_HOVER, Color.white);
+        JButton btnAnnulla = creaToggleBtn("Annulla", grassetto, new Color(180, 40, 40), new Color(210, 55, 55), Color.white);
         btnAnnulla.setEnabled(true);
         btnAnnulla.addActionListener(_ -> dispose());
 
         JPanel panelBottoni = new JPanel(new GridLayout(1, 2, 10, 0));
         panelBottoni.setBorder(BorderFactory.createEmptyBorder(10, 15, 12, 15));
+        panelBottoni.setPreferredSize(new Dimension(0, 60));
         panelBottoni.add(btnAnnulla);
         panelBottoni.add(btnConferma);
         add(panelBottoni, BorderLayout.SOUTH);
 
-        setSize(Math.max(420, lunghezzaCasella * 5), Math.max(390, lunghezzaCasella * 4));
-        setMinimumSize(new Dimension(400, 400));
+        setSize(lunghezzaCasella * 11 / 2, lunghezzaCasella * 9 / 2);
+        setMinimumSize(new Dimension(500, 450));
         setLocationRelativeTo(null);
         setVisible(true);
     }
-
 
     private JButton creaToggleBtn(String testo, Font f, Color norm, Color hov, Color fg) {
         JButton btn = new JButton(testo);
@@ -229,7 +215,7 @@ public class DialogBot extends JDialog {
     private void aggiornaConferma(JButton btnConferma) {
         boolean pronto = difficoltaScelta != -1 && coloreScelta != null;
         btnConferma.setEnabled(pronto);
-        btnConferma.setBackground(pronto ? BLU_NORMALE : BLU_DISAB);
+        btnConferma.setBackground(pronto ? new Color(66, 133, 244) : new Color(150, 180, 230));
     }
 
     public boolean isConfermato(){

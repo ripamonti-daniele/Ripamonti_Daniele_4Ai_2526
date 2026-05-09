@@ -28,7 +28,7 @@ public class DialogBot extends JDialog {
         centro.setLayout(new BoxLayout(centro, BoxLayout.Y_AXIS));
         centro.setBorder(BorderFactory.createEmptyBorder(15, 15, 5, 15));
 
-        JButton btnConferma = new JButton("Conferma");
+        JButton btnConferma = new JButton("Gioca");
         btnConferma.setFont(grassetto);
         btnConferma.setFocusPainted(false);
         btnConferma.setOpaque(true);

@@ -35,7 +35,6 @@ public class GestoreGrafico {
     private final JTextArea nomeBianco;
     private final JTextArea nomeNero;
     private final JButton btnBot;
-    private final JButton btnRimuoviBot;
     private final JButton btnTimer;
     private final TimerGrafico timerBianco;
     private final TimerGrafico timerNero;
@@ -92,11 +91,11 @@ public class GestoreGrafico {
         timerNero = new TimerGrafico(0, 10, 0, 0, Color.black, Color.white);
         materialeBianco = new JLabelCustom(null, Color.white);
         materialeNero = new JLabelCustom(null, Color.black);
-        btnGioca = new JButtonCustom("<html><div style='text-align:center;'>Gioca</div></html>", 0, lunghezzaCasella * 4 - lunghezzaCasella / 2, lunghezzaCasella * 2, lunghezzaCasella, new Color(30, 100, 210), new Color(15, 60, 160), new Color(50, 130, 240), new Color(25, 90, 190), new Color(10, 40, 120), Color.white);
+        btnGioca = new JButtonCustom("<html><div style='text-align:center;'>Gioca in persona</div></html>", 0, lunghezzaCasella * 4 - lunghezzaCasella / 2, lunghezzaCasella * 2, lunghezzaCasella, new Color(30, 100, 210), new Color(15, 60, 160), new Color(50, 130, 240), new Color(25, 90, 190), new Color(10, 40, 120), Color.white);
         btnRotazioneScacchiera = new JButtonCustom("<html><div style='text-align:center;'>Ruota<br>On</div></html>", 0, lunghezzaCasella * 4 - lunghezzaCasella * 3 / 2 - lunghezzaCasella / 15, lunghezzaCasella * 2, lunghezzaCasella, new Color(60, 60, 70), new Color(35, 35, 42), new Color(80, 80, 95), new Color(55, 55, 68), new Color(20, 20, 26), Color.white);
         btnTimer = new JButtonCustom("<html><div style='text-align:center;'>Imposta timer</div></html>", 0, lunghezzaCasella * 3 / 2 - lunghezzaCasella / 15 * 2, lunghezzaCasella * 2, lunghezzaCasella, new Color(240, 120, 20), new Color(200, 75, 10), new Color(255, 150, 50), new Color(225, 100, 30), new Color(160, 50, 5), Color.white);
         btnBot = new JButtonCustom("<html><div style='text-align:center;'>Gioca contro<br>un bot</div></html>", 0, lunghezzaCasella * 4 + lunghezzaCasella / 2 + lunghezzaCasella / 15, lunghezzaCasella * 2, lunghezzaCasella, new Color(34, 139, 60), new Color(20, 100, 40), new Color(50, 170, 80), new Color(30, 130, 55), new Color(10, 70, 25), Color.white);
-        btnRimuoviBot = new JButtonCustom("<html><div style='text-align:center;'>Rimuovi bot</div></html>", 0, lunghezzaCasella * 5 + lunghezzaCasella / 2 + lunghezzaCasella / 15 * 2, lunghezzaCasella * 2, lunghezzaCasella, new Color(200, 40, 40), new Color(160, 20, 20), new Color(230, 70, 70), new Color(185, 40, 40), new Color(110, 10, 10), Color.white);
+//        btnRimuoviBot = new JButtonCustom("<html><div style='text-align:center;'>Rimuovi bot</div></html>", 0, lunghezzaCasella * 5 + lunghezzaCasella / 2 + lunghezzaCasella / 15 * 2, lunghezzaCasella * 2, lunghezzaCasella, new Color(200, 40, 40), new Color(160, 20, 20), new Color(230, 70, 70), new Color(185, 40, 40), new Color(110, 10, 10), Color.white);
         btnSpostamenti = new BottoneSpostamento[4];
         for (int i = 0; i < 4; i++) btnSpostamenti[i] = new BottoneSpostamento(i + 1, lunghezzaScacchiera - lunghezzaCasella / 2 * (4 - i) - lunghezzaCasella / 15 * (4 - i), lunghezzaScacchiera + lunghezzaCasella / 8, lunghezzaCasella / 2);
 
@@ -135,14 +134,11 @@ public class GestoreGrafico {
         setListenerSpostamenti();
         aggiornaBtnSpostamento();
 
-        btnRimuoviBot.setEnabled(false);
-
         panelInfo.add(btnGioca);
         panelInfo.add(btnRotazioneScacchiera);
         panelInfo.add(nomeBianco);
         panelInfo.add(nomeNero);
         panelInfo.add(btnBot);
-        panelInfo.add(btnRimuoviBot);
         panelInfo.add(labelVittoria);
         panelInfo.add(timerBianco);
         panelInfo.add(timerNero);
@@ -168,33 +164,17 @@ public class GestoreGrafico {
                 Color colore = d.getColoreBot();
                 boolean avanzata = d.isRicercaAvanzata();
                 bot = new Bot(scacchiera, colore, difficolta, avanzata);
-                btnRimuoviBot.setEnabled(true);
-                btnRotazioneScacchiera.setText("<html><div style='text-align:center;'>Ruota<br>Off</div></html>");
-                btnRotazioneScacchiera.setEnabled(false);
-                String diff = switch (difficolta) {
-                    case 2 -> "Facile";
-                    case 3 -> "Medio";
-                    case 4 -> "Difficile";
-                    default -> "";
-                };
                 if (colore.equals(Color.white)) {
-                    nomeBianco.setText("Bot " + diff);
-                    nomeNero.setText("Giocatore 2");
+                    if (nomeBianco.getText().equals("Giocatore 1")) nomeBianco.setText("Bot");
+                    if (nomeNero.getText().equals("Bot")) nomeNero.setText("Giocatore 2");
                 }
                 else {
-                    nomeNero.setText("Bot " + diff);
-                    nomeBianco.setText("Giocatore 1");
+                    if (nomeNero.getText().equals("Giocatore 2")) nomeNero.setText("Bot");
+                    if (nomeBianco.getText().equals("Bot")) nomeBianco.setText("Giocatore 1");
                 }
+                btnRotazioneScacchiera.setText("<html><div style='text-align:center;'>Ruota<br>Off</div></html>");
+                gioca();
             }
-        });
-
-        btnRimuoviBot.addActionListener(_ -> {
-            if (bot.getColore().equals(Color.white)) nomeBianco.setText("Giocatore 1");
-            else nomeNero.setText("Giocatore 2");
-            bot = null;
-            btnRimuoviBot.setEnabled(false);
-            if (rotazioneScacchiera) btnRotazioneScacchiera.setText("<html><div style='text-align:center;'>Ruota<br>On</div></html>");
-            btnRotazioneScacchiera.setEnabled(true);
         });
     }
 
@@ -285,12 +265,13 @@ public class GestoreGrafico {
         disegna();
         labelVittoria.setText(null);
         btnGioca.setEnabled(false);
-        btnGioca.setText("<html>Gioca ancora</html>");
         partitaInCorso = true;
         mossaMostrata = 0;
         aggiornaBtnSpostamento();
-        nomeBianco.setText(nomeBianco.getText().trim());
-        nomeNero.setText(nomeNero.getText().trim());
+        if (nomeBianco.getText().equals("Bot")) nomeBianco.setText("Giocatore 1");
+        else nomeBianco.setText(nomeBianco.getText().trim());
+        if (nomeNero.getText().equals("Bot")) nomeNero.setText("Giocatore 2");
+        else nomeNero.setText(nomeNero.getText().trim());
         if (nomeBianco.getText().isEmpty()) nomeBianco.setText("Giocatore 1");
         if (nomeNero.getText().isEmpty()) nomeNero.setText("Giocatore 2");
         if (nomeBianco.getText().equals(nomeNero.getText())) {
@@ -309,7 +290,6 @@ public class GestoreGrafico {
         timerNero.reset();
         timerBianco.start();
         btnBot.setEnabled(false);
-        btnRimuoviBot.setEnabled(false);
         aggiornaLabelMateriale();
 
         if (bot != null && Color.white.equals(bot.getColore())) {
@@ -372,8 +352,8 @@ public class GestoreGrafico {
         timerNero.setForeground(timerNero.getTextColor());
         btnTimer.setEnabled(true);
         btnBot.setEnabled(true);
-        if (bot != null) btnRimuoviBot.setEnabled(true);
-        else btnRotazioneScacchiera.setEnabled(true);
+        btnRotazioneScacchiera.setEnabled(true);
+        if (rotazioneScacchiera) btnRotazioneScacchiera.setText("<html><div style='text-align:center;'>Ruota<br>On</div></html>");
     }
 
     private void aggiornaScacchiera(String s) {

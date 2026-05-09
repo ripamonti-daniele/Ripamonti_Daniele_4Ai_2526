@@ -21,7 +21,7 @@ public class JButtonCustom extends JButton {
         setContentAreaFilled(false);
         setFocusPainted(false);
         setBorderPainted(false);
-        setBorder(null);
+        setBorder(BorderFactory.createEmptyBorder(10, 10, 10, 10));
         setOpaque(false);
         setCursor(new Cursor(Cursor.HAND_CURSOR));
         setFont(new Font("Segoe UI", Font.BOLD, height / 4));

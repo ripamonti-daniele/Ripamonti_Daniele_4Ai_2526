@@ -8,12 +8,21 @@ public class DialogBot extends JDialog {
     private int difficoltaScelta;
     private Color coloreScelta;
     private boolean ricercaAvanzata;
+    private boolean random;
     private boolean confermato;
+
+    private static int difficoltaSceltaDefault = -1;
+    private static Color coloreSceltaDefault = null;
+    private static boolean ricercaAvanzataDefault = false;
+    private static boolean randomDefault = false;
 
     public DialogBot(int lunghezzaCasella) {
         super();
-        difficoltaScelta = -1;
-        coloreScelta = null;
+        difficoltaScelta = difficoltaSceltaDefault;
+        coloreScelta = coloreSceltaDefault;
+        ricercaAvanzata = ricercaAvanzataDefault;
+        random = randomDefault;
+
         setIconImage(new ImageIcon(new ImageIcon("img/chess.png").getImage().getScaledInstance(30, 30, Image.SCALE_SMOOTH)).getImage());
         setTitle("Impostazioni Bot");
         setModal(true);
@@ -47,6 +56,10 @@ public class DialogBot extends JDialog {
         });
         btnConferma.addActionListener(_ -> {
             confermato = true;
+            difficoltaSceltaDefault = difficoltaScelta;
+            coloreSceltaDefault = coloreScelta;
+            ricercaAvanzataDefault = ricercaAvanzata;
+            randomDefault = random;
             dispose();
         });
 
@@ -56,18 +69,22 @@ public class DialogBot extends JDialog {
         centro.add(lblDiff);
         centro.add(Box.createVerticalStrut(8));
 
-        String[] nomiDiff = { "Facile", "Media", "Difficile" };
-        JButton[] btnDiff = new JButton[3];
-        JPanel panelDiff = new JPanel(new GridLayout(1, 3, 8, 0));
+        String[] nomiDiff = { "Facile", "Media", "Difficile", "Estrema" };
+        JButton[] btnDiff = new JButton[4];
+        JPanel panelDiff = new JPanel(new GridLayout(1, 4, 8, 0));
         panelDiff.setMaximumSize(new Dimension(Integer.MAX_VALUE, 38));
         panelDiff.setAlignmentX(Component.LEFT_ALIGNMENT);
 
-        Color[] DIFF_NORMALE = { new Color(34, 139, 60), new Color(210, 160, 10), new Color(180, 40, 40) };
-        Color[] DIFF_HOVER = { new Color(50, 170, 80), new Color(240, 190, 40), new Color(210, 55,55) };
-        for (int i = 0; i < 3; i++) {
+        Color[] DIFF_NORMALE = { new Color(34, 139, 60), new Color(210, 160, 10), new Color(180, 40, 40), new Color(0, 30, 100)  };
+        Color[] DIFF_HOVER = { new Color(50, 170, 80), new Color(240, 190, 40), new Color(210, 55, 55), new Color(10, 55, 140) };
+        for (int i = 0; i < 4; i++) {
             final int idx = i;
             btnDiff[i] = creaToggleBtn(nomiDiff[i], grassetto, DIFF_NORMALE[i], DIFF_HOVER[i], Color.white);
             btnDiff[i].addActionListener(_ -> {
+                if (idx == 3 && difficoltaScelta != 5) {
+                    int risposta = JOptionPane.showConfirmDialog(DialogBot.this, "<html><div style='text-align:center;'>Attenzione: in questa difficoltà il bot può richiedere<br>oltre 1 minuto per effettuare alcune mosse</div></html>", "Difficoltà Estrema", JOptionPane.OK_CANCEL_OPTION, JOptionPane.WARNING_MESSAGE);
+                    if (risposta != JOptionPane.OK_OPTION) return;
+                }
                 difficoltaScelta = idx + 2;
                 selezionaBtn(btnDiff, idx, DIFF_NORMALE, null);
                 aggiornaConferma(btnConferma);
@@ -77,7 +94,7 @@ public class DialogBot extends JDialog {
         centro.add(panelDiff);
         centro.add(Box.createVerticalStrut(18));
 
-        JLabel lblColore = new JLabel("Colore Bot");
+        JLabel lblColore = new JLabel("Colore");
         lblColore.setFont(titolo);
         lblColore.setAlignmentX(Component.LEFT_ALIGNMENT);
         centro.add(lblColore);
@@ -98,9 +115,16 @@ public class DialogBot extends JDialog {
             btnColore[i] = creaToggleBtn(nomiColore[i], grassetto, colNorm[i], colHov[i], colTesto[i]);
             btnColore[i].addActionListener(_ -> {
                 switch(idx) {
-                    case 0 -> coloreScelta = Color.white;
-                    case 1 -> coloreScelta = Color.black;
+                    case 0 -> {
+                        random = false;
+                        coloreScelta = Color.white;
+                    }
+                    case 1 -> {
+                        random = false;
+                        coloreScelta = Color.black;
+                    }
                     case 2 -> {
+                        random = true;
                         Random r = new Random();
                         if (r.nextBoolean()) coloreScelta = Color.white;
                         else coloreScelta = Color.black;
@@ -120,7 +144,7 @@ public class DialogBot extends JDialog {
         centro.add(lblRicerca);
         centro.add(Box.createVerticalStrut(4));
 
-        JLabel lblDescRicerca = new JLabel("<html>Abilita algoritmi di ricerca più profondi per mosse più precise.</html>");
+        JLabel lblDescRicerca = new JLabel("<html>In alcune situazioni abilita algoritmi di ricerca più profondi per mosse più precise ma con tempi di attesa maggiori.</html>");
         lblDescRicerca.setFont(normale);
         lblDescRicerca.setForeground(new Color(90, 90, 90));
         lblDescRicerca.setAlignmentX(Component.LEFT_ALIGNMENT);
@@ -140,7 +164,7 @@ public class DialogBot extends JDialog {
         toggleRicerca.setMaximumSize(new Dimension(90, 32));
         toggleRicerca.setAlignmentX(Component.LEFT_ALIGNMENT);
         toggleRicerca.addItemListener(_ -> {
-            ricercaAvanzata = toggleRicerca.isSelected();
+            ricercaAvanzata = !ricercaAvanzata;
             toggleRicerca.setText(ricercaAvanzata ? "On" : "Off");
         });
         toggleRicerca.addMouseListener(new MouseAdapter() {
@@ -177,8 +201,23 @@ public class DialogBot extends JDialog {
         panelBottoni.add(btnConferma);
         add(panelBottoni, BorderLayout.SOUTH);
 
+        if (coloreScelta != null || random) {
+            int idx = 0;
+            if (coloreScelta != null && coloreScelta.equals(Color.black)) idx = 1;
+            if (random) {
+                Random r = new Random();
+                if (r.nextBoolean()) coloreScelta = Color.white;
+                else coloreScelta = Color.black;
+                idx = 2;
+            }
+            selezionaBtn(btnColore, idx, colNorm, colTesto);
+        }
+        if (difficoltaScelta != -1) selezionaBtn(btnDiff, difficoltaScelta - 2, DIFF_NORMALE, null);
+        if (ricercaAvanzata) toggleRicerca.setText("On");
+        aggiornaConferma(btnConferma);
+
         setSize(lunghezzaCasella * 11 / 2, lunghezzaCasella * 9 / 2);
-        setMinimumSize(new Dimension(500, 450));
+        setMinimumSize(new Dimension(520, 430));
         setLocationRelativeTo(null);
         setVisible(true);
     }
@@ -221,6 +260,7 @@ public class DialogBot extends JDialog {
     public boolean isConfermato(){
         return confermato;
     }
+
     public boolean isRicercaAvanzata() {
         return ricercaAvanzata;
     }
@@ -231,5 +271,29 @@ public class DialogBot extends JDialog {
 
     public Color getColoreBot() {
         return coloreScelta;
+    }
+
+    public boolean isRandom() {
+        return random;
+    }
+
+    public static String getStringaDifficolta() {
+        switch (difficoltaSceltaDefault) {
+            case 2 -> {
+                return "facile";
+            }
+            case 3 -> {
+                return "medio";
+            }
+            case 4 -> {
+                return "difficile";
+            }
+            case 5 -> {
+                return "estremo";
+            }
+            default -> {
+                return "";
+            }
+        }
     }
 }

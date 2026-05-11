@@ -103,6 +103,10 @@ public class Bot {
         mossePrecedenti = new String[4];
     }
 
+    public int getProfondita() {
+        return PROFONDITA;
+    }
+
     public Color getColore() {
         return colore;
     }
@@ -153,6 +157,7 @@ public class Bot {
     public int[][] getMossa(Pedina[][] caselle) {
         int[][] mossa = null;
         int valoreMigliore = Integer.MIN_VALUE;
+        boolean mattoInUno = false;
 
         int profondita = PROFONDITA - 1;
         if (ricercaAvanzata) {
@@ -195,6 +200,7 @@ public class Bot {
                     int val = 0;
                     if (!(stringaScacchiera.equals(mossePrecedenti[1]) && stringaScacchiera.equals(mossePrecedenti[3]) && mossePrecedenti[0].equals(mossePrecedenti[2]))) {
                         val = miniMax(caselle, profondita, false, Integer.MIN_VALUE, Integer.MAX_VALUE, coloreAvversario());
+                        mattoInUno = (val == Integer.MAX_VALUE - 10000 + 10 * (PROFONDITA - 1));
                     }
 
                     caselle[pos[0]][pos[1]] = pezzoMosso;
@@ -215,8 +221,11 @@ public class Bot {
                         mossa = new int[][]{{pos[0], pos[1]}, {m[0], m[1]}};
                         stringaMossaMigliore = stringaScacchiera;
                     }
+                    if (mattoInUno) break;
                 }
+                if (mattoInUno) break;
             }
+            if (mattoInUno) break;
         }
         aggiungiMossa(stringaMossaMigliore);
         return mossa;

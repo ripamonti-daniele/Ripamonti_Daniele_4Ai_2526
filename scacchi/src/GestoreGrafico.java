@@ -91,11 +91,10 @@ public class GestoreGrafico {
         timerNero = new TimerGrafico(0, 10, 0, 0, Color.black, Color.white);
         materialeBianco = new JLabelCustom(null, Color.white);
         materialeNero = new JLabelCustom(null, Color.black);
-        btnGioca = new JButtonCustom("<html><div style='text-align:center;'>Gioca in persona</div></html>", 0, lunghezzaCasella * 4 - lunghezzaCasella / 2, lunghezzaCasella * 2, lunghezzaCasella, new Color(30, 100, 210), new Color(15, 60, 160), new Color(50, 130, 240), new Color(25, 90, 190), new Color(10, 40, 120), Color.white);
-        btnRotazioneScacchiera = new JButtonCustom("<html><div style='text-align:center;'>Ruota<br>On</div></html>", 0, lunghezzaCasella * 4 - lunghezzaCasella * 3 / 2 - lunghezzaCasella / 15, lunghezzaCasella * 2, lunghezzaCasella, new Color(60, 60, 70), new Color(35, 35, 42), new Color(80, 80, 95), new Color(55, 55, 68), new Color(20, 20, 26), Color.white);
-        btnTimer = new JButtonCustom("<html><div style='text-align:center;'>Imposta timer</div></html>", 0, lunghezzaCasella * 3 / 2 - lunghezzaCasella / 15 * 2, lunghezzaCasella * 2, lunghezzaCasella, new Color(240, 120, 20), new Color(200, 75, 10), new Color(255, 150, 50), new Color(225, 100, 30), new Color(160, 50, 5), Color.white);
-        btnBot = new JButtonCustom("<html><div style='text-align:center;'>Gioca contro<br>un bot</div></html>", 0, lunghezzaCasella * 4 + lunghezzaCasella / 2 + lunghezzaCasella / 15, lunghezzaCasella * 2, lunghezzaCasella, new Color(34, 139, 60), new Color(20, 100, 40), new Color(50, 170, 80), new Color(30, 130, 55), new Color(10, 70, 25), Color.white);
-//        btnRimuoviBot = new JButtonCustom("<html><div style='text-align:center;'>Rimuovi bot</div></html>", 0, lunghezzaCasella * 5 + lunghezzaCasella / 2 + lunghezzaCasella / 15 * 2, lunghezzaCasella * 2, lunghezzaCasella, new Color(200, 40, 40), new Color(160, 20, 20), new Color(230, 70, 70), new Color(185, 40, 40), new Color(110, 10, 10), Color.white);
+        btnTimer = new JButtonCustom("<html><div style='text-align:center;'>Imposta timer</div></html>", 0, lunghezzaCasella * 2 - lunghezzaCasella / 15 - lunghezzaCasella / 30, lunghezzaCasella * 2, lunghezzaCasella, new Color(240, 120, 20), new Color(200, 75, 10), new Color(255, 150, 50), new Color(225, 100, 30), new Color(160, 50, 5), Color.white);
+        btnGioca = new JButtonCustom("<html><div style='text-align:center;'>Gioca in persona</div></html>", 0, lunghezzaCasella * 3 - lunghezzaCasella / 30, lunghezzaCasella * 2, lunghezzaCasella, new Color(30, 100, 210), new Color(15, 60, 160), new Color(50, 130, 240), new Color(25, 90, 190), new Color(10, 40, 120), Color.white);
+        btnBot = new JButtonCustom("<html><div style='text-align:center;'>Gioca contro<br>un bot</div></html>", 0, lunghezzaCasella * 4 + lunghezzaCasella / 30, lunghezzaCasella * 2, lunghezzaCasella, new Color(34, 139, 60), new Color(20, 100, 40), new Color(50, 170, 80), new Color(30, 130, 55), new Color(10, 70, 25), Color.white);
+        btnRotazioneScacchiera = new JButtonCustom("<html><div style='text-align:center;'>Ruota<br>On</div></html>", 0, lunghezzaCasella * 5 + lunghezzaCasella / 15 + lunghezzaCasella / 30, lunghezzaCasella * 2, lunghezzaCasella, new Color(60, 60, 70), new Color(35, 35, 42), new Color(80, 80, 95), new Color(55, 55, 68), new Color(20, 20, 26), Color.white);
         btnSpostamenti = new BottoneSpostamento[4];
         for (int i = 0; i < 4; i++) btnSpostamenti[i] = new BottoneSpostamento(i + 1, lunghezzaScacchiera - lunghezzaCasella / 2 * (4 - i) - lunghezzaCasella / 15 * (4 - i), lunghezzaScacchiera + lunghezzaCasella / 8, lunghezzaCasella / 2);
 
@@ -147,12 +146,24 @@ public class GestoreGrafico {
         panelInfo.add(btnTimer);
 
         //listener gestione utente
-        btnGioca.addActionListener(_ -> gioca());
+        btnGioca.addActionListener(_ -> {
+            bot = null;
+            gioca();
+        });
 
         btnRotazioneScacchiera.addActionListener(_ -> {
             rotazioneScacchiera = !rotazioneScacchiera;
-            if (rotazioneScacchiera) btnRotazioneScacchiera.setText("<html><div style='text-align:center;'>Ruota<br>On</div></html>");
-            else btnRotazioneScacchiera.setText("<html><div style='text-align:center;'>Ruota<br>Off</div></html>");
+            if (rotazioneScacchiera) {
+                btnRotazioneScacchiera.setText("<html><div style='text-align:center;'>Ruota<br>On</div></html>");
+                ruotaScacchiera(scacchiera.getTurno(), true);
+            }
+            else {
+                btnRotazioneScacchiera.setText("<html><div style='text-align:center;'>Ruota<br>Off</div></html>");
+                if (bot != null) {
+                    if (bot.getColore().equals(Color.white)) ruotaScacchiera(Color.black, true);
+                    else ruotaScacchiera(Color.white, true);
+                }
+            }
         });
 
         btnTimer.addActionListener(_ -> new DialogTimer(timerBianco, timerNero, lunghezzaCasella));
@@ -165,13 +176,14 @@ public class GestoreGrafico {
                 boolean avanzata = d.isRicercaAvanzata();
                 bot = new Bot(scacchiera, colore, difficolta, avanzata);
                 if (colore.equals(Color.white)) {
-                    if (nomeBianco.getText().equals("Giocatore 1")) nomeBianco.setText("Bot");
-                    if (nomeNero.getText().equals("Bot")) nomeNero.setText("Giocatore 2");
+                    if (nomeBianco.getText().equals("Giocatore 1") || nomeBianco.getText().startsWith("Bot")) nomeBianco.setText("Bot " + DialogBot.getStringaDifficolta());
+                    if (nomeNero.getText().startsWith("Bot")) nomeNero.setText("Giocatore 2");
                 }
                 else {
-                    if (nomeNero.getText().equals("Giocatore 2")) nomeNero.setText("Bot");
-                    if (nomeBianco.getText().equals("Bot")) nomeBianco.setText("Giocatore 1");
+                    if (nomeNero.getText().equals("Giocatore 2") || nomeNero.getText().startsWith("Bot")) nomeNero.setText("Bot " + DialogBot.getStringaDifficolta());
+                    if (nomeBianco.getText().startsWith("Bot")) nomeBianco.setText("Giocatore 1");
                 }
+                rotazioneScacchiera = false;
                 btnRotazioneScacchiera.setText("<html><div style='text-align:center;'>Ruota<br>Off</div></html>");
                 gioca();
             }
@@ -268,12 +280,16 @@ public class GestoreGrafico {
         partitaInCorso = true;
         mossaMostrata = 0;
         aggiornaBtnSpostamento();
-        if (nomeBianco.getText().equals("Bot")) nomeBianco.setText("Giocatore 1");
-        else nomeBianco.setText(nomeBianco.getText().trim());
-        if (nomeNero.getText().equals("Bot")) nomeNero.setText("Giocatore 2");
-        else nomeNero.setText(nomeNero.getText().trim());
-        if (nomeBianco.getText().isEmpty()) nomeBianco.setText("Giocatore 1");
-        if (nomeNero.getText().isEmpty()) nomeNero.setText("Giocatore 2");
+        nomeBianco.setText(nomeBianco.getText().trim());
+        nomeNero.setText(nomeNero.getText().trim());
+        if (nomeBianco.getText().isEmpty()) {
+            if (bot != null && bot.getColore().equals(Color.white)) nomeBianco.setText("Bot " + DialogBot.getStringaDifficolta());
+            else nomeBianco.setText("Giocatore 1");
+        }
+        if (nomeNero.getText().isEmpty()) {
+            if (bot != null && bot.getColore().equals(Color.black)) nomeNero.setText("Bot " + DialogBot.getStringaDifficolta());
+            nomeNero.setText("Giocatore 2");
+        }
         if (nomeBianco.getText().equals(nomeNero.getText())) {
             char c = 'N';
             if (nomeNero.getText().length() == 15) {
@@ -284,7 +300,6 @@ public class GestoreGrafico {
         }
         nomeBianco.setEditable(false);
         nomeNero.setEditable(false);
-        btnRotazioneScacchiera.setEnabled(false);
         btnTimer.setEnabled(false);
         timerBianco.reset();
         timerNero.reset();
@@ -292,15 +307,7 @@ public class GestoreGrafico {
         btnBot.setEnabled(false);
         aggiornaLabelMateriale();
 
-        if (bot != null && Color.white.equals(bot.getColore())) {
-            int[][] m = bot.muovi();
-            if (m != null) {
-                casellaPosIniziale = numeroToLettera.get(m[0][1] + 1) + (DIMENSIONE - m[0][0]);
-                casellaPosFinale = numeroToLettera.get(m[1][1] + 1) + (DIMENSIONE - m[1][0]);
-            }
-            aggiornaScacchiera(scacchiera.getStringaScacchiera());
-            aggiornaInfoScacchiera();
-        }
+        if (bot != null && Color.white.equals(bot.getColore())) mossaBot();
 
 //        Bot botBianco = new Bot(scacchiera, Color.white);
 //        Bot botNero = new Bot(scacchiera, Color.black);
@@ -352,7 +359,6 @@ public class GestoreGrafico {
         timerNero.setForeground(timerNero.getTextColor());
         btnTimer.setEnabled(true);
         btnBot.setEnabled(true);
-        btnRotazioneScacchiera.setEnabled(true);
         if (rotazioneScacchiera) btnRotazioneScacchiera.setText("<html><div style='text-align:center;'>Ruota<br>On</div></html>");
     }
 
@@ -453,23 +459,7 @@ public class GestoreGrafico {
                     casellaPosIniziale = idCasellaSelOld;
                     aggiornaInfoScacchiera();
                     disegna();
-
-                    if (bot != null) {
-                        new SwingWorker<Void, Void>() {
-                            @Override
-                            protected Void doInBackground() throws Exception {
-                                Thread.sleep(100);
-                                mossaBot();
-                                return null;
-                            }
-
-                            @Override
-                            protected void done() {
-                                aggiornaInfoScacchiera();
-                                disegna();
-                            }
-                        }.execute();
-                    }
+                    mossaBot();
                     return;
                 }
 
@@ -529,52 +519,42 @@ public class GestoreGrafico {
                 for (Casella c : casellePromozione) c.rimuoviImg();
                 aggiornaInfoScacchiera();
                 disegna();
-
-                if (bot != null) {
-                    new SwingWorker<Void, Void>() {
-                        @Override
-                        protected Void doInBackground() throws Exception {
-                            Thread.sleep(100);
-                            mossaBot();
-                            return null;
-                        }
-
-                        @Override
-                        protected void done() {
-                            aggiornaInfoScacchiera();
-                            disegna();
-                        }
-                    }.execute();
-                }
+                mossaBot();
             }
         });
     }
 
-    private void mossaBot(Bot bot) {
+    private void mossaBot() {
         if (bot == null) return;
 
-        int[][] m = null;
-        try {
-            m = bot.muovi();
-            if (m == null) System.out.println("mossa non trovata");
-        }
-        catch (IllegalStateException e) {
-            System.out.println(e.getMessage());
-            labelVittoria.setText("<html><div style='text-align:center;'>Partita interrotta:<br>Il bot non ha trovato mosse</div></html>");
-            finePartita();
-        }
-        if (m != null) {
-            casellaPosIniziale = numeroToLettera.get(m[0][1] + 1) + (DIMENSIONE - m[0][0]);
-            casellaPosFinale = numeroToLettera.get(m[1][1] + 1) + (DIMENSIONE - m[1][0]);
-        }
-        else {
-            labelVittoria.setText("<html><div style='text-align:center;'>Partita interrotta:<br>Il bot non ha trovato mosse</div></html>");
-            finePartita();
-        }
-    }
+        new SwingWorker<int[][], Void>() {
+            @Override
+            protected int[][] doInBackground() throws Exception {
+                Thread.sleep(100);
+                return bot.muovi();
+            }
 
-    private void mossaBot() {
-        mossaBot(bot);
+            @Override
+            protected void done() {
+                try {
+                    int[][] m = get();
+                    if (m != null) {
+                        casellaPosIniziale = numeroToLettera.get(m[0][1] + 1) + (DIMENSIONE - m[0][0]);
+                        casellaPosFinale = numeroToLettera.get(m[1][1] + 1) + (DIMENSIONE - m[1][0]);
+                    }
+                    else {
+                        labelVittoria.setText("<html><div style='text-align:center;'>Partita interrotta:<br>Il bot non ha trovato mosse</div></html>");
+                        finePartita();
+                    }
+                }
+                catch (Exception e) {
+                    labelVittoria.setText("<html><div style='text-align:center;'>Partita interrotta:<br>Il bot non ha trovato mosse</div></html>");
+                    finePartita();
+                }
+                aggiornaInfoScacchiera();
+                disegna();
+            }
+        }.execute();
     }
 
     private void setListenerTimer(TimerGrafico t) {
@@ -666,7 +646,7 @@ public class GestoreGrafico {
     private void ruotaScacchiera(Color c, boolean rotazioneObbligatoria) {
         if (c == null) throw new IllegalArgumentException("Il colore non può essere null");
         if (!c.equals(Color.white) && !c.equals(Color.black)) throw new IllegalArgumentException("Il colore può essere solo bianco o nero");
-        if (!(rotazioneObbligatoria || rotazioneScacchiera) || bot != null && !rotazioneObbligatoria) return;
+        if (!(rotazioneObbligatoria || rotazioneScacchiera)) return;
         gestisciGrafica = true;
         for (int i = 0; i < DIMENSIONE; i++) {
             for (int j = 0; j < DIMENSIONE; j++) {

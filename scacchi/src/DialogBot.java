@@ -101,8 +101,8 @@ public class DialogBot extends JDialog {
         centro.add(Box.createVerticalStrut(8));
 
         String[] nomiColore = { "Bianco", "Nero", "Random" };
-        Color[] colNorm = { new Color(200, 200, 210), new Color(50, 50, 55), new Color(110, 50, 190) };
-        Color[] colHov = { new Color(225, 225,235), new Color(75, 75, 85), new Color(140, 80, 220) };
+        Color[] colNorm = { new Color(200, 200, 210), new Color(50, 50, 55), new Color(105, 105, 105) };
+        Color[] colHov = { new Color(225, 225,235), new Color(75, 75, 85), new Color(130, 130, 130) };
         Color[] colTesto = { new Color(30, 30, 40), Color.white, Color.white };
         JButton[] btnColore = new JButton[3];
 

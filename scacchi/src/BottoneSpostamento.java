@@ -56,10 +56,11 @@ public class BottoneSpostamento extends JButton {
 
     private void impostaImmagine(int dimensione) {
         switch (tipo) {
-            case 1 -> setIcon(creaIconaScalata("img/frecce/frecciaStart.png", dimensione));
-            case 2 -> setIcon(creaIconaScalata("img/frecce/frecciaSx.png", dimensione));
-            case 3 -> setIcon(creaIconaScalata("img/frecce/frecciaDx.png", dimensione));
-            case 4 -> setIcon(creaIconaScalata("img/frecce/frecciaEnd.png", dimensione));
+            case 1 -> setIcon(creaIconaScalata("img/frecce/frecceRotazione.png", dimensione));
+            case 2 -> setIcon(creaIconaScalata("img/frecce/frecciaStart.png", dimensione));
+            case 3 -> setIcon(creaIconaScalata("img/frecce/frecciaSx.png", dimensione));
+            case 4 -> setIcon(creaIconaScalata("img/frecce/frecciaDx.png", dimensione));
+            case 5 -> setIcon(creaIconaScalata("img/frecce/frecciaEnd.png", dimensione));
             default -> {}
         }
     }
@@ -81,18 +82,4 @@ public class BottoneSpostamento extends JButton {
     public boolean isAbilitato() {
         return abilitato;
     }
-
-//    private void disegnaBordo(Color col) {
-//        setBorder(new AbstractBorder() {
-//            @Override
-//            public void paintBorder(Component c, Graphics g, int x, int y, int w, int h) {
-//                Graphics2D g2 = (Graphics2D) g.create();
-//                g2.setRenderingHint(RenderingHints.KEY_ANTIALIASING, RenderingHints.VALUE_ANTIALIAS_ON);
-//                g2.setColor(col);
-//                g2.setStroke(new BasicStroke(2));
-//                g2.drawRoundRect(x, y, w - 1, h - 1, 20, 20);
-//                g2.dispose();
-//            }
-//        });
-//    }
 }

@@ -1,4 +1,5 @@
 import javax.swing.*;
+import javax.swing.border.Border;
 import java.awt.*;
 import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
@@ -63,6 +64,18 @@ public class DialogBot extends JDialog {
             dispose();
         });
 
+        JLabel lblNota = new JLabel("");
+        lblNota.setFont(new Font("Segoe UI", Font.PLAIN, 12));
+        lblNota.setForeground(new Color(140, 90, 0));
+        lblNota.setAlignmentX(Component.LEFT_ALIGNMENT);
+        Border bordoNota = BorderFactory.createCompoundBorder(
+            BorderFactory.createEmptyBorder(0, 0, 12, 0),
+            BorderFactory.createCompoundBorder(
+                BorderFactory.createLineBorder(new Color(210, 160, 10), 1, true),
+                BorderFactory.createEmptyBorder(6, 10, 6, 10)
+            )
+        );
+
         JLabel lblDiff = new JLabel("Difficoltà");
         lblDiff.setFont(titolo);
         lblDiff.setAlignmentX(Component.LEFT_ALIGNMENT);
@@ -81,9 +94,13 @@ public class DialogBot extends JDialog {
             final int idx = i;
             btnDiff[i] = creaToggleBtn(nomiDiff[i], grassetto, DIFF_NORMALE[i], DIFF_HOVER[i], Color.white);
             btnDiff[i].addActionListener(_ -> {
-                if (idx == 3 && difficoltaScelta != 5) {
-                    int risposta = JOptionPane.showConfirmDialog(DialogBot.this, "<html><div style='text-align:center;'>Attenzione: in questa difficoltà il bot può richiedere<br>oltre 1 minuto per effettuare alcune mosse</div></html>", "Difficoltà Estrema", JOptionPane.OK_CANCEL_OPTION, JOptionPane.WARNING_MESSAGE);
-                    if (risposta != JOptionPane.OK_OPTION) return;
+                if (idx == 3) {
+                    lblNota.setText("<html><i>In difficoltà estrema il bot può richiedere oltre 1 minuto per effettuare alcune mosse</i></html>");
+                    lblNota.setBorder(bordoNota);
+                }
+                else {
+                    lblNota.setText("");
+                    lblNota.setBorder(null);
                 }
                 difficoltaScelta = idx + 2;
                 selezionaBtn(btnDiff, idx, DIFF_NORMALE, null);
@@ -93,6 +110,7 @@ public class DialogBot extends JDialog {
         }
         centro.add(panelDiff);
         centro.add(Box.createVerticalStrut(18));
+        centro.add(lblNota);
 
         JLabel lblColore = new JLabel("Colore");
         lblColore.setFont(titolo);
@@ -144,7 +162,7 @@ public class DialogBot extends JDialog {
         centro.add(lblRicerca);
         centro.add(Box.createVerticalStrut(4));
 
-        JLabel lblDescRicerca = new JLabel("<html>In alcune situazioni abilita algoritmi di ricerca più profondi per mosse più precise ma con tempi di attesa maggiori.</html>");
+        JLabel lblDescRicerca = new JLabel("<html>In determinate situazioni abilita algoritmi di ricerca più profondi per mosse più precise ma con tempi di attesa maggiori.</html>");
         lblDescRicerca.setFont(normale);
         lblDescRicerca.setForeground(new Color(90, 90, 90));
         lblDescRicerca.setAlignmentX(Component.LEFT_ALIGNMENT);
@@ -176,17 +194,7 @@ public class DialogBot extends JDialog {
             }
         });
         centro.add(toggleRicerca);
-        centro.add(Box.createVerticalStrut(18));
-
-        JLabel lblNota = new JLabel("<html><i>Maggiore è la difficoltà, maggiore sarà il tempo richiesto dal bot per eseguire ogni mossa.</i></html>");
-        lblNota.setFont(new Font("Segoe UI", Font.PLAIN, 12));
-        lblNota.setForeground(new Color(140, 90, 0));
-        lblNota.setAlignmentX(Component.LEFT_ALIGNMENT);
-        lblNota.setBorder(BorderFactory.createCompoundBorder(
-            BorderFactory.createLineBorder(new Color(210, 160, 10), 1, true),
-            BorderFactory.createEmptyBorder(6, 10, 6, 10)
-        ));
-        centro.add(lblNota);
+        centro.add(Box.createVerticalStrut(5));
 
         add(centro, BorderLayout.CENTER);
 
@@ -216,8 +224,8 @@ public class DialogBot extends JDialog {
         if (ricercaAvanzata) toggleRicerca.setText("On");
         aggiornaConferma(btnConferma);
 
-        setSize(lunghezzaCasella * 11 / 2, lunghezzaCasella * 9 / 2);
-        setMinimumSize(new Dimension(520, 430));
+        setSize(lunghezzaCasella * 5, lunghezzaCasella * 4);
+        setMinimumSize(new Dimension(515, 415));
         setLocationRelativeTo(null);
         setVisible(true);
     }

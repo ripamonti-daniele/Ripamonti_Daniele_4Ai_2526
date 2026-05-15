@@ -2,15 +2,15 @@ import javax.sound.sampled.*;
 import java.io.*;
 
 public class SuoniScacchi {
+    public static boolean audio = true;
 
     public enum Suono {
-        //file da convertire in .waw
-        SPOSTAMENTO("move.mp3"),
-        MANGIATA("capture.mp3"),
-        VITTORIA("checkmate.mp3"),
-//        PAREGGIO("pareggio.wav");
-        SCACCO("check.mp3"),
-        SELEZIONA("select.mp3");
+        SPOSTAMENTO("move.wav"),
+        MANGIATA("capture.wav"),
+        VITTORIA("checkmate.wav"),
+        PAREGGIO("draw.wav"),
+        SCACCO("check.wav");
+//        SELEZIONA("select.wav");
 
         private final String file;
 
@@ -20,15 +20,13 @@ public class SuoniScacchi {
     }
 
     private static void riproduci(Suono suono) {
+        if (!audio) return;
         new Thread(() -> {
             try {
                 AudioInputStream audio = AudioSystem.getAudioInputStream(new File("suoni/" + suono.file));
                 Clip clip = AudioSystem.getClip();
                 clip.open(audio);
                 clip.start();
-                clip.addLineListener(e -> {
-                    if (e.getType() == LineEvent.Type.STOP) clip.close();
-                });
             }
             catch (Exception _) {}
         }).start();
@@ -43,13 +41,13 @@ public class SuoniScacchi {
     public static void vittoria() {
         riproduci(Suono.VITTORIA);
     }
-//    public static void pareggio() {
-//        riproduci(Suono.PAREGGIO);
-//    }
+    public static void pareggio() {
+        riproduci(Suono.PAREGGIO);
+    }
     public static void scacco() {
         riproduci(Suono.SCACCO);
     }
-    public static void seleziona() {
-        riproduci(Suono.SELEZIONA);
-    }
+//    public static void seleziona() {
+//        riproduci(Suono.SELEZIONA);
+//    }
 }

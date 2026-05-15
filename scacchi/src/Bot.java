@@ -199,7 +199,7 @@ public class Bot {
                     String stringaScacchiera = Scacchiera.getStringaScacchieraCaselle(caselle, true);
                     int val = 0;
                     if (!(stringaScacchiera.equals(mossePrecedenti[1]) && stringaScacchiera.equals(mossePrecedenti[3]) && mossePrecedenti[0].equals(mossePrecedenti[2]))) {
-                        val = miniMax(caselle, profondita, false, Integer.MIN_VALUE, Integer.MAX_VALUE, coloreAvversario());
+                        val = miniMax(caselle, profondita, false, Integer.MIN_VALUE, Integer.MAX_VALUE, getColoreAvversario());
                         mattoInUno = (val == Integer.MAX_VALUE - 10000 + 10 * (PROFONDITA - 1));
                     }
 
@@ -299,7 +299,7 @@ public class Bot {
         return val;
     }
 
-    private Color coloreAvversario() {
+    public Color getColoreAvversario() {
         if (colore.equals(Color.white)) return Color.black;
         else return Color.white;
     }
@@ -316,8 +316,8 @@ public class Bot {
         if (statoPartita != StatoPartita.IN_CORSO) return 0;
 
         int evalTotale = 0;
-        boolean endgame = Scacchiera.getMaterialeCaselle(caselle, colore) <= 13 && Scacchiera.getMaterialeCaselle(caselle, coloreAvversario()) <= 13;
-        if (endgame && Scacchiera.isScaccoReCaselle(caselle, coloreAvversario())) evalTotale += 30;
+        boolean endgame = Scacchiera.getMaterialeCaselle(caselle, colore) <= 13 && Scacchiera.getMaterialeCaselle(caselle, getColoreAvversario()) <= 13;
+        if (endgame && Scacchiera.isScaccoReCaselle(caselle, getColoreAvversario())) evalTotale += 30;
         if (endgame && Scacchiera.isScaccoReCaselle(caselle, colore)) evalTotale -= 30;
 
         for (int i = 0; i < 8; i++) {

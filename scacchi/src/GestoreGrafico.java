@@ -40,7 +40,7 @@ public class GestoreGrafico {
     private final TimerGrafico timerNero;
     private final JLabel materialeBianco;
     private final JLabel materialeNero;
-    private final BottoneSpostamento[] btnSpostamenti;
+    private final BottoneOpzioni[] btnOpzioni;
 
     //attributi per la gestione di Casella
     private Color caselleChiare;
@@ -94,8 +94,11 @@ public class GestoreGrafico {
         btnGioca = new JButtonCustom("<html><div style='text-align:center;'>Gioca in persona</div></html>", 0, lunghezzaCasella * 3 - lunghezzaCasella / 30, lunghezzaCasella * 2, lunghezzaCasella, new Color(30, 100, 210), new Color(15, 60, 160), new Color(50, 130, 240), new Color(25, 90, 190), new Color(10, 40, 120), Color.white);
         btnBot = new JButtonCustom("<html><div style='text-align:center;'>Gioca contro<br>un bot</div></html>", 0, lunghezzaCasella * 4 + lunghezzaCasella / 30, lunghezzaCasella * 2, lunghezzaCasella, new Color(20, 110, 45), new Color(10, 75, 28), new Color(35, 140, 65), new Color(15, 95, 38), new Color(5, 50, 15), Color.white);
         btnRotazioneScacchiera = new JButtonCustom("<html><div style='text-align:center;'>Ruota<br>On</div></html>", 0, lunghezzaCasella * 5 + lunghezzaCasella / 15 + lunghezzaCasella / 30, lunghezzaCasella * 2, lunghezzaCasella, new Color(60, 60, 70), new Color(35, 35, 42), new Color(80, 80, 95), new Color(55, 55, 68), new Color(20, 20, 26), Color.white);
-        btnSpostamenti = new BottoneSpostamento[5];
-        for (int i = 0; i < btnSpostamenti.length; i++) btnSpostamenti[i] = new BottoneSpostamento(i + 1, lunghezzaScacchiera - lunghezzaCasella / 2 * (btnSpostamenti.length - i) - lunghezzaCasella / 15 * (btnSpostamenti.length - i), lunghezzaScacchiera + lunghezzaCasella / 8, lunghezzaCasella / 2);
+        btnOpzioni = new BottoneOpzioni[6];
+        for (int i = 0; i < btnOpzioni.length; i++) {
+            if (i < 4) btnOpzioni[i] = new BottoneOpzioni(i + 1, lunghezzaScacchiera - lunghezzaCasella / 2 * (4 - i) - lunghezzaCasella / 15 * (4 - i), lunghezzaScacchiera + lunghezzaCasella / 8, lunghezzaCasella / 2);
+            else btnOpzioni[i] = new BottoneOpzioni(i + 1, lunghezzaScacchiera - lunghezzaCasella * 2 - lunghezzaCasella / 15 * i - lunghezzaCasella / 2 * (i - 3), lunghezzaScacchiera + lunghezzaCasella / 8, lunghezzaCasella / 2);
+        }
 
         //setBounds
         panelInfo.setBounds(lunghezzaScacchiera + lunghezzaCasella * 5 / 4, 0, lunghezzaCasella * 6, lunghezzaScacchiera);
@@ -130,6 +133,8 @@ public class GestoreGrafico {
         aggiornaLabelMateriale();
 
         setListenerSpostamenti();
+        setListenerRotazioneManuale();
+        setListenerAudio();
         aggiornaBtnSpostamento();
 
         panelInfo.add(btnGioca);
@@ -559,19 +564,19 @@ public class GestoreGrafico {
     }
 
     private void setListenerSpostamenti() {
-        for (int i = 1; i < btnSpostamenti.length; i++) {
+        for (int i = 0; i < 4; i++) {
             int ind = i;
-            btnSpostamenti[i].addActionListener(_ -> {
-                if (btnSpostamenti[ind].isAbilitato()) {
+            btnOpzioni[i].addActionListener(_ -> {
+                if (btnOpzioni[ind].isAbilitato()) {
                     switch (ind) {
-                        case 1 -> mossaMostrata = 0;
-                        case 2 -> {
+                        case 0 -> mossaMostrata = 0;
+                        case 1 -> {
                             if (mossaMostrata > 0) mossaMostrata--;
                         }
-                        case 3 -> {
+                        case 2 -> {
                             if (mossaMostrata < scacchiera.getMosse()) mossaMostrata++;
                         }
-                        case 4 -> mossaMostrata = scacchiera.getMosse();
+                        case 3 -> mossaMostrata = scacchiera.getMosse();
                         default -> {}
                     }
                     aggiornaScacchiera(PartitaFileManager.leggiScacchiera(mossaMostrata));
@@ -588,29 +593,41 @@ public class GestoreGrafico {
                 aggiornaBtnSpostamento();
             });
         }
+    }
 
-        btnSpostamenti[0].addActionListener(_ -> {
+    private void setListenerRotazioneManuale() {
+        btnOpzioni[4].addActionListener(_ -> {
             Color c = Color.black;
             if (casellePanel[0][0].getX() > lunghezzaScacchiera / 2) c = Color.white;
             ruotaScacchiera(c, true);
         });
     }
 
+    private void setListenerAudio() {
+        btnOpzioni[5].addActionListener(_ -> {
+            int tipo = btnOpzioni[5].getTipo();
+            if (tipo == 6) tipo++;
+            else if (tipo == 7) tipo--;
+            btnOpzioni[5].impostaImmagine(tipo);
+            SuoniScacchi.audio = !SuoniScacchi.audio;
+        });
+    }
+
     private void aggiornaBtnSpostamento() {
         if (promozione) {
-            for (int n = 1; n < btnSpostamenti.length; n++) btnSpostamenti[n].disabilita();
+            for (int n = 0; n < 4; n++) btnOpzioni[n].disabilita();
             return;
         }
-        for (int n = 1; n < btnSpostamenti.length; n++) btnSpostamenti[n].abilita();
+        for (int n = 0; n < 4; n++) btnOpzioni[n].abilita();
         if (mossaMostrata != scacchiera.getMosse()) infoMossa = false;
         else {
-            btnSpostamenti[3].disabilita();
-            btnSpostamenti[4].disabilita();
+            btnOpzioni[2].disabilita();
+            btnOpzioni[3].disabilita();
             infoMossa = true;
         }
         if (mossaMostrata == 0) {
-            btnSpostamenti[1].disabilita();
-            btnSpostamenti[2].disabilita();
+            btnOpzioni[0].disabilita();
+            btnOpzioni[1].disabilita();
         }
         disegna();
     }
@@ -672,7 +689,7 @@ public class GestoreGrafico {
         for (int i = 0; i < 4; i++) container.add(casellePromozione[i]);
         for (int i = 0; i < DIMENSIONE; i++) for (int j = 0; j < DIMENSIONE; j++) container.add(casellePanel[i][j]);
         container.add(panelInfo);
-        for (BottoneSpostamento b : btnSpostamenti) container.add(b);
+        for (BottoneOpzioni b : btnOpzioni) container.add(b);
         aggiuntoASchermo = true;
     }
 

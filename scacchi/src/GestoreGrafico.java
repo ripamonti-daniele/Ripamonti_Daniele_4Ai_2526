@@ -151,6 +151,10 @@ public class GestoreGrafico {
 
         //listener gestione utente
         btnGioca.addActionListener(_ -> {
+            if (bot != null) {
+                rotazioneScacchiera = true;
+                btnRotazioneScacchiera.setText("<html><div style='text-align:center;'>Ruota<br>On</div></html>");
+            }
             bot = null;
             gioca();
         });
@@ -392,10 +396,6 @@ public class GestoreGrafico {
                 if (p != null && p.getColore().equals(scacchiera.getTurno())) casellaSelezionata = casellePanel[y][x].getId();
                 else casellaSelezionata = null;
 
-                Color coloreAvversario = Color.white;
-                if (scacchiera.getTurno().equals(coloreAvversario)) coloreAvversario = Color.black;
-                int materialeAvversario = scacchiera.getMateriale(coloreAvversario);
-
                 //se la casella selezionata non è null allora seleziona la pedina; se è null prova a spostarla e se non riesce seleziona la pedina dove si intendeva spostare quella selezionata precedentemente
                 if (scacchiera.getCasellaSelezionata() == null || !scacchiera.muoviPedina(pos)) {
                     List<int[]> mosseValide = scacchiera.selezionaPedina(pos);
@@ -428,7 +428,7 @@ public class GestoreGrafico {
                 else {
                     casellaPosFinale = casellePanel[y][x].getId();
                     casellaPosIniziale = idCasellaSelOld;
-                    suonoMossa(coloreAvversario, materialeAvversario);
+                    suonoMossa(scacchiera.getTurno());
                     aggiornaInfoScacchiera();
                     disegna();
                     mossaBot();
@@ -489,6 +489,7 @@ public class GestoreGrafico {
                 promozione = false;
                 posPromozione = null;
                 for (Casella c : casellePromozione) c.rimuoviImg();
+                suonoMossa(scacchiera.getTurno());
                 aggiornaInfoScacchiera();
                 disegna();
                 mossaBot();
@@ -496,18 +497,18 @@ public class GestoreGrafico {
         });
     }
 
-    private void suonoMossa(Color coloreAvversario, int materialeAvversario) {
+    private void suonoMossa(Color coloreAvversario) {
+        if (!SuoniScacchi.audio) return;
         StatoPartita sp = scacchiera.getStatoPartita();
         if (sp == StatoPartita.VITTORIA_BIANCO || sp == StatoPartita.VITTORIA_NERO) SuoniScacchi.vittoria();
         else if (sp == StatoPartita.STALLO || sp == StatoPartita.PAREGGIO_MOSSE_NEUTRE || sp == StatoPartita.PAREGGIO_RIPETIZIONI || sp == StatoPartita.MATERIALE_INSUFFICIENTE) SuoniScacchi.pareggio();
         else if (scacchiera.isScaccoRe(coloreAvversario)) SuoniScacchi.scacco();
-        else if (materialeAvversario > scacchiera.getMateriale(coloreAvversario)) SuoniScacchi.mangiata();
+        else if (scacchiera.getMaterialeMossa(coloreAvversario, scacchiera.getMosse() - 1) > scacchiera.getMateriale(coloreAvversario)) SuoniScacchi.mangiata();
         else SuoniScacchi.spostamento();
     }
 
     private void mossaBot() {
         if (bot == null) return;
-        int materialeAvversario = scacchiera.getMateriale(bot.getColoreAvversario());
 
         new SwingWorker<int[][], Void>() {
             @Override
@@ -535,7 +536,7 @@ public class GestoreGrafico {
                     labelVittoria.setText("<html><div style='text-align:center;'>Partita interrotta:<br>Il bot non ha trovato mosse</div></html>");
                     finePartita();
                 }
-                suonoMossa(bot.getColoreAvversario(), materialeAvversario);
+                suonoMossa(bot.getColoreAvversario());
                 SuoniScacchi.spostamento();
                 aggiornaInfoScacchiera();
                 disegna();

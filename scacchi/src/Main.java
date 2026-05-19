@@ -1,6 +1,4 @@
 //TODO
-// altri suoni da aggiungere
-// tasto abilita / disabilita suoni
 // controllo finale per ottimizzazione codice
 // debug generale
 

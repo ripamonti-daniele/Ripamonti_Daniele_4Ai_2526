@@ -8,9 +8,11 @@ public class SuoniScacchi {
         SPOSTAMENTO("move.wav"),
         MANGIATA("capture.wav"),
         VITTORIA("checkmate.wav"),
-        PAREGGIO("draw.wav"),
-        SCACCO("check.wav");
-//        SELEZIONA("select.wav");
+        FINEPARTITA("game_end.wav"),
+        SCACCO("check.wav"),
+        TEMPO("low_time.wav"),
+        RUOTA("rotate.wav"),
+        MENU("menu.wav");
 
         private final String file;
 
@@ -41,13 +43,19 @@ public class SuoniScacchi {
     public static void vittoria() {
         riproduci(Suono.VITTORIA);
     }
-    public static void pareggio() {
-        riproduci(Suono.PAREGGIO);
+    public static void finePartita() {
+        riproduci(Suono.FINEPARTITA);
     }
     public static void scacco() {
         riproduci(Suono.SCACCO);
     }
-//    public static void seleziona() {
-//        riproduci(Suono.SELEZIONA);
-//    }
+    public static void tempo() {
+        riproduci(Suono.TEMPO);
+    }
+    public static void ruota() {
+        riproduci(Suono.RUOTA);
+    }
+    public static void menu() {
+        riproduci(Suono.MENU);
+    }
 }

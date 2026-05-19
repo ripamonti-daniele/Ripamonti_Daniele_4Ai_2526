@@ -151,6 +151,7 @@ public class GestoreGrafico {
 
         //listener gestione utente
         btnGioca.addActionListener(_ -> {
+            SuoniScacchi.menu();
             if (bot != null) {
                 rotazioneScacchiera = true;
                 btnRotazioneScacchiera.setText("<html><div style='text-align:center;'>Ruota<br>On</div></html>");
@@ -160,6 +161,7 @@ public class GestoreGrafico {
         });
 
         btnRotazioneScacchiera.addActionListener(_ -> {
+            SuoniScacchi.menu();
             rotazioneScacchiera = !rotazioneScacchiera;
             if (rotazioneScacchiera) {
                 btnRotazioneScacchiera.setText("<html><div style='text-align:center;'>Ruota<br>On</div></html>");
@@ -174,9 +176,13 @@ public class GestoreGrafico {
             }
         });
 
-        btnTimer.addActionListener(_ -> new DialogTimer(timerBianco, timerNero, lunghezzaCasella));
+        btnTimer.addActionListener(_ -> {
+            SuoniScacchi.menu();
+            new DialogTimer(timerBianco, timerNero, lunghezzaCasella);
+        });
 
         btnBot.addActionListener(_ -> {
+            SuoniScacchi.menu();
             DialogBot d = new DialogBot(lunghezzaCasella);
             if (d.isConfermato()) {
                 int difficolta = d.getDifficolta();
@@ -501,7 +507,7 @@ public class GestoreGrafico {
         if (!SuoniScacchi.audio) return;
         StatoPartita sp = scacchiera.getStatoPartita();
         if (sp == StatoPartita.VITTORIA_BIANCO || sp == StatoPartita.VITTORIA_NERO) SuoniScacchi.vittoria();
-        else if (sp == StatoPartita.STALLO || sp == StatoPartita.PAREGGIO_MOSSE_NEUTRE || sp == StatoPartita.PAREGGIO_RIPETIZIONI || sp == StatoPartita.MATERIALE_INSUFFICIENTE) SuoniScacchi.pareggio();
+        else if (sp == StatoPartita.STALLO || sp == StatoPartita.PAREGGIO_MOSSE_NEUTRE || sp == StatoPartita.PAREGGIO_RIPETIZIONI || sp == StatoPartita.MATERIALE_INSUFFICIENTE) SuoniScacchi.finePartita();
         else if (scacchiera.isScaccoRe(coloreAvversario)) SuoniScacchi.scacco();
         else if (scacchiera.getMaterialeMossa(coloreAvversario, scacchiera.getMosse() - 1) > scacchiera.getMateriale(coloreAvversario)) SuoniScacchi.mangiata();
         else SuoniScacchi.spostamento();
@@ -514,7 +520,6 @@ public class GestoreGrafico {
             @Override
             protected int[][] doInBackground() throws Exception {
                 Thread.sleep(100);
-                Color coloreAvversario = Color.white;
                 return bot.muovi();
             }
 
@@ -529,11 +534,13 @@ public class GestoreGrafico {
                     }
                     else {
                         labelVittoria.setText("<html><div style='text-align:center;'>Partita interrotta:<br>Il bot non ha trovato mosse</div></html>");
+                        SuoniScacchi.finePartita();
                         finePartita();
                     }
                 }
                 catch (Exception e) {
                     labelVittoria.setText("<html><div style='text-align:center;'>Partita interrotta:<br>Il bot non ha trovato mosse</div></html>");
+                    SuoniScacchi.finePartita();
                     finePartita();
                 }
                 suonoMossa(bot.getColoreAvversario());
@@ -547,6 +554,7 @@ public class GestoreGrafico {
     private void setListenerTimer(TimerGrafico t) {
         t.addPropertyChangeListener("text", _ -> {
             if (!t.isOff() && partitaInCorso && t.getOre() == 0 && t.getMinuti() == 0 && !t.isPaused() && (t.getMinutiDefault() > 0 || t.getSecondi() < 10)) {
+                if (SuoniScacchi.audio && (t.getSecondi() == 59 || t.getSecondi() == 9 && t.getMinutiDefault() == 0)) SuoniScacchi.tempo();
                 if (t.getSecondi() % 2 != 0) t.setForeground(Color.red);
                 else t.setForeground(t.getTextColor());
             }
@@ -559,6 +567,7 @@ public class GestoreGrafico {
                     if (t == timerBianco) testo = nomeNero.getText() + " (nero)";
                     labelVittoria.setText("<html><div style='text-align:center;'>Tempo scaduto:<br>Vince " + testo + "</div></html>");
                 }
+                SuoniScacchi.finePartita();
                 finePartita();
             }
         });
@@ -569,6 +578,7 @@ public class GestoreGrafico {
             int ind = i;
             btnOpzioni[i].addActionListener(_ -> {
                 if (btnOpzioni[ind].isAbilitato()) {
+                    SuoniScacchi.spostamento();
                     switch (ind) {
                         case 0 -> mossaMostrata = 0;
                         case 1 -> {
@@ -598,6 +608,7 @@ public class GestoreGrafico {
 
     private void setListenerRotazioneManuale() {
         btnOpzioni[4].addActionListener(_ -> {
+            SuoniScacchi.ruota();
             Color c = Color.black;
             if (casellePanel[0][0].getX() > lunghezzaScacchiera / 2) c = Color.white;
             ruotaScacchiera(c, true);
@@ -611,6 +622,7 @@ public class GestoreGrafico {
             else if (tipo == 7) tipo--;
             btnOpzioni[5].impostaImmagine(tipo);
             SuoniScacchi.audio = !SuoniScacchi.audio;
+            SuoniScacchi.menu();
         });
     }
 

@@ -154,7 +154,11 @@ public class Bot {
         mossePrecedenti[0] = mossa;
     }
 
-    public int[][] getMossa(Pedina[][] caselle) {
+    public int[][] getMossa() {
+        return getMossa(scacchiera.getCaselle());
+    }
+
+    private int[][] getMossa(Pedina[][] caselle) {
         int[][] mossa = null;
         int valoreMigliore = Integer.MIN_VALUE;
         boolean mattoInUno = false;

@@ -47,6 +47,11 @@ public class DialogTimer extends JDialog {
         JLabel l4 = new JLabel("Guadagno (sec):"); l4.setFont(f); panel.add(l4);
         s4.setFont(f); panel.add(s4);
 
+        s1.addChangeListener(_ -> SuoniScacchi.cambioTempo());
+        s2.addChangeListener(_ -> SuoniScacchi.cambioTempo());
+        s3.addChangeListener(_ -> SuoniScacchi.cambioTempo());
+        s4.addChangeListener(_ -> SuoniScacchi.cambioTempo());
+
         add(panel, BorderLayout.CENTER);
     }
 
@@ -68,6 +73,7 @@ public class DialogTimer extends JDialog {
         btnConferma.addActionListener(_ -> {
             timerBianco.setTimer((int) s1.getValue(), (int) s2.getValue(), (int) s3.getValue(), (int) s4.getValue());
             timerNero.setTimer((int) s1.getValue(), (int) s2.getValue(), (int) s3.getValue(), (int) s4.getValue());
+            SuoniScacchi.conferma();
             dispose();
         });
 
@@ -84,7 +90,10 @@ public class DialogTimer extends JDialog {
             public void mouseEntered(MouseEvent e) { btnAnnulla.setBackground(new Color(80, 80, 80)); }
             public void mouseExited(MouseEvent e) { btnAnnulla.setBackground(new Color(60, 60, 60)); }
         });
-        btnAnnulla.addActionListener(_ -> dispose());
+        btnAnnulla.addActionListener(_ -> {
+            SuoniScacchi.conferma();
+            dispose();
+        });
 
         btnDisattiva = new JButton("Disattiva");
         btnDisattiva.setFont(f);
@@ -102,6 +111,7 @@ public class DialogTimer extends JDialog {
         btnDisattiva.addActionListener(_ -> {
             timerBianco.disattiva();
             timerNero.disattiva();
+            SuoniScacchi.conferma();
             dispose();
         });
 

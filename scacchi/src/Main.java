@@ -29,7 +29,6 @@ void main() {
     Scacchiera scacchiera = new Scacchiera();
     GestoreGrafico gestoreGrafico = new GestoreGrafico(scacchiera, (int) Math.round(height * 0.8), sfondo, new Color(240, 217, 181), new Color(161, 116, 79));
 //    GestoreGrafico gestoreGrafico = new GestoreGrafico(scacchiera, 500, sfondo, new Color(240, 217, 181), new Color(161, 116, 79));
-//    GestoreGrafico gestoreGrafico = new GestoreGrafico(scacchiera, (int) Math.round(height * 0.8));
 
     JPanel contenitore = new JPanel(null);
 

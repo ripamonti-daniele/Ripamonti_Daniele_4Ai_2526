@@ -61,6 +61,7 @@ public class DialogBot extends JDialog {
             coloreSceltaDefault = coloreScelta;
             ricercaAvanzataDefault = ricercaAvanzata;
             randomDefault = random;
+            SuoniScacchi.conferma();
             dispose();
         });
 
@@ -94,6 +95,7 @@ public class DialogBot extends JDialog {
             final int idx = i;
             btnDiff[i] = creaToggleBtn(nomiDiff[i], grassetto, DIFF_NORMALE[i], DIFF_HOVER[i], Color.white);
             btnDiff[i].addActionListener(_ -> {
+                SuoniScacchi.opzioniDialog();
                 if (idx == 3) {
                     lblNota.setText("<html><i>In difficoltà estrema il bot può richiedere oltre 1 minuto per effettuare alcune mosse</i></html>");
                     lblNota.setBorder(bordoNota);
@@ -132,6 +134,7 @@ public class DialogBot extends JDialog {
             final int idx = i;
             btnColore[i] = creaToggleBtn(nomiColore[i], grassetto, colNorm[i], colHov[i], colTesto[i]);
             btnColore[i].addActionListener(_ -> {
+                SuoniScacchi.opzioniDialog();
                 switch(idx) {
                     case 0 -> {
                         random = false;
@@ -182,6 +185,7 @@ public class DialogBot extends JDialog {
         toggleRicerca.setMaximumSize(new Dimension(90, 32));
         toggleRicerca.setAlignmentX(Component.LEFT_ALIGNMENT);
         toggleRicerca.addItemListener(_ -> {
+            SuoniScacchi.opzioniDialog();
             ricercaAvanzata = !ricercaAvanzata;
             toggleRicerca.setText(ricercaAvanzata ? "On" : "Off");
         });
@@ -200,7 +204,10 @@ public class DialogBot extends JDialog {
 
         JButton btnAnnulla = creaToggleBtn("Annulla", grassetto, new Color(180, 40, 40), new Color(210, 55, 55), Color.white);
         btnAnnulla.setEnabled(true);
-        btnAnnulla.addActionListener(_ -> dispose());
+        btnAnnulla.addActionListener(_ -> {
+            SuoniScacchi.conferma();
+            dispose();
+        });
 
         JPanel panelBottoni = new JPanel(new GridLayout(1, 2, 10, 0));
         panelBottoni.setBorder(BorderFactory.createEmptyBorder(10, 15, 12, 15));

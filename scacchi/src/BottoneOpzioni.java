@@ -63,8 +63,9 @@ public class BottoneOpzioni extends JButton {
             case 3 -> setIcon(creaIconaScalata("img/opzioni/frecciaDx.png", dimensione));
             case 4 -> setIcon(creaIconaScalata("img/opzioni/frecciaEnd.png", dimensione));
             case 5 -> setIcon(creaIconaScalata("img/opzioni/frecceRotazione.png", dimensione));
-            case 6 -> setIcon(creaIconaScalata("img/opzioni/sound_on.png", dimensione));
-            case 7 -> setIcon(creaIconaScalata("img/opzioni/sound_off.png", dimensione));
+            case 6 -> setIcon(creaIconaScalata("img/opzioni/bandiera.png", dimensione));
+            case 7 -> setIcon(creaIconaScalata("img/opzioni/sound_on.png", dimensione));
+            case 8 -> setIcon(creaIconaScalata("img/opzioni/sound_off.png", dimensione));
             default -> {}
         }
     }
@@ -106,7 +107,7 @@ public class BottoneOpzioni extends JButton {
     }
 
     public void setTipo(int tipo) {
-        if (tipo < 1 || tipo > 7) throw new IllegalArgumentException("Tipo di immagine non valido (min 1 max 7)");
+        if (tipo < 1 || tipo > 8) throw new IllegalArgumentException("Tipo di immagine non valido (min 1 max 8)");
         this.tipo = tipo;
     }
 }

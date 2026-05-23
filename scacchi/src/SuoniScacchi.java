@@ -15,8 +15,8 @@ public class SuoniScacchi {
         MENU("click1.wav"),
         CONFERMA("click2.wav"),
         CAMBIOTEMPO("click3.wav"),
-        OPZIONIDIALOG("click4.wav");
-//        AUDIOON("audio_on.wav");
+        OPZIONIDIALOG("click4.wav"),
+        AUDIOON("audio_on.wav");
 
         private final String file;
 
@@ -82,7 +82,7 @@ public class SuoniScacchi {
         riproduci(Suono.OPZIONIDIALOG);
     }
 
-//    public static void audioOn() {
-//        riproduci(Suono.AUDIOON);
-//    }
+    public static void audioOn() {
+        riproduci(Suono.AUDIOON);
+    }
 }

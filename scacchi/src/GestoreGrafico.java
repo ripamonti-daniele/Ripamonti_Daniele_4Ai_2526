@@ -90,8 +90,8 @@ public class GestoreGrafico {
         labelVittoria = new JLabelCustom(null, new Color(180,130,20), new Color(140,95,10), font);
         nomeBianco = new JTextAreaCustom("Giocatore 1", 0, lunghezzaScacchiera - lunghezzaCasella / 2,  lunghezzaCasella * 2 + lunghezzaCasella / 2 + lunghezzaCasella / 15, lunghezzaCasella / 2);
         nomeNero = new JTextAreaCustom("Giocatore 2", 0, 0,  lunghezzaCasella * 2 + lunghezzaCasella / 2 + lunghezzaCasella / 15, lunghezzaScacchiera / 16);
-        timerBianco = new TimerGrafico(0, 0, 0, 0, Color.white, Color.black);
-        timerNero = new TimerGrafico(0, 0, 0, 0, Color.black, Color.white);
+        timerBianco = new TimerGrafico(0, 10, 0, 0, Color.white, Color.black);
+        timerNero = new TimerGrafico(0, 10, 0, 0, Color.black, Color.white);
         Font fontPiccolo = new Font("Segoe UI", Font.BOLD, lunghezzaScacchiera / 60);
         materialeBianco = new JLabelCustom(null, Color.white, fontPiccolo);
         materialeNero = new JLabelCustom(null, Color.black, fontPiccolo);
@@ -185,7 +185,7 @@ public class GestoreGrafico {
 
         btnBot.addActionListener(_ -> {
             SuoniScacchi.menu();
-            DialogBot d = new DialogBot(lunghezzaCasella);
+            DialogBot d = new DialogBot(lunghezzaCasella, timerBianco, timerNero);
             if (d.isConfermato()) {
                 int difficolta = d.getDifficolta();
                 Color colore = d.getColoreBot();
@@ -654,7 +654,7 @@ public class GestoreGrafico {
             else if (tipo == 8) tipo--;
             btnOpzioni[6].impostaImmagine(tipo);
             SuoniScacchi.audio = !SuoniScacchi.audio;
-            SuoniScacchi.menu();
+            SuoniScacchi.audioOn();
         });
     }
 

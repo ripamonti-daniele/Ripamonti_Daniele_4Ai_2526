@@ -15,7 +15,7 @@ public class DialogTimer extends JDialog {
     public DialogTimer(TimerGrafico timerBianco, TimerGrafico timerNero, int lunghezzaCasella) {
         super();
         setIconImage(new ImageIcon(new ImageIcon("img/chess.png").getImage().getScaledInstance(30, 30, Image.SCALE_SMOOTH)).getImage());
-        setTitle("Imposta il timer");
+        setTitle("Impostazioni timer");
         setModal(true);
         setResizable(true);
         setLayout(new BorderLayout());

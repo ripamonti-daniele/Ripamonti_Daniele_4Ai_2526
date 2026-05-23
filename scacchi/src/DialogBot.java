@@ -17,7 +17,7 @@ public class DialogBot extends JDialog {
     private static boolean ricercaAvanzataDefault = false;
     private static boolean randomDefault = false;
 
-    public DialogBot(int lunghezzaCasella) {
+    public DialogBot(int lunghezzaCasella, TimerGrafico timerBianco, TimerGrafico timerNero) {
         super();
         difficoltaScelta = difficoltaSceltaDefault;
         coloreScelta = coloreSceltaDefault;
@@ -38,6 +38,7 @@ public class DialogBot extends JDialog {
         centro.setLayout(new BoxLayout(centro, BoxLayout.Y_AXIS));
         centro.setBorder(BorderFactory.createEmptyBorder(15, 15, 5, 15));
 
+        //da rivedere se istanziarlo con creaToggleBtn
         JButton btnConferma = new JButton("Gioca");
         btnConferma.setFont(grassetto);
         btnConferma.setFocusPainted(false);
@@ -202,17 +203,25 @@ public class DialogBot extends JDialog {
 
         add(centro, BorderLayout.CENTER);
 
-        JButton btnAnnulla = creaToggleBtn("Annulla", grassetto, new Color(180, 40, 40), new Color(210, 55, 55), Color.white);
+        JButton btnAnnulla = creaToggleBtn("Annulla", grassetto, new Color(60, 60, 60), new Color(80, 80, 80), Color.white);
         btnAnnulla.setEnabled(true);
         btnAnnulla.addActionListener(_ -> {
             SuoniScacchi.conferma();
             dispose();
         });
 
+        JButton btnTimer = creaToggleBtn("Modifica timer", grassetto, new Color(180, 40, 40), new Color(210, 55, 55), Color.white);
+        btnTimer.setEnabled(true);
+        btnTimer.addActionListener(_ -> {
+            SuoniScacchi.menu();
+            new DialogTimer(timerBianco, timerNero, lunghezzaCasella);
+        });
+
         JPanel panelBottoni = new JPanel(new GridLayout(1, 2, 10, 0));
         panelBottoni.setBorder(BorderFactory.createEmptyBorder(10, 15, 12, 15));
         panelBottoni.setPreferredSize(new Dimension(0, 60));
         panelBottoni.add(btnAnnulla);
+        if (timerBianco != null && timerNero != null) panelBottoni.add(btnTimer);
         panelBottoni.add(btnConferma);
         add(panelBottoni, BorderLayout.SOUTH);
 

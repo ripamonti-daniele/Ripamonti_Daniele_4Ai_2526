@@ -160,6 +160,8 @@ public class GestoreGrafico {
                 btnRotazioneScacchiera.setText("<html><div style='text-align:center;'>Auto rotazione<br>On</div></html>");
             }
             bot = null;
+            if (nomeBianco.getText().startsWith("Bot ")) nomeBianco.setText("Giocatore 1");
+            if (nomeNero.getText().startsWith("Bot ")) nomeNero.setText("Giocatore 2");
             gioca();
         });
 

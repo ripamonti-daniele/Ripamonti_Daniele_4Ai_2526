@@ -18,6 +18,7 @@ public class DialogBot extends JDialog {
     private static boolean randomDefault = false;
 
     public DialogBot(int lunghezzaCasella, TimerGrafico timerBianco, TimerGrafico timerNero) {
+        if (lunghezzaCasella <= 0) throw new IllegalArgumentException("La lunghezza delle casella deve essere maggiore di 0");
         super();
         difficoltaScelta = difficoltaSceltaDefault;
         coloreScelta = coloreSceltaDefault;
@@ -38,31 +39,15 @@ public class DialogBot extends JDialog {
         centro.setLayout(new BoxLayout(centro, BoxLayout.Y_AXIS));
         centro.setBorder(BorderFactory.createEmptyBorder(15, 15, 5, 15));
 
-        //da rivedere se istanziarlo con creaToggleBtn
-        JButton btnConferma = new JButton("Gioca");
-        btnConferma.setFont(grassetto);
-        btnConferma.setFocusPainted(false);
-        btnConferma.setOpaque(true);
-        btnConferma.setBorderPainted(false);
-        btnConferma.setCursor(Cursor.getPredefinedCursor(Cursor.HAND_CURSOR));
+        JButton btnConferma = creaToggleBtn("Gioca", grassetto, new Color(66, 133, 244), new Color(90, 160, 255), Color.white);
         btnConferma.setEnabled(false);
-        btnConferma.setBackground(new Color(150, 180, 230));
-        btnConferma.setForeground(Color.white);
-        btnConferma.addMouseListener(new MouseAdapter() {
-            public void mouseEntered(MouseEvent e) {
-                if (btnConferma.isEnabled()) btnConferma.setBackground(new Color(90, 160, 255));
-            }
-            public void mouseExited (MouseEvent e) {
-                if (btnConferma.isEnabled()) btnConferma.setBackground(new Color(66, 133, 244));
-            }
-        });
         btnConferma.addActionListener(_ -> {
             confermato = true;
             difficoltaSceltaDefault = difficoltaScelta;
             coloreSceltaDefault = coloreScelta;
             ricercaAvanzataDefault = ricercaAvanzata;
             randomDefault = random;
-            SuoniScacchi.conferma();
+            SuoniScacchi.inizioPartita();
             dispose();
         });
 
@@ -70,13 +55,7 @@ public class DialogBot extends JDialog {
         lblNota.setFont(new Font("Segoe UI", Font.PLAIN, 12));
         lblNota.setForeground(new Color(140, 90, 0));
         lblNota.setAlignmentX(Component.LEFT_ALIGNMENT);
-        Border bordoNota = BorderFactory.createCompoundBorder(
-            BorderFactory.createEmptyBorder(0, 0, 12, 0),
-            BorderFactory.createCompoundBorder(
-                BorderFactory.createLineBorder(new Color(210, 160, 10), 1, true),
-                BorderFactory.createEmptyBorder(6, 10, 6, 10)
-            )
-        );
+        Border bordoNota = BorderFactory.createCompoundBorder(BorderFactory.createEmptyBorder(0, 0, 12, 0), BorderFactory.createCompoundBorder(BorderFactory.createLineBorder(new Color(210, 160, 10), 1, true), BorderFactory.createEmptyBorder(6, 10, 6, 10)));
 
         JLabel lblDiff = new JLabel("Difficoltà");
         lblDiff.setFont(titolo);
@@ -90,7 +69,7 @@ public class DialogBot extends JDialog {
         panelDiff.setMaximumSize(new Dimension(Integer.MAX_VALUE, 38));
         panelDiff.setAlignmentX(Component.LEFT_ALIGNMENT);
 
-        Color[] DIFF_NORMALE = { new Color(34, 139, 60), new Color(210, 160, 10), new Color(180, 40, 40), new Color(0, 30, 100)  };
+        Color[] DIFF_NORMALE = { new Color(34, 139, 60), new Color(210, 160, 10), new Color(180, 40, 40), new Color(0, 30, 100) };
         Color[] DIFF_HOVER = { new Color(50, 170, 80), new Color(240, 190, 40), new Color(210, 55, 55), new Color(10, 55, 140) };
         for (int i = 0; i < 4; i++) {
             final int idx = i;
@@ -257,8 +236,12 @@ public class DialogBot extends JDialog {
         btn.setBorder(BorderFactory.createLineBorder(new Color(0, 0, 0, 0), 3, false));
         btn.setCursor(Cursor.getPredefinedCursor(Cursor.HAND_CURSOR));
         btn.addMouseListener(new MouseAdapter() {
-            public void mouseEntered(MouseEvent e) { btn.setBackground(hov); }
-            public void mouseExited (MouseEvent e) { btn.setBackground(norm); }
+            public void mouseEntered(MouseEvent e) {
+                if (btn.isEnabled()) btn.setBackground(hov);
+            }
+            public void mouseExited (MouseEvent e) {
+                if (btn.isEnabled()) btn.setBackground(norm);
+            }
         });
         return btn;
     }
@@ -269,7 +252,6 @@ public class DialogBot extends JDialog {
             btns[j].putClientProperty("selected", sel);
             btns[j].setBackground(normali[j]);
             if (testi != null) btns[j].setForeground(testi[j]);
-
             if (sel) btns[j].setBorder(BorderFactory.createLineBorder(Color.black, 3, false));
             else btns[j].setBorder(BorderFactory.createLineBorder(new Color(0, 0, 0, 0), 3, false));
         }

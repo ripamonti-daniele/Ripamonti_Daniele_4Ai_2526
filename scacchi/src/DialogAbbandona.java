@@ -4,7 +4,6 @@ import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
 
 public class DialogAbbandona extends JDialog {
-
     private boolean confermato = false;
 
     public DialogAbbandona() {
@@ -12,7 +11,7 @@ public class DialogAbbandona extends JDialog {
         setIconImage(new ImageIcon(new ImageIcon("img/chess.png").getImage().getScaledInstance(30, 30, Image.SCALE_SMOOTH)).getImage());
         setTitle("Abbandona");
         setModal(true);
-        setResizable(false);
+        setResizable(true);
         setLayout(new BorderLayout());
         setDefaultCloseOperation(DISPOSE_ON_CLOSE);
 
@@ -30,10 +29,11 @@ public class DialogAbbandona extends JDialog {
         centro.add(lbl, BorderLayout.CENTER);
         add(centro, BorderLayout.CENTER);
 
-        JButton btnSi = creaBtn("Sì", grassetto, new Color(180, 40, 40), new Color(210, 55, 55), Color.white);
-        JButton btnAnnulla = creaBtn("Annulla", grassetto, new Color(60, 60, 60), new Color(90, 90, 90), Color.white);
+        JButton btnAbbandona = creaBtn("Abbandona", grassetto, new Color(180, 40, 40), new Color(210, 55, 55));
+        JButton btnAnnulla = creaBtn("Annulla", grassetto, new Color(60, 60, 60), new Color(90, 90, 90));
 
-        btnSi.addActionListener(_ -> {
+        btnAbbandona.addActionListener(_ -> {
+            SuoniScacchi.finePartita();
             confermato = true;
             dispose();
         });
@@ -47,20 +47,20 @@ public class DialogAbbandona extends JDialog {
         JPanel bottoni = new JPanel(new GridLayout(1, 2, 10, 0));
         bottoni.setBorder(BorderFactory.createEmptyBorder(10, 15, 15, 15));
         bottoni.add(btnAnnulla);
-        bottoni.add(btnSi);
-
+        bottoni.add(btnAbbandona);
         add(bottoni, BorderLayout.SOUTH);
 
         setSize(400, 180);
+        setMinimumSize(new Dimension(400, 180));
         setLocationRelativeTo(null);
         setVisible(true);
     }
 
-    private JButton creaBtn(String testo, Font f, Color norm, Color hover, Color fg) {
+    private JButton creaBtn(String testo, Font f, Color norm, Color hover) {
         JButton btn = new JButton(testo);
         btn.setFont(f);
         btn.setBackground(norm);
-        btn.setForeground(fg);
+        btn.setForeground(Color.white);
         btn.setFocusPainted(false);
         btn.setBorderPainted(false);
         btn.setOpaque(true);

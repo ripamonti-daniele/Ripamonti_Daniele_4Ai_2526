@@ -154,7 +154,7 @@ public class GestoreGrafico {
 
         //listener gestione utente
         btnGioca.addActionListener(_ -> {
-            SuoniScacchi.menu();
+            SuoniScacchi.inizioPartita();
             if (bot != null) {
                 rotazioneScacchiera = true;
                 btnRotazioneScacchiera.setText("<html><div style='text-align:center;'>Auto rotazione<br>On</div></html>");
@@ -658,7 +658,6 @@ public class GestoreGrafico {
             String giocatore = nomeBianco.getText() + " (bianco)";
             if (bot == null && scacchiera.getTurno().equals(Color.black) || bot != null && bot.getColore().equals(Color.white)) giocatore = nomeNero.getText() + " (nero)";
             labelVittoria.setText("<html><div style='text-align:center;'>" + giocatore + "<br>ha abbandonato</div></html>");
-            SuoniScacchi.finePartita();
             finePartita();
         });
     }

@@ -13,6 +13,9 @@ public class DialogTimer extends JDialog {
     private JButton btnDisattiva;
 
     public DialogTimer(TimerGrafico timerBianco, TimerGrafico timerNero, int lunghezzaCasella) {
+        if (lunghezzaCasella <= 0) throw new IllegalArgumentException("La lunghezza delle casella deve essere maggiore di 0");
+        if (timerBianco == null) throw new IllegalArgumentException("Il timer bianco non può essere null");
+        if (timerNero == null) throw new IllegalArgumentException("Il timer nero non può essere null");
         super();
         setIconImage(new ImageIcon(new ImageIcon("img/chess.png").getImage().getScaledInstance(30, 30, Image.SCALE_SMOOTH)).getImage());
         setTitle("Impostazioni timer");
@@ -56,8 +59,8 @@ public class DialogTimer extends JDialog {
     }
 
     private void creaBottoni(TimerGrafico timerBianco, TimerGrafico timerNero, Font f) {
-        btnConferma = new JButton("Conferma");
         Insets margin = new Insets(4, 8, 4, 8);
+        btnConferma = new JButton("Conferma");
         btnConferma.setFont(f);
         btnConferma.setMargin(margin);
         btnConferma.setBackground(new Color(66, 133, 244));

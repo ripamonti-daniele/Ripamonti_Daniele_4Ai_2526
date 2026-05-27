@@ -8,6 +8,7 @@ public class SuoniScacchi {
         SPOSTAMENTO("move.wav"),
         MANGIATA("capture.wav"),
         VITTORIA("checkmate.wav"),
+        INIZIOPARTITA("game_start.wav"),
         FINEPARTITA("game_end.wav"),
         SCACCO("check.wav"),
         TEMPO("low_time.wav"),
@@ -48,6 +49,10 @@ public class SuoniScacchi {
 
     public static void vittoria() {
         riproduci(Suono.VITTORIA);
+    }
+
+    public static void inizioPartita() {
+        riproduci(Suono.INIZIOPARTITA);
     }
 
     public static void finePartita() {

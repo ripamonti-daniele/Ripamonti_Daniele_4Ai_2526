@@ -1,4 +1,6 @@
 //TODO
+// singleton GestoreGrafico
+// javadoc
 // controllo finale per ottimizzazione codice
 // debug generale
 

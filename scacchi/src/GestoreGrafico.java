@@ -55,6 +55,7 @@ public class GestoreGrafico {
     private boolean ultimaMossa;
     private String idEnPassant;
 
+    //fai singleton
     public GestoreGrafico(Scacchiera scacchiera, int lunghezzaScacchiera, ImageIcon[] immagini, Color sfondo, Color caselleChiare, Color caselleScure) {
         if (scacchiera == null) throw new IllegalArgumentException("La scacchiera non può essere null");
         this.scacchiera = scacchiera;
@@ -101,9 +102,10 @@ public class GestoreGrafico {
         btnBot = new JButtonCustom("<html><div style='text-align:center;'>Gioca contro<br>un bot</div></html>", 0, lunghezzaCasella * 4 + lunghezzaCasella / 30, lunghezzaCasella * 2, lunghezzaCasella, new Color(20, 110, 45), new Color(10, 75, 28), new Color(35, 140, 65), new Color(15, 95, 38), new Color(5, 50, 15), Color.white);
         btnRotazioneScacchiera = new JButtonCustom("<html><div style='text-align:center;'>Auto rotazione<br>On</div></html>", 0, lunghezzaCasella * 5 + lunghezzaCasella / 15 + lunghezzaCasella / 30, lunghezzaCasella * 2, lunghezzaCasella, new Color(60, 60, 70), new Color(35, 35, 42), new Color(80, 80, 95), new Color(55, 55, 68), new Color(20, 20, 26), Color.white);
         btnOpzioni = new BottoneOpzioni[7];
+        BottoneOpzioni.TipoImmagine[] tipi = { BottoneOpzioni.TipoImmagine.FRECCIASTART, BottoneOpzioni.TipoImmagine.FRECCIASX, BottoneOpzioni.TipoImmagine.FRECCIADX, BottoneOpzioni.TipoImmagine.FRECCIAEND, BottoneOpzioni.TipoImmagine.FRECCEROTAZIONE, BottoneOpzioni.TipoImmagine.BANDIERA, BottoneOpzioni.TipoImmagine.SOUNDON, BottoneOpzioni.TipoImmagine.SOUNDOFF };
         for (int i = 0; i < btnOpzioni.length; i++) {
-            if (i < 4) btnOpzioni[i] = new BottoneOpzioni(i + 1, lunghezzaScacchiera - lunghezzaCasella / 2 * (4 - i), lunghezzaScacchiera + lunghezzaCasella / 8, lunghezzaCasella / 2);
-            else btnOpzioni[i] = new BottoneOpzioni(i + 1, lunghezzaScacchiera - lunghezzaCasella * 2 - lunghezzaCasella / 2 * (i - 3), lunghezzaScacchiera + lunghezzaCasella / 8, lunghezzaCasella / 2);
+            if (i < 4) btnOpzioni[i] = new BottoneOpzioni(tipi[i], lunghezzaScacchiera - lunghezzaCasella / 2 * (4 - i), lunghezzaScacchiera + lunghezzaCasella / 8, lunghezzaCasella / 2);
+            else btnOpzioni[i] = new BottoneOpzioni(tipi[i], lunghezzaScacchiera - lunghezzaCasella * 2 - lunghezzaCasella / 2 * (i - 3), lunghezzaScacchiera + lunghezzaCasella / 8, lunghezzaCasella / 2);
         }
 
         //setBounds
@@ -664,9 +666,9 @@ public class GestoreGrafico {
 
     private void setListenerAudio() {
         btnOpzioni[6].addActionListener(_ -> {
-            int tipo = btnOpzioni[6].getTipo();
-            if (tipo == 7) tipo++;
-            else if (tipo == 8) tipo--;
+            BottoneOpzioni.TipoImmagine tipo = btnOpzioni[6].getTipo();
+            if (tipo == BottoneOpzioni.TipoImmagine.SOUNDON) tipo = BottoneOpzioni.TipoImmagine.SOUNDOFF;
+            else if (tipo == BottoneOpzioni.TipoImmagine.SOUNDOFF) tipo = BottoneOpzioni.TipoImmagine.SOUNDON;
             btnOpzioni[6].impostaImmagine(tipo);
             SuoniScacchi.audio = !SuoniScacchi.audio;
             SuoniScacchi.audioOn();
@@ -794,7 +796,7 @@ public class GestoreGrafico {
         private final JLabel label;
         private int lunghezzaLato;
         private String id;
-        private casellaClickListener listener;
+        private CasellaListener listener;
         private boolean mossaValida;
 
         private Casella(Boolean pari, int lunghezzaLato, String id) {
@@ -875,7 +877,7 @@ public class GestoreGrafico {
             label.setIcon(null);
         }
 
-        private void setListener(casellaClickListener l) {
+        private void setListener(CasellaListener l) {
             this.listener = l;
         }
 

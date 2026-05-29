@@ -3,9 +3,34 @@ import java.awt.*;
 import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
 
+/**
+ * Dialog modale di conferma per l'abbandono della partita in corso.
+ * <p>
+ * Mostra un messaggio di conferma e due pulsanti: "Abbandona" e "Annulla".
+ * Al termine dell'interazione, il risultato della scelta dell'utente è
+ * consultabile tramite {@link #isConfermato()}.
+ * </p>
+ * <p>
+ * Il dialog è modale: la chiamata al costruttore blocca il thread chiamante
+ * fino alla chiusura della finestra.
+ * </p>
+ */
 public class DialogAbbandona extends JDialog {
+
+    /**
+     * {@code true} se l'utente ha confermato l'abbandono, {@code false}
+     * se ha annullato o chiuso il dialog senza confermare.
+     */
     private boolean confermato = false;
 
+    /**
+     * Costruisce e visualizza il dialog di conferma abbandono.
+     * <p>
+     * Il costruttore inizializza tutti i componenti grafici, registra i listener
+     * sui pulsanti e rende il dialog visibile. Poiché il dialog è modale,
+     * il costruttore ritorna solo dopo che l'utente ha chiuso la finestra.
+     * </p>
+     */
     public DialogAbbandona() {
         super();
         setIconImage(new ImageIcon(new ImageIcon("img/chess.png").getImage().getScaledInstance(30, 30, Image.SCALE_SMOOTH)).getImage());
@@ -56,6 +81,19 @@ public class DialogAbbandona extends JDialog {
         setVisible(true);
     }
 
+    /**
+     * Crea un pulsante stilizzato con effetto hover.
+     * <p>
+     * Il pulsante non mostra bordo né indicatore di focus, ha il cursore
+     * a forma di mano e cambia colore di sfondo al passaggio del mouse.
+     * </p>
+     *
+     * @param testo il testo da visualizzare sul pulsante
+     * @param f     il font da applicare al testo
+     * @param norm  il colore di sfondo nella stato normale
+     * @param hover il colore di sfondo quando il cursore è sopra il pulsante
+     * @return il pulsante configurato
+     */
     private JButton creaBtn(String testo, Font f, Color norm, Color hover) {
         JButton btn = new JButton(testo);
         btn.setFont(f);
@@ -77,6 +115,15 @@ public class DialogAbbandona extends JDialog {
         return btn;
     }
 
+    /**
+     * Indica se l'utente ha confermato l'abbandono della partita.
+     * <p>
+     * Il valore è significativo solo dopo la chiusura del dialog.
+     * </p>
+     *
+     * @return {@code true} se l'utente ha premuto "Abbandona",
+     *         {@code false} se ha premuto "Annulla" o chiuso il dialog
+     */
     public boolean isConfermato() {
         return confermato;
     }

@@ -3,20 +3,69 @@ import java.awt.*;
 import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
 
+/**
+ * Finestra di dialogo modale per la configurazione dei timer di gioco degli scacchi.
+ * <p>
+ * Permette all'utente di impostare ore, minuti, secondi e il guadagno di tempo
+ * per entrambi i timer (bianco e nero). Le modifiche vengono applicate a entrambi
+ * i timer simultaneamente alla conferma.
+ * </p>
+ * <p>
+ * La finestra offre tre azioni:
+ * <ul>
+ *   <li><b>Conferma</b>: applica le impostazioni inserite a entrambi i timer.</li>
+ *   <li><b>Annulla</b>: chiude il dialogo senza modificare i timer.</li>
+ *   <li><b>Disattiva</b>: disattiva entrambi i timer.</li>
+ * </ul>
+ * </p>
+ */
 public class DialogTimer extends JDialog {
+
+    /** Spinner per la selezione delle ore (0–23). */
     private JSpinner s1;
+
+    /** Spinner per la selezione dei minuti (0–59). */
     private JSpinner s2;
+
+    /** Spinner per la selezione dei secondi (0–59, passo 5). */
     private JSpinner s3;
+
+    /**
+     * Spinner per la selezione del guadagno di tempo in secondi
+     * dopo ogni mossa (0–60, passo 5).
+     */
     private JSpinner s4;
+
+    /** Pulsante per confermare e applicare le impostazioni del timer. */
     private JButton btnConferma;
+
+    /** Pulsante per annullare senza salvare le modifiche. */
     private JButton btnAnnulla;
+
+    /** Pulsante per disattivare entrambi i timer. */
     private JButton btnDisattiva;
 
+    /**
+     * Costruisce e visualizza il dialogo di configurazione del timer.
+     * <p>
+     * I valori iniziali degli spinner vengono letti dallo stato corrente
+     * di {@code timerBianco}. Le dimensioni della finestra sono calcolate
+     * proporzionalmente a {@code lunghezzaCasella}.
+     * </p>
+     *
+     * @param timerBianco     il timer del giocatore bianco; non può essere {@code null}
+     * @param timerNero       il timer del giocatore nero; non può essere {@code null}
+     * @param lunghezzaCasella la dimensione in pixel di una casella della scacchiera,
+     *                        usata per calcolare le dimensioni della finestra;
+     *                        deve essere maggiore di 0
+     * @throws IllegalArgumentException se {@code lunghezzaCasella} è ≤ 0,
+     *                                  o se uno dei timer è {@code null}
+     */
     public DialogTimer(TimerGrafico timerBianco, TimerGrafico timerNero, int lunghezzaCasella) {
+        super();
         if (lunghezzaCasella <= 0) throw new IllegalArgumentException("La lunghezza delle casella deve essere maggiore di 0");
         if (timerBianco == null) throw new IllegalArgumentException("Il timer bianco non può essere null");
         if (timerNero == null) throw new IllegalArgumentException("Il timer nero non può essere null");
-        super();
         setIconImage(new ImageIcon(new ImageIcon("img/chess.png").getImage().getScaledInstance(30, 30, Image.SCALE_SMOOTH)).getImage());
         setTitle("Impostazioni timer");
         setModal(true);
@@ -33,6 +82,18 @@ public class DialogTimer extends JDialog {
         setVisible(true);
     }
 
+    /**
+     * Crea e aggiunge al dialogo il pannello centrale con i quattro spinner
+     * per la configurazione del tempo.
+     * <p>
+     * Ogni modifica agli spinner riproduce un suono tramite
+     * {@link SuoniScacchi#cambioTempo()}.
+     * </p>
+     *
+     * @param tg il timer da cui leggere i valori predefiniti per gli spinner;
+     *           tipicamente il timer del giocatore bianco
+     * @param f  il font da applicare alle etichette e agli spinner
+     */
     private void creaSpinner(TimerGrafico tg, Font f) {
         s1 = new JSpinner(new SpinnerNumberModel(tg.getOreDefault(), 0, 23, 1));
         s2 = new JSpinner(new SpinnerNumberModel(tg.getMinutiDefault(), 0, 59, 1));
@@ -58,6 +119,21 @@ public class DialogTimer extends JDialog {
         add(panel, BorderLayout.CENTER);
     }
 
+    /**
+     * Crea e aggiunge al dialogo il pannello inferiore con i pulsanti
+     * di azione: Annulla, Disattiva e Conferma.
+     * <p>
+     * Ogni pulsante include un effetto hover sul colore di sfondo e
+     * riproduce un suono di conferma tramite {@link SuoniScacchi#conferma()}
+     * alla pressione.
+     * </p>
+     *
+     * @param timerBianco il timer del giocatore bianco su cui applicare
+     *                    le modifiche o la disattivazione
+     * @param timerNero   il timer del giocatore nero su cui applicare
+     *                    le modifiche o la disattivazione
+     * @param f           il font da applicare ai pulsanti
+     */
     private void creaBottoni(TimerGrafico timerBianco, TimerGrafico timerNero, Font f) {
         Insets margin = new Insets(4, 8, 4, 8);
         btnConferma = new JButton("Conferma");

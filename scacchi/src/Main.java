@@ -1,9 +1,3 @@
-//TODO
-// singleton GestoreGrafico
-// javadoc
-// controllo finale per ottimizzazione codice
-// debug generale
-
 import scacchiera_pedine.PartitaFileManager;
 import scacchiera_pedine.Scacchiera;
 import javax.swing.*;
@@ -18,7 +12,6 @@ void main() {
     int height = screenSize.height - screenInsets.top - screenInsets.bottom;
 
     Color sfondo = new Color(120, 72, 48);
-//    new Color(193, 154, 107) new Color(181, 140, 90) new Color(120, 72, 48)
 
     JFrame frame = new JFrame("Scacchi");
     frame.setLayout(null);
@@ -28,9 +21,7 @@ void main() {
     frame.getContentPane().setBackground(sfondo);
     frame.setIconImage(new ImageIcon(new ImageIcon("img/chess.png").getImage().getScaledInstance(30, 30, Image.SCALE_SMOOTH)).getImage());
 
-    Scacchiera scacchiera = new Scacchiera();
-    GestoreGrafico gestoreGrafico = new GestoreGrafico(scacchiera, (int) Math.round(height * 0.8), sfondo, new Color(240, 217, 181), new Color(161, 116, 79));
-//    GestoreGrafico gestoreGrafico = new GestoreGrafico(scacchiera, 500, sfondo, new Color(240, 217, 181), new Color(161, 116, 79));
+    GestoreGrafico gestoreGrafico = new GestoreGrafico(new Scacchiera(), (int) Math.round(height * 0.8), sfondo, new Color(240, 217, 181), new Color(161, 116, 79));
 
     JPanel contenitore = new JPanel(null);
 

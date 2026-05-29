@@ -5,21 +5,94 @@ import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
 import java.util.Random;
 
+/**
+ * Dialog modale per la configurazione di una partita contro il Bot.
+ * <p>
+ * Permette all'utente di scegliere la difficoltà del Bot, il colore dei pezzi
+ * e se abilitare la ricerca avanzata. Le ultime scelte effettuate vengono
+ * memorizzate in campi statici e riproposte come default alla successiva apertura.
+ * </p>
+ * <p>
+ * Il dialog è modale: il costruttore blocca il thread chiamante fino alla chiusura
+ * della finestra. Al termine, i risultati della configurazione sono consultabili
+ * tramite i metodi getter.
+ * </p>
+ */
 public class DialogBot extends JDialog {
+
+    /**
+     * La difficoltà selezionata dall'utente per questa sessione.
+     * I valori possibili sono: 2 (Facile), 3 (Media), 4 (Difficile), 5 (Estrema).
+     * Il valore {@code -1} indica che non è stata ancora effettuata una scelta.
+     */
     private int difficoltaScelta;
+
+    /**
+     * Il colore scelto dall'utente per il Bot in questa sessione
+     * ({@link Color#white} o {@link Color#black}).
+     * {@code null} se non è ancora stato scelto.
+     */
     private Color coloreScelta;
+
+    /**
+     * Indica se la modalità di ricerca avanzata è abilitata per questa sessione.
+     */
     private boolean ricercaAvanzata;
+
+    /**
+     * Indica se il colore del Bot è stato scelto in modalità casuale.
+     */
     private boolean random;
+
+    /**
+     * Indica se l'utente ha confermato la configurazione premendo "Gioca".
+     */
     private boolean confermato;
 
+    /**
+     * Ultimo valore di difficoltà confermato, usato come default alla riapertura del dialog.
+     * {@code -1} se non è mai stato confermato.
+     */
     private static int difficoltaSceltaDefault = -1;
+
+    /**
+     * Ultimo colore confermato, usato come default alla riapertura del dialog.
+     * {@code null} se non è mai stato confermato.
+     */
     private static Color coloreSceltaDefault = null;
+
+    /**
+     * Ultimo valore di ricerca avanzata confermato, usato come default alla riapertura.
+     */
     private static boolean ricercaAvanzataDefault = false;
+
+    /**
+     * Indica se l'ultima scelta confermata era in modalità casuale.
+     */
     private static boolean randomDefault = false;
 
+    /**
+     * Costruisce e visualizza il dialog di configurazione del Bot.
+     * <p>
+     * I valori dei campi vengono inizializzati con gli ultimi default confermati,
+     * se disponibili. Il dialog è modale e rimane visibile fino a che l'utente
+     * non preme "Gioca", "Annulla" o chiude la finestra.
+     * </p>
+     *
+     * @param lunghezzaCasella la lunghezza in pixel di una casella della scacchiera,
+     *                         usata per calcolare le dimensioni del dialog;
+     *                         deve essere maggiore di 0
+     * @param timerBianco      il timer grafico del giocatore bianco; se {@code null}
+     *                         (insieme a {@code timerNero}) il pulsante "Modifica timer"
+     *                         non viene mostrato
+     * @param timerNero        il timer grafico del giocatore nero; se {@code null}
+     *                         (insieme a {@code timerBianco}) il pulsante "Modifica timer"
+     *                         non viene mostrato
+     * @throws IllegalArgumentException se {@code lunghezzaCasella} è minore o uguale a 0
+     */
     public DialogBot(int lunghezzaCasella, TimerGrafico timerBianco, TimerGrafico timerNero) {
-        if (lunghezzaCasella <= 0) throw new IllegalArgumentException("La lunghezza delle casella deve essere maggiore di 0");
         super();
+        if (lunghezzaCasella <= 0) throw new IllegalArgumentException("La lunghezza delle casella deve essere maggiore di 0");
         difficoltaScelta = difficoltaSceltaDefault;
         coloreScelta = coloreSceltaDefault;
         ricercaAvanzata = ricercaAvanzataDefault;
@@ -225,6 +298,21 @@ public class DialogBot extends JDialog {
         setVisible(true);
     }
 
+    /**
+     * Crea un pulsante stilizzato con effetto hover.
+     * <p>
+     * Il pulsante ha un bordo trasparente di 3px che diventa nero quando
+     * selezionato tramite {@link #selezionaBtn}, ha il cursore a forma di mano
+     * e cambia colore di sfondo al passaggio del mouse se abilitato.
+     * </p>
+     *
+     * @param testo il testo da visualizzare sul pulsante
+     * @param f     il font da applicare al testo
+     * @param norm  il colore di sfondo nello stato normale
+     * @param hov   il colore di sfondo quando il cursore è sopra il pulsante
+     * @param fg    il colore del testo
+     * @return il pulsante configurato
+     */
     private JButton creaToggleBtn(String testo, Font f, Color norm, Color hov, Color fg) {
         JButton btn = new JButton(testo);
         btn.setFont(f);
@@ -246,6 +334,18 @@ public class DialogBot extends JDialog {
         return btn;
     }
 
+    /**
+     * Aggiorna visivamente un gruppo di pulsanti evidenziando quello selezionato
+     * con un bordo nero e ripristinando gli altri con bordo trasparente.
+     *
+     * @param btns    il gruppo di pulsanti da aggiornare
+     * @param idx     l'indice del pulsante da selezionare
+     * @param normali i colori di sfondo normali per ciascun pulsante,
+     *                paralleli all'array {@code btns}
+     * @param testi   i colori del testo per ciascun pulsante, paralleli
+     *                all'array {@code btns}; può essere {@code null} se
+     *                non si vuole modificare il colore del testo
+     */
     private void selezionaBtn(JButton[] btns, int idx, Color[] normali, Color[] testi) {
         for (int j = 0; j < btns.length; j++) {
             boolean sel = (j == idx);
@@ -257,32 +357,87 @@ public class DialogBot extends JDialog {
         }
     }
 
+    /**
+     * Aggiorna lo stato del pulsante "Gioca" in base alla completezza
+     * della configurazione corrente.
+     * <p>
+     * Il pulsante viene abilitato solo se è stata selezionata sia una difficoltà
+     * che un colore. Il colore di sfondo cambia per riflettere visivamente
+     * lo stato di abilitazione.
+     * </p>
+     *
+     * @param btnConferma il pulsante "Gioca" da aggiornare
+     */
     private void aggiornaConferma(JButton btnConferma) {
         boolean pronto = difficoltaScelta != -1 && coloreScelta != null;
         btnConferma.setEnabled(pronto);
         btnConferma.setBackground(pronto ? new Color(66, 133, 244) : new Color(150, 180, 230));
     }
 
-    public boolean isConfermato(){
+    /**
+     * Indica se l'utente ha confermato la configurazione premendo "Gioca".
+     *
+     * @return {@code true} se l'utente ha confermato, {@code false} altrimenti
+     */
+    public boolean isConfermato() {
         return confermato;
     }
 
+    /**
+     * Indica se la modalità di ricerca avanzata è stata abilitata.
+     *
+     * @return {@code true} se la ricerca avanzata è attiva, {@code false} altrimenti
+     */
     public boolean isRicercaAvanzata() {
         return ricercaAvanzata;
     }
 
+    /**
+     * Restituisce la difficoltà selezionata dall'utente.
+     * <p>
+     * I valori possibili sono: 2 (Facile), 3 (Media), 4 (Difficile), 5 (Estrema).
+     * </p>
+     *
+     * @return la difficoltà scelta, o {@code -1} se non è stata ancora effettuata
+     *         una scelta
+     */
     public int getDifficolta() {
         return difficoltaScelta;
     }
 
+    /**
+     * Restituisce il colore scelto per il Bot.
+     *
+     * @return {@link Color#white} o {@link Color#black} in base alla scelta
+     *         dell'utente (eventualmente determinata casualmente se era stata
+     *         selezionata la modalità Random); {@code null} se non è ancora
+     *         stato scelto
+     */
     public Color getColoreBot() {
         return coloreScelta;
     }
 
+    /**
+     * Indica se il colore del Bot è stato scelto in modalità casuale.
+     *
+     * @return {@code true} se è stata selezionata la modalità Random,
+     *         {@code false} altrimenti
+     */
     public boolean isRandom() {
         return random;
     }
 
+    /**
+     * Restituisce una stringa descrittiva dell'ultimo livello di difficoltà confermato.
+     * <p>
+     * Il valore è basato sull'ultimo default salvato alla conferma del dialog,
+     * indipendentemente dall'istanza corrente.
+     * </p>
+     *
+     * @return la stringa corrispondente alla difficoltà ({@code "facile"},
+     *         {@code "medio"}, {@code "difficile"}, {@code "estremo"}),
+     *         oppure una stringa vuota se nessuna difficoltà è mai stata confermata
+     */
     public static String getStringaDifficolta() {
         switch (difficoltaSceltaDefault) {
             case 2 -> {

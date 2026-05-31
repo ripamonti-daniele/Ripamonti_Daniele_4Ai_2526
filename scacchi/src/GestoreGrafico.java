@@ -8,55 +8,182 @@ import java.util.ArrayList;
 import java.util.Map;
 import java.util.List;
 
+/**
+ * Gestore grafico dell'applicazione scacchistica, implementato come Singleton.
+ * <p>
+ * Gestisce il rendering della scacchiera, l'interazione con l'utente, i timer,
+ * la navigazione delle mosse, la promozione del pedone e la gestione del bot.
+ * Tutti i componenti grafici vengono creati e posizionati alla costruzione;
+ * per renderli visibili è necessario chiamare {@link #mettiASchermo(JPanel)}
+ * o {@link #mettiASchermo(JFrame)}.
+ * </p>
+ * <p>
+ * L'istanza unica si ottiene tramite uno degli overload di {@code getInstance}.
+ * Solo la prima chiamata crea l'istanza; le successive restituiscono sempre
+ * quella già creata ignorando i parametri.
+ * </p>
+ */
 public class GestoreGrafico {
+
+    /** Unica istanza della classe (pattern Singleton). */
+    private static GestoreGrafico instance = null;
+
+    /** Matrice dei pannelli grafici che rappresentano le caselle della scacchiera. */
     private final Casella[][] casellePanel;
+
+    /** Array delle caselle usate per la scelta della pedina in caso di promozione. */
     private final Casella[] casellePromozione;
+
+    /** Riferimento al modello logico della scacchiera. */
     private final Scacchiera scacchiera;
+
+    /** {@code true} se una partita è attualmente in corso. */
     private boolean partitaInCorso;
+
+    /** Indice della mossa attualmente visualizzata nella navigazione storico mosse. */
     private int mossaMostrata;
+
+    /** {@code true} se la rotazione automatica della scacchiera è abilitata. */
     private boolean rotazioneScacchiera;
+
+    /** {@code true} se è in corso una promozione del pedone in attesa di scelta. */
     private boolean promozione;
+
+    /** Posizione sulla scacchiera del pedone in attesa di promozione. */
     private int[] posPromozione;
+
+    /** Larghezza totale della scacchiera in pixel. */
     public final int lunghezzaScacchiera;
+
+    /** Larghezza di una singola casella in pixel ({@code lunghezzaScacchiera / 8}). */
     public final int lunghezzaCasella;
+
+    /** Dimensione della scacchiera (numero di righe e colonne). */
     public static final int DIMENSIONE = Scacchiera.DIMENSIONE;
+
+    /** Array delle icone delle pedine, indicizzato per tipo e colore. */
     private ImageIcon[] immagini;
+
+    /** Separatore usato nella stringa di rappresentazione della scacchiera. */
     private static final String SEP = Scacchiera.getSEP();
-    private static final Map<Integer, String> numeroToLettera = Map.of(1, "A", 2, "B", 3, "C", 4, "D", 5, "E", 6, "F", 7, "G", 8, "H");;
+
+    /** Mappa da indice numerico di colonna alla lettera corrispondente (1→A, ..., 8→H). */
+    private static final Map<Integer, String> numeroToLettera = Map.of(1, "A", 2, "B", 3, "C", 4, "D", 5, "E", 6, "F", 7, "G", 8, "H");
+
+    /** Timestamp in millisecondi dell'ultimo clic su una casella, usato per rilevare il doppio clic. */
     private long ultimoClic;
+
+    /** Intervallo massimo in millisecondi entro cui due clic vengono considerati un doppio clic. */
     private static final long SOGLIA_MS = 250;
+
+    /** {@code true} se i componenti grafici sono già stati aggiunti a un container. */
     private boolean aggiuntoASchermo;
+
+    /** Riferimento al bot avversario; {@code null} se la partita è tra due umani. */
     private Bot bot;
+
+    /** Worker Swing usato per calcolare la mossa del bot in background. */
     private SwingWorker<int[][], Void> workerBot;
 
+    /** Pannello laterale contenente i controlli di gioco (timer, bottoni, nomi, ecc.). */
     private final JPanel panelInfo;
+
+    /** Bottone per avviare una partita tra due giocatori umani. */
     private final JButton btnGioca;
+
+    /** Bottone per attivare/disattivare la rotazione automatica della scacchiera. */
     private final JButton btnRotazioneScacchiera;
+
+    /** Etichetta che mostra il risultato finale della partita (vittoria, pareggio, abbandono). */
     private final JLabel labelVittoria;
+
+    /** Area di testo per il nome del giocatore bianco. */
     private final JTextArea nomeBianco;
+
+    /** Area di testo per il nome del giocatore nero. */
     private final JTextArea nomeNero;
+
+    /** Bottone per configurare e avviare una partita contro il bot. */
     private final JButton btnBot;
+
+    /** Bottone per aprire il dialog di configurazione dei timer. */
     private final JButton btnTimer;
+
+    /** Timer grafico del giocatore bianco. */
     private final TimerGrafico timerBianco;
+
+    /** Timer grafico del giocatore nero. */
     private final TimerGrafico timerNero;
+
+    /** Etichetta che mostra il materiale e il vantaggio materiale del bianco. */
     private final JLabel materialeBianco;
+
+    /** Etichetta che mostra il materiale e il vantaggio materiale del nero. */
     private final JLabel materialeNero;
+
+    /**
+     * Array dei bottoni opzione nella barra inferiore.
+     * Indici: 0=prima mossa, 1=mossa precedente, 2=mossa successiva,
+     * 3=ultima mossa, 4=rotazione manuale, 5=abbandona, 6=audio on/off.
+     */
     private final BottoneOpzioni[] btnOpzioni;
 
-    //attributi per la gestione di Casella
+    /** Colore delle caselle chiare della scacchiera. */
     private Color caselleChiare;
+
+    /** Colore delle caselle scure della scacchiera. */
     private Color caselleScure;
+
+    /** Lista degli ID già assegnati alle caselle, usata per garantirne l'unicità. */
     private final List<String> idUtilizzati;
+
+    /** ID della casella attualmente selezionata dal giocatore, o {@code null} se nessuna. */
     private String casellaSelezionata;
+
+    /** ID della casella di partenza dell'ultima mossa eseguita. */
     private String casellaPosIniziale;
+
+    /** ID della casella di arrivo dell'ultima mossa eseguita. */
     private String casellaPosFinale;
+
+    /** {@code true} se la scacchiera è attualmente orientata dal lato del nero. */
     private boolean scacchieraGirata;
+
+    /**
+     * Flag interno che abilita le modifiche grafiche alle caselle.
+     * Quando {@code false}, tutti gli override dei metodi Swing in {@link Casella}
+     * bloccano le chiamate esterne.
+     */
     private boolean gestisciGrafica;
+
+    /** {@code true} se è attualmente visualizzata l'ultima mossa della partita. */
     private boolean ultimaMossa;
+
+    /**
+     * ID della casella su cui si trova il pedone catturabile en passant,
+     * usato per mostrare il cerchio di cattura sulla casella corretta; {@code null} se non applicabile.
+     */
     private String idEnPassant;
 
-    //fai singleton
-    public GestoreGrafico(Scacchiera scacchiera, int lunghezzaScacchiera, ImageIcon[] immagini, Color sfondo, Color caselleChiare, Color caselleScure) {
+    /**
+     * Costruisce il gestore grafico con tutti i parametri esplicitamente specificati.
+     * <p>
+     * Inizializza la scacchiera grafica, i componenti UI, i listener e il pannello
+     * laterale. Questo costruttore è privato: per ottenere l'istanza usare
+     * {@link #getInstance(Scacchiera, int, ImageIcon[], Color, Color, Color)}.
+     * </p>
+     *
+     * @param scacchiera       il modello logico della scacchiera; non può essere {@code null}
+     * @param lunghezzaScacchiera larghezza totale della scacchiera in pixel; deve essere {@code > 0}
+     * @param immagini         array di 12 icone delle pedine (6 bianche + 6 nere); non può essere {@code null}
+     * @param sfondo           colore di sfondo del pannello laterale; {@code null} per trasparente
+     * @param caselleChiare    colore delle caselle chiare; non può essere {@code null}
+     * @param caselleScure     colore delle caselle scure; non può essere {@code null}
+     * @throws IllegalArgumentException se {@code scacchiera} è {@code null},
+     *                                  {@code lunghezzaScacchiera} è ≤ 0,
+     *                                  o i parametri delle immagini non sono validi
+     */
+    private GestoreGrafico(Scacchiera scacchiera, int lunghezzaScacchiera, ImageIcon[] immagini, Color sfondo, Color caselleChiare, Color caselleScure) {
         if (scacchiera == null) throw new IllegalArgumentException("La scacchiera non può essere null");
         this.scacchiera = scacchiera;
         if (lunghezzaScacchiera <= 0) throw new IllegalArgumentException("La lunghezza della scacchiera deve essere maggiore di 0");
@@ -85,8 +212,6 @@ public class GestoreGrafico {
         inizializzaCaselle(caselleChiare, caselleScure);
         aggiornaScacchiera(scacchiera.getStringaScacchiera());
 
-        //inizializzazione parte grafica gestione utente
-
         panelInfo = new JPanel();
         Font font = new Font("Segoe UI", Font.BOLD, lunghezzaCasella / 4);
         labelVittoria = new JLabelCustom(null, new Color(180,130,20), new Color(140,95,10), font);
@@ -108,7 +233,6 @@ public class GestoreGrafico {
             else btnOpzioni[i] = new BottoneOpzioni(tipi[i], lunghezzaScacchiera - lunghezzaCasella * 2 - lunghezzaCasella / 2 * (i - 3), lunghezzaScacchiera + lunghezzaCasella / 8, lunghezzaCasella / 2);
         }
 
-        //setBounds
         panelInfo.setBounds(lunghezzaScacchiera + lunghezzaCasella * 5 / 4, 0, lunghezzaCasella * 6, lunghezzaScacchiera);
         labelVittoria.setBounds(lunghezzaCasella * 2 + lunghezzaCasella / 15, lunghezzaCasella * 4 - lunghezzaCasella / 4 * 3, lunghezzaCasella * 5 / 2, lunghezzaCasella * 3 / 2);
         timerBianco.setBounds(0, lunghezzaScacchiera - lunghezzaCasella - lunghezzaCasella / 15,  lunghezzaCasella * 4 / 3, lunghezzaCasella / 2);
@@ -116,7 +240,6 @@ public class GestoreGrafico {
         materialeBianco.setBounds(lunghezzaCasella * 4 / 3 + lunghezzaCasella / 15, lunghezzaScacchiera - lunghezzaCasella - lunghezzaCasella / 15,  lunghezzaScacchiera / 7, lunghezzaCasella / 2);
         materialeNero.setBounds(lunghezzaCasella * 4 / 3 + lunghezzaCasella / 15, lunghezzaCasella / 2 + lunghezzaCasella / 15,  lunghezzaScacchiera / 7, lunghezzaCasella / 2);
 
-        //modifiche grafiche
         panelInfo.setLayout(null);
         if (sfondo != null) {
             panelInfo.setOpaque(true);
@@ -154,7 +277,6 @@ public class GestoreGrafico {
         panelInfo.add(materialeNero);
         panelInfo.add(btnTimer);
 
-        //listener gestione utente
         btnGioca.addActionListener(_ -> {
             SuoniScacchi.inizioPartita();
             if (bot != null) {
@@ -211,7 +333,16 @@ public class GestoreGrafico {
         });
     }
 
-    public GestoreGrafico(Scacchiera scacchiera, int lunghezzaScacchiera, Color sfondo, Color caselleChiare, Color caselleScure) {
+    /**
+     * Costruttore privato con immagini delle pedine predefinite ricavate da {@link IconaPedina}.
+     *
+     * @param scacchiera          il modello logico della scacchiera
+     * @param lunghezzaScacchiera larghezza totale della scacchiera in pixel
+     * @param sfondo              colore di sfondo del pannello laterale; {@code null} per trasparente
+     * @param caselleChiare       colore delle caselle chiare
+     * @param caselleScure        colore delle caselle scure
+     */
+    private GestoreGrafico(Scacchiera scacchiera, int lunghezzaScacchiera, Color sfondo, Color caselleChiare, Color caselleScure) {
         int lunghezzaCasella = lunghezzaScacchiera / 8;
         this(scacchiera, lunghezzaScacchiera, new ImageIcon[]{
                 IconaPedina.PEDONE_WHITE.getImageIcon(lunghezzaCasella),
@@ -229,22 +360,157 @@ public class GestoreGrafico {
         }, sfondo, caselleChiare, caselleScure);
     }
 
-    public GestoreGrafico(Scacchiera scacchiera, int lunghezzaScacchiera, ImageIcon[] immagini) {
+    /**
+     * Costruttore privato con immagini personalizzate e sfondo {@code null}.
+     *
+     * @param scacchiera          il modello logico della scacchiera
+     * @param lunghezzaScacchiera larghezza totale della scacchiera in pixel
+     * @param immagini            array di 12 icone delle pedine
+     */
+    private GestoreGrafico(Scacchiera scacchiera, int lunghezzaScacchiera, ImageIcon[] immagini) {
         this(scacchiera, lunghezzaScacchiera, immagini, null, new Color(245, 245, 245), new Color(70, 70, 70));
     }
 
-    public GestoreGrafico(Scacchiera scacchiera, int lunghezzaScacchiera) {
+    /**
+     * Costruttore privato con colori delle caselle predefiniti (bianco chiaro e grigio scuro)
+     * e sfondo {@code null}.
+     *
+     * @param scacchiera          il modello logico della scacchiera
+     * @param lunghezzaScacchiera larghezza totale della scacchiera in pixel
+     */
+    private GestoreGrafico(Scacchiera scacchiera, int lunghezzaScacchiera) {
         this(scacchiera, lunghezzaScacchiera, null, new Color(245, 245, 245), new Color(70, 70, 70));
     }
 
-    public GestoreGrafico(Scacchiera scacchiera, int lunghezzaScacchiera, ImageIcon[] immagini, Color sfondo) {
+    /**
+     * Costruttore privato con immagini personalizzate e colori delle caselle predefiniti.
+     *
+     * @param scacchiera          il modello logico della scacchiera
+     * @param lunghezzaScacchiera larghezza totale della scacchiera in pixel
+     * @param immagini            array di 12 icone delle pedine
+     * @param sfondo              colore di sfondo del pannello laterale; {@code null} per trasparente
+     */
+    private GestoreGrafico(Scacchiera scacchiera, int lunghezzaScacchiera, ImageIcon[] immagini, Color sfondo) {
         this(scacchiera, lunghezzaScacchiera, immagini, sfondo, new Color(245, 245, 245), new Color(70, 70, 70));
     }
 
-    public GestoreGrafico(Scacchiera scacchiera, int lunghezzaScacchiera, Color sfondo) {
+    /**
+     * Costruttore privato con immagini predefinite, colori delle caselle predefiniti e sfondo specificato.
+     *
+     * @param scacchiera          il modello logico della scacchiera
+     * @param lunghezzaScacchiera larghezza totale della scacchiera in pixel
+     * @param sfondo              colore di sfondo del pannello laterale; {@code null} per trasparente
+     */
+    private GestoreGrafico(Scacchiera scacchiera, int lunghezzaScacchiera, Color sfondo) {
         this(scacchiera, lunghezzaScacchiera, sfondo, new Color(245, 245, 245), new Color(70, 70, 70));
     }
 
+    /**
+     * Restituisce l'istanza unica del gestore grafico, creandola se non esiste ancora.
+     * <p>
+     * Se l'istanza è già stata creata, i parametri vengono ignorati.
+     * </p>
+     *
+     * @param scacchiera          il modello logico della scacchiera
+     * @param lunghezzaScacchiera larghezza totale della scacchiera in pixel
+     * @param immagini            array di 12 icone delle pedine
+     * @param sfondo              colore di sfondo del pannello laterale
+     * @param caselleChiare       colore delle caselle chiare
+     * @param caselleScure        colore delle caselle scure
+     * @return l'istanza unica di {@code GestoreGrafico}
+     */
+    public static GestoreGrafico getInstance(Scacchiera scacchiera, int lunghezzaScacchiera, ImageIcon[] immagini, Color sfondo, Color caselleChiare, Color caselleScure) {
+        if (instance == null) instance = new GestoreGrafico(scacchiera, lunghezzaScacchiera, immagini, sfondo, caselleChiare, caselleScure);
+        return instance;
+    }
+
+    /**
+     * Restituisce l'istanza unica con immagini predefinite.
+     * <p>Se l'istanza è già stata creata, i parametri vengono ignorati.</p>
+     *
+     * @param scacchiera          il modello logico della scacchiera
+     * @param lunghezzaScacchiera larghezza totale della scacchiera in pixel
+     * @param sfondo              colore di sfondo del pannello laterale
+     * @param caselleChiare       colore delle caselle chiare
+     * @param caselleScure        colore delle caselle scure
+     * @return l'istanza unica di {@code GestoreGrafico}
+     */
+    public static GestoreGrafico getInstance(Scacchiera scacchiera, int lunghezzaScacchiera, Color sfondo, Color caselleChiare, Color caselleScure) {
+        if (instance == null) instance = new GestoreGrafico(scacchiera, lunghezzaScacchiera, sfondo, caselleChiare, caselleScure);
+        return instance;
+    }
+
+    /**
+     * Restituisce l'istanza unica con immagini personalizzate e sfondo/colori predefiniti.
+     * <p>Se l'istanza è già stata creata, i parametri vengono ignorati.</p>
+     *
+     * @param scacchiera          il modello logico della scacchiera
+     * @param lunghezzaScacchiera larghezza totale della scacchiera in pixel
+     * @param immagini            array di 12 icone delle pedine
+     * @return l'istanza unica di {@code GestoreGrafico}
+     */
+    public static GestoreGrafico getInstance(Scacchiera scacchiera, int lunghezzaScacchiera, ImageIcon[] immagini) {
+        if (instance == null) instance = new GestoreGrafico(scacchiera, lunghezzaScacchiera, immagini);
+        return instance;
+    }
+
+    /**
+     * Restituisce l'istanza unica con tutti i parametri predefiniti.
+     * <p>Se l'istanza è già stata creata, i parametri vengono ignorati.</p>
+     *
+     * @param scacchiera          il modello logico della scacchiera
+     * @param lunghezzaScacchiera larghezza totale della scacchiera in pixel
+     * @return l'istanza unica di {@code GestoreGrafico}
+     */
+    public static GestoreGrafico getInstance(Scacchiera scacchiera, int lunghezzaScacchiera) {
+        if (instance == null) instance = new GestoreGrafico(scacchiera, lunghezzaScacchiera);
+        return instance;
+    }
+
+    /**
+     * Restituisce l'istanza unica con immagini personalizzate e sfondo specificato.
+     * <p>Se l'istanza è già stata creata, i parametri vengono ignorati.</p>
+     *
+     * @param scacchiera          il modello logico della scacchiera
+     * @param lunghezzaScacchiera larghezza totale della scacchiera in pixel
+     * @param immagini            array di 12 icone delle pedine
+     * @param sfondo              colore di sfondo del pannello laterale
+     * @return l'istanza unica di {@code GestoreGrafico}
+     */
+    public static GestoreGrafico getInstance(Scacchiera scacchiera, int lunghezzaScacchiera, ImageIcon[] immagini, Color sfondo) {
+        if (instance == null) instance = new GestoreGrafico(scacchiera, lunghezzaScacchiera, immagini, sfondo);
+        return instance;
+    }
+
+    /**
+     * Restituisce l'istanza unica con immagini predefinite e sfondo specificato.
+     * <p>Se l'istanza è già stata creata, i parametri vengono ignorati.</p>
+     *
+     * @param scacchiera          il modello logico della scacchiera
+     * @param lunghezzaScacchiera larghezza totale della scacchiera in pixel
+     * @param sfondo              colore di sfondo del pannello laterale
+     * @return l'istanza unica di {@code GestoreGrafico}
+     */
+    public static GestoreGrafico getInstance(Scacchiera scacchiera, int lunghezzaScacchiera, Color sfondo) {
+        if (instance == null) instance = new GestoreGrafico(scacchiera, lunghezzaScacchiera, sfondo);
+        return instance;
+    }
+
+    /**
+     * Inizializza le caselle della scacchiera e le caselle di promozione.
+     * <p>
+     * Valida i colori delle caselle, crea i pannelli {@link Casella}, li posiziona
+     * e registra i listener. Le operazioni avvengono con {@link #gestisciGrafica}
+     * impostato a {@code true} per sbloccare temporaneamente i metodi Swing.
+     * </p>
+     *
+     * @param caselleChiare colore delle caselle chiare; può essere {@code null} solo
+     *                      se anche {@code caselleScure} è {@code null}
+     * @param caselleScure  colore delle caselle scure; può essere {@code null} solo
+     *                      se anche {@code caselleChiare} è {@code null}
+     * @throws IllegalArgumentException se uno solo dei due colori è {@code null}
+     * @throws IllegalStateException    se i due colori sono uguali
+     */
     private void inizializzaCaselle(Color caselleChiare, Color caselleScure) {
         if (!(caselleChiare == null && caselleScure == null)) {
             if (caselleChiare == null || caselleScure == null) throw new IllegalArgumentException("I colori delle caselle devono essere entrambi assegnati o entrambi null");
@@ -258,7 +524,7 @@ public class GestoreGrafico {
         gestisciGrafica = true;
         for (int i = 0; i < DIMENSIONE; i++) {
             for (int j = 0; j < DIMENSIONE; j++) {
-                boolean pari =  ((j + i) % 2 == 0);
+                boolean pari = ((j + i) % 2 == 0);
                 casellePanel[i][j] = new Casella(pari, lunghezzaCasella, numeroToLettera.get(j + 1) + (DIMENSIONE - i));
                 casellePanel[i][j].setBounds(lunghezzaCasella * j, lunghezzaCasella * i, lunghezzaCasella, lunghezzaCasella);
                 setListener(i, j);
@@ -274,6 +540,18 @@ public class GestoreGrafico {
         gestisciGrafica = false;
     }
 
+    /**
+     * Valida e imposta l'array delle icone delle pedine.
+     * <p>
+     * Verifica che l'array contenga esattamente 12 elementi non {@code null} e tutti distinti.
+     * Le immagini non corrispondenti alla dimensione di una casella vengono riscalate.
+     * </p>
+     *
+     * @param immagini array di 12 {@link ImageIcon} (6 bianche + 6 nere)
+     * @throws IllegalArgumentException se {@code immagini} è {@code null}, non contiene
+     *                                  esattamente 12 elementi, contiene {@code null},
+     *                                  o contiene icone duplicate
+     */
     private void setImmagini(ImageIcon[] immagini) {
         if (immagini == null) throw new IllegalArgumentException("Immagini non può essere un parametro null");
         if (immagini.length != 12) throw new IllegalArgumentException("Le immagini devono essere obbligatoriamente 12");
@@ -285,6 +563,14 @@ public class GestoreGrafico {
         this.immagini = immagini;
     }
 
+    /**
+     * Avvia una nuova partita, resettando scacchiera, timer, nomi e stato grafico.
+     * <p>
+     * Gestisce la differenziazione tra partita umano-umano e umano-bot,
+     * incluso il corretto orientamento della scacchiera e la chiamata
+     * alla prima mossa del bot se necessario.
+     * </p>
+     */
     private void gioca() {
         scacchiera.reset();
         aggiornaScacchiera(scacchiera.getStringaScacchiera());
@@ -313,13 +599,14 @@ public class GestoreGrafico {
         }
         if (nomeNero.getText().isEmpty()) {
             if (bot != null && bot.getColore().equals(Color.black)) nomeNero.setText("Bot " + DialogBot.getStringaDifficolta());
-            nomeNero.setText("Giocatore 2");
+            else nomeNero.setText("Giocatore 2");
         }
         if (nomeBianco.getText().equals(nomeNero.getText())) {
             char c = 'N';
-            if (nomeNero.getText().length() == 15) {
-                if (nomeBianco.getText().charAt(14) == c) c = 'n';
-                nomeNero.setText(nomeNero.getText().substring(0, 14) + c);
+            int caratteri_max = JTextAreaCustom.getCaratteriMax();
+            if (nomeNero.getText().length() == caratteri_max) {
+                if (nomeBianco.getText().charAt(caratteri_max - 1) == c) c = 'n';
+                nomeNero.setText(nomeNero.getText().substring(0, caratteri_max - 1) + c);
             }
             else nomeNero.setText(nomeNero.getText() + c);
         }
@@ -337,6 +624,13 @@ public class GestoreGrafico {
         if (bot != null && Color.white.equals(bot.getColore())) mossaBot();
     }
 
+    /**
+     * Termina la partita in corso, ripristinando l'interfaccia allo stato iniziale.
+     * <p>
+     * Ferma i timer, riabilita i controlli di configurazione, cancella
+     * l'eventuale worker del bot e deseleziona le caselle.
+     * </p>
+     */
     private void finePartita() {
         casellaSelezionata = null;
         resetMosseValide();
@@ -345,8 +639,8 @@ public class GestoreGrafico {
         nomeBianco.setEditable(true);
         nomeNero.setEditable(true);
         partitaInCorso = false;
-        timerBianco.pause(true);
-        timerNero.pause(true);
+        timerBianco.pause();
+        timerNero.pause();
         timerBianco.setForeground(timerBianco.getTextColor());
         timerNero.setForeground(timerNero.getTextColor());
         btnTimer.setEnabled(true);
@@ -356,6 +650,13 @@ public class GestoreGrafico {
         if (rotazioneScacchiera) btnRotazioneScacchiera.setText("<html><div style='text-align:center;'>Auto rotazione<br>On</div></html>");
     }
 
+    /**
+     * Aggiorna le icone delle caselle in base alla stringa di stato della scacchiera.
+     *
+     * @param s la stringa di rappresentazione della scacchiera, con righe separate da
+     *          {@code \n} e celle separate da {@link #SEP}; non può essere {@code null}
+     * @throws IllegalArgumentException se {@code s} è {@code null}
+     */
     private void aggiornaScacchiera(String s) {
         if (s == null) throw new IllegalArgumentException("La stringa non può essere null");
         String[] righe = s.split("\n");
@@ -382,9 +683,19 @@ public class GestoreGrafico {
         }
     }
 
+    /**
+     * Registra il listener di clic sulla casella in posizione {@code [y][x]}.
+     * <p>
+     * Il listener gestisce: il doppio clic per tornare all'ultima mossa durante
+     * la navigazione storico, la selezione e deselezione delle pedine, lo spostamento,
+     * il rilevamento dell'en passant e l'avvio della promozione.
+     * </p>
+     *
+     * @param y riga della casella (0–{@link #DIMENSIONE}-1)
+     * @param x colonna della casella (0–{@link #DIMENSIONE}-1)
+     */
     private void setListener(int y, int x) {
         casellePanel[y][x].setListener(() -> {
-            //se sto guardano una vecchia mossa e clicco due volte la scacchiera torno alla mossa corrente
             long ora = System.currentTimeMillis();
             if (ora - ultimoClic <= SOGLIA_MS && mossaMostrata != scacchiera.getMosse() && !promozione) {
                 ultimoClic = ora;
@@ -403,7 +714,6 @@ public class GestoreGrafico {
             if (bot != null && bot.getColore().equals(scacchiera.getTurno())) return;
 
             if (!promozione && partitaInCorso && mossaMostrata == scacchiera.getMosse()) {
-                //se clicco su una casella già selezionata la deseleziono
                 resetMosseValide();
                 if (casellePanel[y][x].getId().equals(casellaSelezionata)) {
                     casellaSelezionata = null;
@@ -419,12 +729,10 @@ public class GestoreGrafico {
                 if (p != null && p.getColore().equals(scacchiera.getTurno())) casellaSelezionata = casellePanel[y][x].getId();
                 else casellaSelezionata = null;
 
-                //se la casella selezionata non è null allora seleziona la pedina; se è null prova a spostarla e se non riesce seleziona la pedina dove si intendeva spostare quella selezionata precedentemente
                 if (scacchiera.getCasellaSelezionata() == null || !scacchiera.muoviPedina(pos)) {
                     List<int[]> mosseValide = scacchiera.selezionaPedina(pos);
                     idEnPassant = null;
                     if (mosseValide != null) {
-                        //se c'è un en passant tre le mosse valide viene indicato che il pedone avversario viene mangiato
                         if (scacchiera.getPedinaSelezionata() instanceof Pedone) {
                             for (int[] mossa : mosseValide) {
                                 if (mossa[1] != scacchiera.getCasellaSelezionata()[1] && scacchiera.getPedina(mossa) == null) {
@@ -436,8 +744,6 @@ public class GestoreGrafico {
                         mostraMosseValide(mosseValide);
                     }
                 }
-
-                //promozione pedone
                 else if (scacchiera.promozioneInSospeso() != null) {
                     casellaPosFinale = casellePanel[y][x].getId();
                     casellaPosIniziale = idCasellaSelOld;
@@ -446,8 +752,6 @@ public class GestoreGrafico {
                     setImgCasellePromozione(scacchiera.getPedina(pos).getColore());
                     aggiornaBtnSpostamento();
                 }
-
-                //mossa normale
                 else {
                     casellaPosFinale = casellePanel[y][x].getId();
                     casellaPosIniziale = idCasellaSelOld;
@@ -463,6 +767,15 @@ public class GestoreGrafico {
         });
     }
 
+    /**
+     * Aggiorna timer, contatori di mossa, materiale e stato della scacchiera
+     * dopo ogni mossa eseguita.
+     * <p>
+     * Gestisce tutti gli stati di fine partita tramite {@link #finePartita()} e,
+     * nel caso di {@link StatoPartita#PROMOZIONE_IN_SOSPESO}, esegue una promozione
+     * automatica a regina chiamandosi ricorsivamente una volta.
+     * </p>
+     */
     private void aggiornaInfoScacchiera() {
         timerBianco.invertiStato();
         timerNero.invertiStato();
@@ -506,6 +819,15 @@ public class GestoreGrafico {
         }
     }
 
+    /**
+     * Registra il listener sulla casella di promozione all'indice {@code i}.
+     * <p>
+     * Alla pressione, completa la promozione con la pedina scelta (indice {@code i+1}),
+     * aggiorna la scacchiera e avvia eventualmente la mossa del bot.
+     * </p>
+     *
+     * @param i indice della casella di promozione (0=regina, 1=torre, 2=alfiere, 3=cavallo)
+     */
     private void setListenerPromozione(int i) {
         casellePromozione[i].setListener(() -> {
             if (promozione && mossaMostrata == scacchiera.getMosse()) {
@@ -521,8 +843,19 @@ public class GestoreGrafico {
         });
     }
 
+    /**
+     * Riproduce il suono appropriato in base all'esito dell'ultima mossa.
+     * <p>
+     * Non produce effetti se l'audio è disattivato. La priorità dei suoni è:
+     * vittoria → fine partita → scacco → cattura → spostamento.
+     * </p>
+     *
+     * @param coloreAvversario il colore del giocatore che ha subito la mossa
+     * @throws IllegalArgumentException se {@code coloreAvversario} è {@code null}
+     *                                  o diverso da {@link Color#white}/{@link Color#black}
+     */
     private void suonoMossa(Color coloreAvversario) {
-        if (!SuoniScacchi.audio) return;
+        if (!SuoniScacchi.isAudioOn()) return;
         if (coloreAvversario == null) throw new IllegalArgumentException("Il colore dell'avversario non può essere null");
         if (!coloreAvversario.equals(Color.white) && !coloreAvversario.equals(Color.black)) throw new IllegalArgumentException("Il colore dell'avversario può essere solo bianco o nero");
 
@@ -534,10 +867,17 @@ public class GestoreGrafico {
         else SuoniScacchi.spostamento();
     }
 
+    /**
+     * Calcola e applica la mossa del bot tramite un {@link SwingWorker}.
+     * <p>
+     * Il calcolo avviene in background per non bloccare l'EDT. Se il bot
+     * non trova mosse valide o si verifica un errore, la partita viene
+     * terminata con un messaggio di interruzione.
+     * </p>
+     */
     private void mossaBot() {
         if (bot == null) return;
 
-        //il bot ha bisogno di uno swingWorker perché il programma non aspetti il termine del calcolo della mossa del bot prima di chiamare la draw delle caselle che non riguardano il bot
         workerBot = new SwingWorker<>() {
             @Override
             protected int[][] doInBackground() throws Exception {
@@ -586,11 +926,19 @@ public class GestoreGrafico {
         workerBot.execute();
     }
 
+    /**
+     * Registra un {@code PropertyChangeListener} sul testo del timer per gestire
+     * l'avviso sonoro di tempo in esaurimento, il lampeggio del colore e la
+     * fine partita per scadenza del tempo.
+     *
+     * @param t il timer su cui registrare il listener; non può essere {@code null}
+     * @throws IllegalArgumentException se {@code t} è {@code null}
+     */
     private void setListenerTimer(TimerGrafico t) {
         if (t == null) throw new IllegalArgumentException("Il timer non può essere null");
         t.addPropertyChangeListener("text", _ -> {
             if (!t.isOff() && partitaInCorso && t.getOre() == 0 && t.getMinuti() == 0 && !t.isPaused() && (t.getMinutiDefault() > 0 || t.getSecondi() < 10)) {
-                if (SuoniScacchi.audio && (t.getSecondi() == 59 || t.getSecondi() == 9 && t.getMinutiDefault() == 0)) SuoniScacchi.tempo();
+                if (SuoniScacchi.isAudioOn() && (t.getSecondi() == 59 || t.getSecondi() == 9 && t.getMinutiDefault() == 0)) SuoniScacchi.tempo();
                 if (t.getSecondi() % 2 != 0) t.setForeground(Color.red);
                 else t.setForeground(t.getTextColor());
             }
@@ -609,6 +957,10 @@ public class GestoreGrafico {
         });
     }
 
+    /**
+     * Registra i listener sui quattro bottoni di navigazione dello storico mosse
+     * (prima mossa, precedente, successiva, ultima mossa).
+     */
     private void setListenerSpostamenti() {
         for (int i = 0; i < 4; i++) {
             int ind = i;
@@ -627,14 +979,6 @@ public class GestoreGrafico {
                         default -> {}
                     }
                     aggiornaScacchiera(PartitaFileManager.leggiScacchiera(mossaMostrata));
-                    if (mossaMostrata != scacchiera.getMosse()) {
-                        timerBianco.pause();
-                        timerBianco.setForeground(timerBianco.getTextColor());
-                        timerNero.pause();
-                        timerNero.setForeground(timerNero.getTextColor());
-                    }
-                    else if (partitaInCorso && scacchiera.getTurno().equals(Color.white) && timerBianco.isPaused()) timerBianco.start();
-                    else if (partitaInCorso && scacchiera.getTurno().equals(Color.black) && timerNero.isPaused()) timerNero.start();
                     aggiornaLabelMateriale();
                 }
                 aggiornaBtnSpostamento();
@@ -642,6 +986,13 @@ public class GestoreGrafico {
         }
     }
 
+    /**
+     * Registra il listener sul bottone di rotazione manuale della scacchiera.
+     * <p>
+     * Rileva l'orientamento corrente dalla posizione X della casella {@code [0][0]}
+     * e ruota verso il lato opposto.
+     * </p>
+     */
     private void setListenerRotazioneManuale() {
         btnOpzioni[4].addActionListener(_ -> {
             SuoniScacchi.ruota();
@@ -651,6 +1002,13 @@ public class GestoreGrafico {
         });
     }
 
+    /**
+     * Registra il listener sul bottone di abbandono della partita.
+     * <p>
+     * Apre un dialogo di conferma; se confermato, termina la partita
+     * mostrando il nome del giocatore che ha abbandonato.
+     * </p>
+     */
     private void setListenerAbbandona() {
         btnOpzioni[5].addActionListener(_ -> {
             if (!btnOpzioni[5].isAbilitato()) return;
@@ -664,17 +1022,31 @@ public class GestoreGrafico {
         });
     }
 
+    /**
+     * Registra il listener sul bottone di attivazione/disattivazione dell'audio.
+     * <p>
+     * Alterna l'icona tra {@link BottoneOpzioni.TipoImmagine#SOUNDON} e
+     * {@link BottoneOpzioni.TipoImmagine#SOUNDOFF} e aggiorna {@link SuoniScacchi}.
+     * </p>
+     */
     private void setListenerAudio() {
         btnOpzioni[6].addActionListener(_ -> {
             BottoneOpzioni.TipoImmagine tipo = btnOpzioni[6].getTipo();
             if (tipo == BottoneOpzioni.TipoImmagine.SOUNDON) tipo = BottoneOpzioni.TipoImmagine.SOUNDOFF;
             else if (tipo == BottoneOpzioni.TipoImmagine.SOUNDOFF) tipo = BottoneOpzioni.TipoImmagine.SOUNDON;
             btnOpzioni[6].impostaImmagine(tipo);
-            SuoniScacchi.audio = !SuoniScacchi.audio;
-            SuoniScacchi.audioOn();
+            SuoniScacchi.setAudio(!SuoniScacchi.isAudioOn());
+            SuoniScacchi.menu();
         });
     }
 
+    /**
+     * Aggiorna l'abilitazione dei quattro bottoni di navigazione storico mosse
+     * in base alla mossa correntemente visualizzata e allo stato di promozione.
+     * <p>
+     * Durante una promozione in attesa tutti i bottoni vengono disabilitati.
+     * </p>
+     */
     private void aggiornaBtnSpostamento() {
         if (promozione) {
             for (int n = 0; n < 4; n++) btnOpzioni[n].disabilita();
@@ -694,6 +1066,12 @@ public class GestoreGrafico {
         disegna();
     }
 
+    /**
+     * Imposta le icone delle quattro caselle di promozione in base al colore del pedone.
+     *
+     * @param c il colore del pedone da promuovere ({@link Color#white} o {@link Color#black})
+     * @throws IllegalArgumentException se {@code c} è {@code null} o diverso da bianco/nero
+     */
     private void setImgCasellePromozione(Color c) {
         if (c == null) throw new IllegalArgumentException("Il colore non può essere null");
         if (!c.equals(Color.white) && !c.equals(Color.black)) throw new IllegalArgumentException("Il colore può essere solo bianco o nero");
@@ -712,6 +1090,15 @@ public class GestoreGrafico {
         }
     }
 
+    /**
+     * Ruota la scacchiera orientandola dal lato del colore specificato.
+     *
+     * @param c                    il colore dal cui lato orientare la scacchiera
+     * @param rotazioneObbligatoria {@code true} per forzare la rotazione ignorando
+     *                             {@link #rotazioneScacchiera}; {@code false} per
+     *                             eseguirla solo se la rotazione automatica è attiva
+     * @throws IllegalArgumentException se {@code c} è {@code null} o diverso da bianco/nero
+     */
     private void ruotaScacchiera(Color c, boolean rotazioneObbligatoria) {
         if (!(rotazioneObbligatoria || rotazioneScacchiera)) return;
         if (c == null) throw new IllegalArgumentException("Il colore non può essere null");
@@ -725,7 +1112,7 @@ public class GestoreGrafico {
                     scacchieraGirata = false;
                 }
                 else {
-                    casellePanel[i][j].setBounds(lunghezzaCasella * (7 - j),  lunghezzaCasella * (7 - i), lunghezzaCasella, lunghezzaCasella);
+                    casellePanel[i][j].setBounds(lunghezzaCasella * (7 - j), lunghezzaCasella * (7 - i), lunghezzaCasella, lunghezzaCasella);
                     scacchieraGirata = true;
                 }
             }
@@ -733,10 +1120,20 @@ public class GestoreGrafico {
         gestisciGrafica = false;
     }
 
+    /**
+     * Ruota la scacchiera rispettando il flag {@link #rotazioneScacchiera}.
+     * Equivale a {@link #ruotaScacchiera(Color, boolean) ruotaScacchiera(c, false)}.
+     *
+     * @param c il colore dal cui lato orientare la scacchiera
+     */
     private void ruotaScacchiera(Color c) {
         ruotaScacchiera(c, false);
     }
 
+    /**
+     * Aggiorna le etichette del materiale per entrambi i giocatori
+     * alla mossa attualmente visualizzata.
+     */
     private void aggiornaLabelMateriale() {
         int matBianco = scacchiera.getMaterialeMossa(Color.white, mossaMostrata);
         int matNero = scacchiera.getMaterialeMossa(Color.black, mossaMostrata);
@@ -750,7 +1147,18 @@ public class GestoreGrafico {
         materialeNero.setText("<html>Materiale: " + matNero + "<br>Differenza: " + diffNero + "</html>");
     }
 
-    private void mettiASchermo(Container container) {
+    /**
+     * Aggiunge tutti i componenti grafici al container specificato.
+     * <p>
+     * Può essere chiamato al massimo una volta; una seconda chiamata lancia
+     * {@link IllegalStateException}.
+     * </p>
+     *
+     * @param container il container Swing a cui aggiungere i componenti; non può essere {@code null}
+     * @throws IllegalArgumentException se {@code container} è {@code null}
+     * @throws IllegalStateException    se i componenti sono già stati aggiunti a un container
+     */
+    public void mettiASchermo(Container container) {
         if (container == null) throw new IllegalArgumentException("Il container non può essere null");
         if (aggiuntoASchermo) throw new IllegalStateException("Impossibile mettere a schermo più di una volta");
 
@@ -761,20 +1169,44 @@ public class GestoreGrafico {
         aggiuntoASchermo = true;
     }
 
+    /**
+     * Aggiunge tutti i componenti grafici al {@link JPanel} specificato.
+     * Delega a {@link #mettiASchermo(Container)}.
+     *
+     * @param panel il pannello a cui aggiungere i componenti
+     */
     public void mettiASchermo(JPanel panel) {
         mettiASchermo((Container) panel);
     }
 
+    /**
+     * Aggiunge tutti i componenti grafici al {@link JFrame} specificato.
+     * Delega a {@link #mettiASchermo(Container)}.
+     *
+     * @param frame il frame a cui aggiungere i componenti
+     */
     public void mettiASchermo(JFrame frame) {
         mettiASchermo((Container) frame);
     }
 
+    /**
+     * Azzera il flag {@link Casella#mossaValida} su tutte le caselle della scacchiera.
+     */
     private void resetMosseValide() {
         for (Casella[] riga : casellePanel) {
             for (Casella c : riga) c.mossaValida = false;
         }
     }
 
+    /**
+     * Imposta il flag {@link Casella#mossaValida} sulle caselle corrispondenti
+     * alle mosse valide della pedina selezionata.
+     *
+     * @param mosseValide lista di posizioni {@code [riga, colonna]} raggiungibili;
+     *                    non può essere {@code null} né contenere elementi {@code null}
+     * @throws IllegalArgumentException se {@code mosseValide} è {@code null}
+     *                                  o contiene elementi {@code null}
+     */
     private void mostraMosseValide(List<int[]> mosseValide) {
         if (mosseValide == null) throw new IllegalArgumentException("Le mosse valide non possono essere null");
         for (int[] m : mosseValide) {
@@ -783,6 +1215,10 @@ public class GestoreGrafico {
         }
     }
 
+    /**
+     * Richiama {@link Casella#repaint()} su tutte le caselle della scacchiera
+     * e sulle caselle di promozione.
+     */
     private void disegna() {
         for (Casella[] riga : casellePanel) {
             for (Casella c : riga) c.repaint();
@@ -790,19 +1226,57 @@ public class GestoreGrafico {
         for (Casella c : casellePromozione) c.repaint();
     }
 
+    /**
+     * Pannello grafico che rappresenta una singola casella della scacchiera
+     * o una delle caselle di scelta per la promozione.
+     * <p>
+     * La maggior parte dei metodi Swing è bloccata tramite override: le modifiche
+     * sono consentite solo quando {@link GestoreGrafico#gestisciGrafica} è {@code true},
+     * per impedire alterazioni accidentali dall'esterno.
+     * </p>
+     */
     private class Casella extends JPanel {
+
+        /** Colore base della casella. */
         private Color colore;
+
+        /** Variante più satura del colore base, usata per evidenziare l'ultima mossa. */
         private Color variante;
+
+        /** Label interna che contiene l'icona della pedina. */
         private final JLabel label;
+
+        /** Dimensione del lato della casella in pixel. */
         private int lunghezzaLato;
+
+        /**
+         * Identificatore univoco della casella nel formato {@code [A-H][1-8]}
+         * (es. {@code "E4"}), oppure {@code "PROMOZIONE"} per le caselle di promozione.
+         */
         private String id;
+
+        /** Listener invocato al clic del mouse sulla casella. */
         private CasellaListener listener;
+
+        /**
+         * {@code true} se questa casella è raggiungibile dalla pedina selezionata
+         * e deve mostrare l'indicatore di mossa valida.
+         */
         private boolean mossaValida;
 
+        /**
+         * Costruisce una casella con colore, dimensione e ID specificati.
+         *
+         * @param pari          {@code true} per casella chiara, {@code false} per scura,
+         *                      {@code null} per casella di promozione (sfondo trasparente)
+         * @param lunghezzaLato dimensione del lato in pixel; deve essere {@code > 0}
+         * @param id            identificatore della casella ({@code [A-H][1-8]} o {@code "PROMOZIONE"})
+         * @throws IllegalArgumentException se {@code lunghezzaLato} è ≤ 0 o {@code id} non è valido
+         */
         private Casella(Boolean pari, int lunghezzaLato, String id) {
             setLunghezzaLato(lunghezzaLato);
             label = new JLabel();
-            label.setPreferredSize(new Dimension(lunghezzaLato,lunghezzaLato));
+            label.setPreferredSize(new Dimension(lunghezzaLato, lunghezzaLato));
             setId(id);
             if (pari == null || this.id.equals("PROMOZIONE")) setColore(new Color(0, 0, 0, 0));
             else if (pari) setColore(caselleChiare);
@@ -824,19 +1298,41 @@ public class GestoreGrafico {
             });
         }
 
+        /**
+         * Restituisce la dimensione del lato della casella.
+         *
+         * @return la lunghezza del lato in pixel
+         */
         private int getLunghezzaLato() {
             return lunghezzaLato;
         }
 
+        /**
+         * Imposta la dimensione del lato della casella.
+         *
+         * @param lunghezzaLato la nuova lunghezza del lato in pixel; deve essere {@code > 0}
+         * @throws IllegalArgumentException se {@code lunghezzaLato} è ≤ 0
+         */
         private void setLunghezzaLato(int lunghezzaLato) {
             if (lunghezzaLato <= 0) throw new IllegalArgumentException("La lunghezza del lato deve essere maggiore di 0");
             this.lunghezzaLato = lunghezzaLato;
         }
 
+        /**
+         * Restituisce il colore base della casella.
+         *
+         * @return il colore base
+         */
         private Color getColore() {
             return colore;
         }
 
+        /**
+         * Imposta il colore base della casella e calcola la variante per l'evidenziazione.
+         *
+         * @param colore il nuovo colore base; non può essere {@code null}
+         * @throws IllegalArgumentException se {@code colore} è {@code null}
+         */
         private void setColore(Color colore) {
             if (colore == null) throw new IllegalArgumentException("Il colore non può essere null");
             this.colore = colore;
@@ -844,10 +1340,27 @@ public class GestoreGrafico {
             variante = varianteColore(colore);
         }
 
+        /**
+         * Restituisce l'identificatore della casella.
+         *
+         * @return l'ID nel formato {@code [A-H][1-8]} o {@code "PROMOZIONE"}
+         */
         private String getId() {
             return id;
         }
 
+        /**
+         * Imposta l'identificatore della casella, validandone il formato.
+         * <p>
+         * Per le caselle normali l'ID deve essere nel formato {@code [A-H][1-8]}
+         * e non può essere già in uso. Per le caselle di promozione l'ID è {@code "PROMOZIONE"}
+         * (ammesso più volte).
+         * </p>
+         *
+         * @param id il nuovo identificatore
+         * @throws IllegalArgumentException se {@code id} è {@code null}, non rispetta
+         *                                  il formato, o è già stato assegnato a un'altra casella
+         */
         private void setId(String id) {
             if (id == null) throw new IllegalArgumentException("L'id non può essere null");
             id = id.trim().toUpperCase();
@@ -860,10 +1373,21 @@ public class GestoreGrafico {
             }
         }
 
+        /**
+         * Restituisce l'icona attualmente visualizzata nella casella.
+         *
+         * @return l'icona corrente, o {@code null} se la casella è vuota
+         */
         private Icon getImg() {
             return label.getIcon();
         }
 
+        /**
+         * Imposta l'icona della pedina nella casella, riscalandola se necessario.
+         * Se {@code img} è {@code null}, rimuove l'icona.
+         *
+         * @param img l'icona da visualizzare, o {@code null} per svuotare la casella
+         */
         private void setImg(ImageIcon img) {
             if (img == null) rimuoviImg();
             else if (img.getIconWidth() != lunghezzaLato || img.getIconHeight() != lunghezzaLato) {
@@ -873,14 +1397,30 @@ public class GestoreGrafico {
             else label.setIcon(img);
         }
 
+        /**
+         * Rimuove l'icona dalla casella, lasciandola visivamente vuota.
+         */
         private void rimuoviImg() {
             label.setIcon(null);
         }
 
+        /**
+         * Imposta il listener da invocare al clic del mouse sulla casella.
+         *
+         * @param l il listener da registrare; {@code null} per rimuoverlo
+         */
         private void setListener(CasellaListener l) {
             this.listener = l;
         }
 
+        /**
+         * Calcola una variante più satura del colore specificato, usata per
+         * evidenziare la casella di partenza e di arrivo dell'ultima mossa.
+         *
+         * @param c il colore base; non può essere {@code null}
+         * @return un colore con saturazione aumentata di 0.4 (massimo 1.0)
+         * @throws IllegalArgumentException se {@code c} è {@code null}
+         */
         private Color varianteColore(Color c) {
             if (c == null) throw new IllegalArgumentException("Il colore non può essere null");
             float[] hsb = Color.RGBtoHSB(c.getRed(), c.getGreen(), c.getBlue(), null);
@@ -888,6 +1428,23 @@ public class GestoreGrafico {
             return Color.getHSBColor(hsb[0], hsb[1], hsb[2]);
         }
 
+        /**
+         * Disegna la casella con sfondo, evidenziazioni e indicatori grafici.
+         * <p>
+         * Gestisce i seguenti stati visivi:
+         * <ul>
+         *   <li>Casella di partenza/arrivo dell'ultima mossa: sfondo con {@link #variante}.</li>
+         *   <li>Casella selezionata: bordo nero.</li>
+         *   <li>Casella di promozione attiva: sfondo dorato con bordo nero.</li>
+         *   <li>Mossa valida con pedina o en passant: cerchio vuoto semitrasparente.</li>
+         *   <li>Mossa valida senza pedina: cerchio pieno semitrasparente.</li>
+         * </ul>
+         * Se non è visualizzata l'ultima mossa ({@link GestoreGrafico#ultimaMossa} è {@code false}),
+         * vengono omessi tutti gli indicatori sopra elencati.
+         * </p>
+         *
+         * @param g il contesto grafico fornito da Swing
+         */
         @Override
         protected void paintComponent(Graphics g) {
             super.paintComponent(g);
@@ -929,6 +1486,17 @@ public class GestoreGrafico {
             g2d.dispose();
         }
 
+        /**
+         * Disegna la coordinata alfanumerica nell'angolo in alto a sinistra della casella.
+         * <p>
+         * La coordinata viene disegnata solo sulle caselle del bordo visibile
+         * (colonna A o riga 1 se non girata; colonna H o riga 8 se girata).
+         * Il colore del testo è il contrario del colore della casella per massimizzare
+         * il contrasto. La casella {@code "PROMOZIONE"} non mostra coordinate.
+         * </p>
+         *
+         * @param g2d il contesto grafico 2D su cui disegnare
+         */
         private void disegnaCoordinata(Graphics2D g2d) {
             if (id.equals("PROMOZIONE")) return;
             if (!scacchieraGirata && (id.charAt(0) == 'A' || id.charAt(1) == '1') || scacchieraGirata && (id.charAt(0) == 'H' || id.charAt(1) == '8')) {
@@ -951,92 +1519,39 @@ public class GestoreGrafico {
             }
         }
 
-        //rende meno modificabili possibili le caselle da classi esterne
-        @Override
-        public void setBounds(Rectangle r) {
-            if (gestisciGrafica) super.setBounds(r);
-        }
-
-        @Override
-        public void setBounds(int x, int y, int width, int height) {
-            if (gestisciGrafica) super.setBounds(x, y, width, height);
-        }
-
-        @Override
-        public void setLayout(LayoutManager mgr) {
-            if (gestisciGrafica) super.setLayout(mgr);
-        }
-
-        @Override
-        public void removeAll() {
-            if (gestisciGrafica) super.removeAll();
-        }
-
-        @Override
-        public void remove(int index) {
-            if (gestisciGrafica) super.remove(index);
-        }
-
-        @Override
-        public void remove(Component comp) {
-            if (gestisciGrafica) super.remove(comp);
-        }
-
-        @Override
-        public void setSize(Dimension d) {
-            if (gestisciGrafica) super.setSize(d);
-        }
-
-        @Override
-        public void setSize(int width, int height) {
-            if (gestisciGrafica) super.setSize(width, height);
-        }
-
-        @Override
-        public Component add(Component comp) {
-            if (gestisciGrafica) return super.add(comp);
-            return comp;
-        }
-
-        @Override
-        public Component add(Component comp, int index) {
-            if (gestisciGrafica) return super.add(comp, index);
-            return comp;
-        }
-
-        @Override
-        public void add(Component comp, Object constraints) {
-            if (gestisciGrafica) super.add(comp, constraints);
-        }
-
-        @Override
-        public void setBackground(Color bg) {
-            if (gestisciGrafica) super.setBackground(bg);
-        }
-
-        @Override
-        public void setForeground(Color fg) {
-            if (gestisciGrafica) super.setForeground(fg);
-        }
-
-        @Override
-        public void setOpaque(boolean isOpaque) {
-            if (gestisciGrafica) super.setOpaque(isOpaque);
-        }
-
-        @Override
-        public void setBorder(Border border) {
-            if (gestisciGrafica) super.setBorder(border);
-        }
-
-        @Override
-        public void setVisible(boolean aFlag) {
-            if (gestisciGrafica) super.setVisible(aFlag);
-        }
-
-        @Override
-        public void setEnabled(boolean enabled) {
-            if (gestisciGrafica) super.setEnabled(enabled);
-        }
+        /** Bloccato: modificabile solo tramite {@link GestoreGrafico#gestisciGrafica}. */
+        @Override public void setBounds(Rectangle r) { if (gestisciGrafica) super.setBounds(r); }
+        /** Bloccato: modificabile solo tramite {@link GestoreGrafico#gestisciGrafica}. */
+        @Override public void setBounds(int x, int y, int width, int height) { if (gestisciGrafica) super.setBounds(x, y, width, height); }
+        /** Bloccato: modificabile solo tramite {@link GestoreGrafico#gestisciGrafica}. */
+        @Override public void setLayout(LayoutManager mgr) { if (gestisciGrafica) super.setLayout(mgr); }
+        /** Bloccato: modificabile solo tramite {@link GestoreGrafico#gestisciGrafica}. */
+        @Override public void removeAll() { if (gestisciGrafica) super.removeAll(); }
+        /** Bloccato: modificabile solo tramite {@link GestoreGrafico#gestisciGrafica}. */
+        @Override public void remove(int index) { if (gestisciGrafica) super.remove(index); }
+        /** Bloccato: modificabile solo tramite {@link GestoreGrafico#gestisciGrafica}. */
+        @Override public void remove(Component comp) { if (gestisciGrafica) super.remove(comp); }
+        /** Bloccato: modificabile solo tramite {@link GestoreGrafico#gestisciGrafica}. */
+        @Override public void setSize(Dimension d) { if (gestisciGrafica) super.setSize(d); }
+        /** Bloccato: modificabile solo tramite {@link GestoreGrafico#gestisciGrafica}. */
+        @Override public void setSize(int width, int height) { if (gestisciGrafica) super.setSize(width, height); }
+        /** Bloccato: modificabile solo tramite {@link GestoreGrafico#gestisciGrafica}. */
+        @Override public Component add(Component comp) { if (gestisciGrafica) return super.add(comp); return comp; }
+        /** Bloccato: modificabile solo tramite {@link GestoreGrafico#gestisciGrafica}. */
+        @Override public Component add(Component comp, int index) { if (gestisciGrafica) return super.add(comp, index); return comp; }
+        /** Bloccato: modificabile solo tramite {@link GestoreGrafico#gestisciGrafica}. */
+        @Override public void add(Component comp, Object constraints) { if (gestisciGrafica) super.add(comp, constraints); }
+        /** Bloccato: modificabile solo tramite {@link GestoreGrafico#gestisciGrafica}. */
+        @Override public void setBackground(Color bg) { if (gestisciGrafica) super.setBackground(bg); }
+        /** Bloccato: modificabile solo tramite {@link GestoreGrafico#gestisciGrafica}. */
+        @Override public void setForeground(Color fg) { if (gestisciGrafica) super.setForeground(fg); }
+        /** Bloccato: modificabile solo tramite {@link GestoreGrafico#gestisciGrafica}. */
+        @Override public void setOpaque(boolean isOpaque) { if (gestisciGrafica) super.setOpaque(isOpaque); }
+        /** Bloccato: modificabile solo tramite {@link GestoreGrafico#gestisciGrafica}. */
+        @Override public void setBorder(Border border) { if (gestisciGrafica) super.setBorder(border); }
+        /** Bloccato: modificabile solo tramite {@link GestoreGrafico#gestisciGrafica}. */
+        @Override public void setVisible(boolean aFlag) { if (gestisciGrafica) super.setVisible(aFlag); }
+        /** Bloccato: modificabile solo tramite {@link GestoreGrafico#gestisciGrafica}. */
+        @Override public void setEnabled(boolean enabled) { if (gestisciGrafica) super.setEnabled(enabled); }
     }
 }

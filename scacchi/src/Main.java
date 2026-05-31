@@ -3,6 +3,15 @@ import scacchiera_pedine.Scacchiera;
 import javax.swing.*;
 import java.awt.*;
 
+/**
+ * Avvia l'applicazione degli scacchi inizializzando la finestra principale
+ * e tutti i componenti grafici necessari alla partita.
+ * <p>
+ * La finestra viene aperta in modalità massimizzata; la dimensione minima
+ * consentita è 700×500 pixel. Lo shutdown hook garantisce che i file
+ * di partita vengano svuotati alla chiusura dell'applicazione.
+ * </p>
+ */
 void main() {
     System.setProperty("sun.java2d.uiScale", "1");
 
@@ -15,13 +24,14 @@ void main() {
 
     JFrame frame = new JFrame("Scacchi");
     frame.setLayout(null);
+    frame.setMinimumSize(new Dimension(700, 500));
     frame.setSize(width, height);
     frame.setLocationRelativeTo(null);
     frame.setExtendedState(JFrame.MAXIMIZED_BOTH);
     frame.getContentPane().setBackground(sfondo);
     frame.setIconImage(new ImageIcon(new ImageIcon("img/chess.png").getImage().getScaledInstance(30, 30, Image.SCALE_SMOOTH)).getImage());
 
-    GestoreGrafico gestoreGrafico = new GestoreGrafico(new Scacchiera(), (int) Math.round(height * 0.8), sfondo, new Color(240, 217, 181), new Color(161, 116, 79));
+    GestoreGrafico gestoreGrafico = GestoreGrafico.getInstance(new Scacchiera(), (int) Math.round(height * 0.8), sfondo, new Color(240, 217, 181), new Color(161, 116, 79));
 
     JPanel contenitore = new JPanel(null);
 

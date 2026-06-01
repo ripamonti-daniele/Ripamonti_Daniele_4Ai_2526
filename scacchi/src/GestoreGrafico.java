@@ -343,20 +343,19 @@ public class GestoreGrafico {
      * @param caselleScure        colore delle caselle scure
      */
     private GestoreGrafico(Scacchiera scacchiera, int lunghezzaScacchiera, Color sfondo, Color caselleChiare, Color caselleScure) {
-        int lunghezzaCasella = lunghezzaScacchiera / 8;
         this(scacchiera, lunghezzaScacchiera, new ImageIcon[]{
-                IconaPedina.PEDONE_WHITE.getImageIcon(lunghezzaCasella),
-                IconaPedina.ALFIERE_WHITE.getImageIcon(lunghezzaCasella),
-                IconaPedina.CAVALLO_WHITE.getImageIcon(lunghezzaCasella),
-                IconaPedina.TORRE_WHITE.getImageIcon(lunghezzaCasella),
-                IconaPedina.REGINA_WHITE.getImageIcon(lunghezzaCasella),
-                IconaPedina.RE_WHITE.getImageIcon(lunghezzaCasella),
-                IconaPedina.PEDONE_BLACK.getImageIcon(lunghezzaCasella),
-                IconaPedina.ALFIERE_BLACK.getImageIcon(lunghezzaCasella),
-                IconaPedina.CAVALLO_BLACK.getImageIcon(lunghezzaCasella),
-                IconaPedina.TORRE_BLACK.getImageIcon(lunghezzaCasella),
-                IconaPedina.REGINA_BLACK.getImageIcon(lunghezzaCasella),
-                IconaPedina.RE_BLACK.getImageIcon(lunghezzaCasella)
+                IconaPedina.PEDONE_WHITE.getImageIcon(lunghezzaScacchiera / 8),
+                IconaPedina.ALFIERE_WHITE.getImageIcon(lunghezzaScacchiera / 8),
+                IconaPedina.CAVALLO_WHITE.getImageIcon(lunghezzaScacchiera / 8),
+                IconaPedina.TORRE_WHITE.getImageIcon(lunghezzaScacchiera / 8),
+                IconaPedina.REGINA_WHITE.getImageIcon(lunghezzaScacchiera / 8),
+                IconaPedina.RE_WHITE.getImageIcon(lunghezzaScacchiera / 8),
+                IconaPedina.PEDONE_BLACK.getImageIcon(lunghezzaScacchiera / 8),
+                IconaPedina.ALFIERE_BLACK.getImageIcon(lunghezzaScacchiera / 8),
+                IconaPedina.CAVALLO_BLACK.getImageIcon(lunghezzaScacchiera / 8),
+                IconaPedina.TORRE_BLACK.getImageIcon(lunghezzaScacchiera / 8),
+                IconaPedina.REGINA_BLACK.getImageIcon(lunghezzaScacchiera / 8),
+                IconaPedina.RE_BLACK.getImageIcon(lunghezzaScacchiera / 8)
         }, sfondo, caselleChiare, caselleScure);
     }
 

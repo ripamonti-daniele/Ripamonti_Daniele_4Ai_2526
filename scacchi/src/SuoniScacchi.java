@@ -1,5 +1,6 @@
 import javax.sound.sampled.*;
 import java.io.*;
+import java.util.Objects;
 
 /**
  * Classe utility per la riproduzione degli effetti sonori dell'applicazione scacchistica.
@@ -75,7 +76,7 @@ public class SuoniScacchi {
         if (!audio) return;
         new Thread(() -> {
             try {
-                AudioInputStream audio = AudioSystem.getAudioInputStream(new File("suoni/" + suono.file));
+                AudioInputStream audio = AudioSystem.getAudioInputStream(Objects.requireNonNull(Main.class.getResource("/suoni/" + suono.file)));
                 Clip clip = AudioSystem.getClip();
                 clip.open(audio);
                 clip.start();

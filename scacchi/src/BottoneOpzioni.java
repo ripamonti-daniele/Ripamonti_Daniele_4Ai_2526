@@ -2,6 +2,7 @@ import javax.swing.*;
 import java.awt.*;
 import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
+import java.util.Objects;
 
 /**
  * Pulsante grafico personalizzato per il pannello delle opzioni di gioco.
@@ -196,7 +197,7 @@ public class BottoneOpzioni extends JButton {
      * @return un {@link ImageIcon} contenente l'immagine scalata con interpolazione bilineare
      */
     private ImageIcon creaIconaScalata(String percorso, int dimensione) {
-        ImageIcon icon = new ImageIcon(percorso);
+        ImageIcon icon = new ImageIcon(Objects.requireNonNull(IconaPedina.class.getResource("/" + percorso)));
         Image img = icon.getImage().getScaledInstance(dimensione, dimensione, Image.SCALE_SMOOTH);
         return new ImageIcon(img);
     }

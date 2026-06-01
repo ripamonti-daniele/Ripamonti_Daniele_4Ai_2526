@@ -30,7 +30,7 @@ public class PartitaFileManager {
      * partita. Visibilità package-private per consentirne l'uso diretto da
      * parte delle classi del package.
      */
-    static final String percorsoFile = "partita.txt";
+    static final String percorsoFile = System.getProperty("user.home") + File.separator + "PartitaScacchi.txt";
 
     /**
      * Costruttore privato che impedisce l'istanziazione della classe.
@@ -199,5 +199,29 @@ public class PartitaFileManager {
      */
     public static synchronized void svuotaFile() {
         svuotaFile(percorsoFile);
+    }
+
+    /**
+     * Elimina il file al percorso specificato.
+     * <p>
+     * Se l'eliminazione fallisce, svuota il contenuto del file tramite
+     * {@link #svuotaFile()} come operazione di fallback.
+     * </p>
+     *
+     * @param percorso il percorso del file da eliminare
+     */
+    public static synchronized void eliminaFile(String percorso) {
+        boolean deleted = new File(percorso).delete();
+        if (!deleted) svuotaFile();
+    }
+
+    /**
+     * Elimina il file di partita predefinito ({@link #percorsoFile}).
+     * <p>
+     * Delega a {@link #eliminaFile(String)}.
+     * </p>
+     */
+    public static synchronized void eliminaFile() {
+        eliminaFile(percorsoFile);
     }
 }

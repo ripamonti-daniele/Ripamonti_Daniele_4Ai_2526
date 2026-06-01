@@ -2,6 +2,7 @@ import javax.swing.*;
 import java.awt.*;
 import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
+import java.util.Objects;
 
 /**
  * Finestra di dialogo modale per la configurazione dei timer di gioco degli scacchi.
@@ -66,7 +67,7 @@ public class DialogTimer extends JDialog {
         if (lunghezzaCasella <= 0) throw new IllegalArgumentException("La lunghezza delle casella deve essere maggiore di 0");
         if (timerBianco == null) throw new IllegalArgumentException("Il timer bianco non può essere null");
         if (timerNero == null) throw new IllegalArgumentException("Il timer nero non può essere null");
-        setIconImage(new ImageIcon(new ImageIcon("img/chess.png").getImage().getScaledInstance(30, 30, Image.SCALE_SMOOTH)).getImage());
+        setIconImage(new ImageIcon(new ImageIcon(Objects.requireNonNull(IconaPedina.class.getResource("/img/chess.png"))).getImage().getScaledInstance(30, 30, Image.SCALE_SMOOTH)).getImage());
         setTitle("Impostazioni timer");
         setModal(true);
         setResizable(true);

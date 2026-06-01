@@ -1,5 +1,6 @@
 import javax.swing.ImageIcon;
 import java.awt.*;
+import java.util.Objects;
 
 /**
  * Enumerazione delle icone grafiche associate a ciascuna pedina degli scacchi.
@@ -70,7 +71,7 @@ public enum IconaPedina {
      *         se {@code dimensione} è ≤ 0 o il ridimensionamento non è necessario
      */
     public ImageIcon getImageIcon(int dimensione) {
-        ImageIcon icon = new ImageIcon(iconPath);
+        ImageIcon icon = new ImageIcon(Objects.requireNonNull(IconaPedina.class.getResource("/" + iconPath)));
         if (dimensione <= 0) return icon;
         if (icon.getIconWidth() == dimensione && icon.getIconHeight() == dimensione) return icon;
         Image image = icon.getImage().getScaledInstance(dimensione, dimensione, Image.SCALE_SMOOTH);
